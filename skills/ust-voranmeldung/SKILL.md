@@ -124,8 +124,12 @@ sich auf die Felder im amtlichen Formular USt 1 A.
     KZ 89: ig. Erwerbe zum Normalsatz (19%)          × 0,19
 
 + Steuerschuldnerschaft des Leistungsempfängers (§13b UStG)
-    KZ 46: Leistungen eines im Ausland ansässigen Unternehmers (19%)
-    KZ 47: Sonstige §13b-Fälle (19%)
+    Zeile 30 — § 13b Abs. 1 (EU sonstige Leistungen § 3a Abs. 2):
+      KZ 46 (Bemessungsgrundlage) / KZ 47 (Steuer)
+    Zeile 31 — § 13b Abs. 2 Nr. 3 (GrEStG-Umsätze):
+      KZ 73 (Bemessungsgrundlage) / KZ 74 (Steuer)
+    Zeile 32 — § 13b Abs. 2 Nr. 1, 2, 4-12 (Bauleistungen, Schrott, Gold, Mobilfunk etc.):
+      KZ 84 (Bemessungsgrundlage) / KZ 85 (Steuer)
 
 – Vorsteuer aus Eingangsrechnungen
     KZ 66: Abziehbare Vorsteuerabzugsbeträge
@@ -134,7 +138,7 @@ sich auf die Felder im amtlichen Formular USt 1 A.
     KZ 61: Vorsteuer ig. Erwerbe
 
 – Vorsteuer aus §13b-Leistungen
-    KZ 67: Vorsteuer §13b-Steuerschuldnerschaft
+    Zeile 41 — KZ 67: Vorsteuerbeträge aus § 13b UStG (§ 15 Abs. 1 S. 1 Nr. 4 UStG)
 
 ──────────────────────────────────────────────────
 = Zahllast (positiv) / Erstattung (negativ)        → KZ 83
@@ -197,9 +201,12 @@ Fälle, in denen der Leistungsempfänger die USt schuldet:
 - Gebäudereinigung (§13b Abs. 2 Nr. 8)
 - Lieferung von Mobilfunkgeräten, Tablets etc. über 5.000,00 € (§13b Abs. 2 Nr. 10)
 
-**Buchung §13b:**
-- USt-Schuld: KZ 46 oder KZ 47 (nach Sachverhalt)
-- Gleichzeitig Vorsteuerabzug: KZ 67 (sofern vorsteuerabzugsberechtigt)
+**Buchung §13b in der USt-VA (gemäß BMF-Vordruckmuster USt 1 A 2026):**
+- Bemessungsgrundlage (je nach Tatbestand):
+  - § 13b Abs. 1 EU sonstige Leistungen → **KZ 46** (Zeile 30), Steuer → KZ 47
+  - § 13b Abs. 2 Nr. 3 GrEStG-Umsätze → **KZ 73** (Zeile 31), Steuer → KZ 74
+  - § 13b Abs. 2 Nr. 1, 2, 4-12 (Bauleistungen, Schrott, Mobilfunk etc.) → **KZ 84** (Zeile 32), Steuer → KZ 85
+- Gleichzeitiger Vorsteuerabzug: **KZ 67** (Zeile 41), sofern vorsteuerabzugsberechtigt (§ 15 Abs. 1 S. 1 Nr. 4 UStG)
 - Saldo bei vollem Vorsteuerabzug: 0,00 €
 
 ### 4.3 Innergemeinschaftliche Erwerbe (§1a UStG)

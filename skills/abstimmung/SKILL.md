@@ -364,15 +364,22 @@ USt-Voranmeldung abgeglichen werden:
 | 66  | Vorsteuerbeträge aus Rechnungen §15 Abs.1 Nr.1       | 1570–1579           | 1400–1409           |
 | 89  | ig Erwerbe §1a — Bemessungsgrundlage                 | 3425                | 5425                |
 
-#### Reverse Charge — §13b UStG
+#### Reverse Charge — §13b UStG (gemäß BMF-Vordruckmuster USt 1 A 2026)
 
-Für Leistungen, bei denen der Leistungsempfänger die Steuer schuldet:
+Für Leistungen, bei denen der Leistungsempfänger die Steuer schuldet — exakte Zuordnung aus dem aktuellen USt-VA-Formular:
 
-| KZ  | Bezeichnung                                  | Anwendung                        |
-|-----|----------------------------------------------|----------------------------------|
-| 46  | Nicht steuerbare sonstige Leistungen §13b    | EU-Dienstleistungen              |
-| 73  | Lieferungen §13b Abs.2 Nr.1, 2, 4–12        | Bauleistungen, Schrott u.a.     |
-| 84  | Vorsteuer §13b                               | Korrespondierende Vorsteuer      |
+| Zeile | KZ BG | KZ Steuer | §13b-Tatbestand                                                                            |
+|-------|-------|-----------|--------------------------------------------------------------------------------------------|
+| **30** | **46** | **47**   | § 13b Abs. 1 — Sonstige Leistungen nach § 3a Abs. 2 eines im übrigen Gemeinschaftsgebiet ansässigen Unternehmers |
+| **31** | **73** | **74**   | § 13b Abs. 2 Nr. 3 — Umsätze, die unter das GrEStG fallen                                  |
+| **32** | **84** | **85**   | § 13b Abs. 2 Nr. 1, 2, 4 bis 12 — andere Leistungen (Werklieferungen Drittland, Bauleistungen Nr.4, Gebäudereinigung Nr.8, Mobilfunk/Tablets/Spielekonsolen Nr.10, Schrott, Gold, CO2-Zertifikate etc.) |
+| 34    | 60    | —         | Eigene im Inland steuerpflichtige Umsätze, für die der Leistungsempfänger die Steuer schuldet (§ 13b Abs. 5) |
+| **41** | —    | **67**    | **Vorsteuerbeträge** aus § 13b UStG (§ 15 Abs. 1 S. 1 Nr. 4 UStG)                          |
+
+> **Korrektur gegenüber älterer Plugin-Version:**
+> - KZ 73 ist **nicht** für "Bauleistungen / Schrott", sondern für **GrEStG-Umsätze** (§ 13b Abs. 2 Nr. 3).
+> - Bauleistungen, Mobilfunk, Schrott etc. (§ 13b Abs. 2 Nr. 1, 2, 4–12) gehen auf **KZ 84/85**.
+> - **§ 13b-Vorsteuer ist KZ 67** (NICHT 84 wie früher fälschlich angenommen).
 
 ### 4.7 Monatliche USt-Verprobung
 
