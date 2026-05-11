@@ -1,0 +1,37 @@
+# SHA-256 manifest of upstream files as captured from
+# mlobo2012/Germany-SMB-Finance-Accounting-Plugin
+# at commit 787d81cbb78f227767a415cb64c911b1ad8acbb0 (2026-03-28)
+# Captured: 2026-05-08
+#
+# Verify with: sha256sum -c SHA256SUMS
+# Note: .mcp.json has been pruned by us; use .mcp.json.original to verify against this manifest.
+#
+7fac2dec54304d21fd18b9c528c451e53bb6d0e00f89cff4c3b88f27a1f7ee4b  ./.claude-plugin/plugin.json
+8a1ecd0db59c1f832dafb1d7e144034ea4feaf715dfbca2ad35486bb4b746431  ./.gitignore
+7f1e15a9c5058fd22ea8d205de9561d45200a320c859871d31e23ab52d6eac36  ./.mcp.json
+2eaaf53f9da80c79227e38560ca2b60cfcc439d211aad59ba3b3be7e9bab7469  ./CONNECTORS.md
+a80b6d03ae4f104bdc060d688ecbbe51fc68d092ba504c4b19bcd828f82b8c22  ./LICENSE
+f1c096ba35e0c82f0cbf488d24b5f0e290c47dccdc33c540cb1b63c2e98ccceb  ./README.md
+9570221cc0a9ff6d05b47a7917365d889ae26abe53565bd930c2d82e6aa0bc7c  ./commands/abstimmung.md
+314f945a3e62d96bdfd2de68f2f56b74ab003f3afe1f11f341d1402318954936  ./commands/abweichungsanalyse.md
+f121e8c9f6b4cec1222ecfc3ded431265ebbdca0b8c360d648a85f801fa48af1  ./commands/buchungssatz.md
+3fa2b64d4cf20ead582b537843fe4448798eafcdc036184f2acf0f45d2ca803c  ./commands/compliance.md
+220eee4480d84244a973490a84551d5c2e962cafe8f97fb088da320918616a7b  ./commands/ebilanz.md
+59257a9aa0c02827d2d98936cde6e9b28307d4d2ff81ec5cc984a10119cdcf0a  ./commands/iks-pruefung.md
+bed60783aafa9e68dd0c080d709bad3a3665e151633041aa5501b34dd12ae38b  ./commands/jahresabschluss.md
+5b5d0dedb22db26fbe35fc27ca72712423f172dc464808106815d533941d8ffd  ./commands/lohnabrechnung.md
+fbeec94bd4e2bc0f3e1a58fa452e6a5fb29a2b8317c48d1ca52dc4c985e6d10d  ./commands/monatsabschluss.md
+fab660b6d52c22d47317a08c84610b948c0563f91d67858f29464e2aeb3ac680  ./commands/ust-voranmeldung.md
+fd08375f4050d35d0cb9c6a806fe65683abaf0f60af5dcd027c078735aee0697  ./config/kontenrahmen.json
+c13b6cb21681b5599b2abb8a708f765e11666e071558490e4c6268c528d054bf  ./config/rates-2026.json
+d8ff62226fbe3c66a49a6afe1059da544eafe85ddd1c5cfe8dc50d85a9da2926  ./skills/abstimmung/SKILL.md
+7ce3ce6a613ab0c3e6b12f372bd31cc60314bb3ef9b7a7972a454af6f3cb51c9  ./skills/abweichungsanalyse/SKILL.md
+add8cf1e5875d5d7e41eb962c669f57289710c6d7a2b9c2743ce53e262b8ed45  ./skills/buchungssatz-vorbereitung/SKILL.md
+2f44ffd9d52ddc49c2949d98097dafb0c1840607ccd55ab48ae5aa03b1004642  ./skills/buchungssatz/SKILL.md
+9818034438ea35e63180a1fa6b0889ad5ad1c7ea4e1b709cdfe3794cb371d6f2  ./skills/compliance/SKILL.md
+245c7584456e8756d0c2d74170f82e1a75bf50262006656be73bea4918eac65d  ./skills/ebilanz/SKILL.md
+bfeaadef87e81a6970873594eec7a98f66cc6e89c3d4d07a533da12eac359bac  ./skills/iks-pruefung/SKILL.md
+0190515013782e3aff3cb7d2fc8865517d1a845b3f68c94af0631811cf917e4b  ./skills/jahresabschluss/SKILL.md
+3e6a688e1eff2f502703769ea08e5c85cb85453b5d593efc80225c25c85c5d50  ./skills/lohnabrechnung/SKILL.md
+e17cc11fc2990f9e79c1f3de951e4c6b8d7fa03ba3c01ef37f990344b38f5de3  ./skills/monatsabschluss/SKILL.md
+ba05ae62d4a9b99ff2bd9c78f539ea9177185f8fc43855835f95d391bac24a49  ./skills/ust-voranmeldung/SKILL.md

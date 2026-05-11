@@ -1,32 +1,4 @@
 {
-  "mcpServers": {
-    "slack": {
-      "type": "http",
-      "url": "https://mcp.slack.com/mcp"
-    },
-    "box": {
-      "type": "http",
-      "url": "https://mcp.box.com"
-    },
-    "egnyte": {
-      "type": "http",
-      "url": "https://mcp-server.egnyte.com/mcp"
-    },
-    "atlassian": {
-      "type": "http",
-      "url": "https://mcp.atlassian.com/v1/mcp"
-    },
-    "ms365": {
-      "type": "http",
-      "url": "https://microsoft365.mcp.claude.com/mcp"
-    },
-    "google-calendar": {
-      "type": "http",
-      "url": "https://gcal.mcp.claude.com/mcp"
-    },
-    "gmail": {
-      "type": "http",
-      "url": "https://gmail.mcp.claude.com/mcp"
-    }
-  }
+  "_comment": "Pruned for internal deployment. The original upstream .mcp.json is preserved as .mcp.json.original. None of the upstream connectors (Slack, Box, Egnyte, Atlassian, MS365, Gmail, GCal) are necessary for HGB accounting workflows. Add your own ERP / payroll / banking MCP servers here once each one has passed its own security review.",
+  "mcpServers": {}
 }
