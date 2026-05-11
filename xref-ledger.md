@@ -1,5 +1,20 @@
 # Cross-Reference Ledger — HGB Plugin
 
+> ⚠ **HISTORICAL PRE-FIX SNAPSHOT (2026-05-11)**
+>
+> Dieses Dokument war das Working-Dokument während des Accounting-Content-Reviews
+> und reflektiert den Zustand des Plugins **VOR den Korrekturen** vom 2026-05-11.
+>
+> **Nicht als aktuelle Referenz verwenden.** Für den heutigen Stand:
+> - `config/rates-2026.json` und `config/kontenrahmen.json` sind die authoritativen
+>   Konfigurationsquellen (post-fix, gegen DATEV-2026-PDFs abgeglichen).
+> - `ACCOUNTING_REVIEW_FIRST_PASS.md` enthält den Befundbericht mit 4 Addenda.
+> - `CHANGES_APPLIED.md` listet konkret alle 16 Datei-Korrekturen.
+>
+> Der Ledger bleibt erhalten als nachvollziehbarer Audit-Trail des Review-Prozesses
+> (welche Werte in welcher Datei vor dem Fix standen, welche Cross-Skill-Konflikte
+> bestanden, wie das Cross-Reference-Mapping aufgebaut wurde).
+
 Working document for the accounting-content first-pass review.
 Section A is the "canonical" side (what the configs define). Section B is
 filled in as each skill / command is reviewed (what they reference).
