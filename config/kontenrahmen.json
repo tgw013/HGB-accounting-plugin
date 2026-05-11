@@ -70,8 +70,12 @@
       "prap": {"konto": "0990", "bezeichnung": "Passive Rechnungsabgrenzung (PRAP)"},
       "koerperschaftsteuer_aufwand": {"konto": "2200", "bezeichnung": "Koerperschaftsteuer (Aufwand, in Klasse 2 'Steuern vom Einkommen')"},
       "gewerbesteuer_aufwand": {"konto": "4320", "bezeichnung": "Gewerbesteuer (Aufwand bzw. Vorauszahlungen)"},
-      "einstellung_pwb_forderungen": {"konto": "2450", "bezeichnung": "Einstellungen in die Pauschalwertberichtigung (PWB)"},
-      "einstellung_ewb_forderungen": {"konto": "2451", "bezeichnung": "Einstellungen in die Einzelwertberichtigung (EWB)"},
+      "einstellung_pwb_forderungen_aufwand": {"konto": "2450", "bezeichnung": "Einstellungen in die Pauschalwertberichtigung auf Forderungen (Aufwand)"},
+      "einstellung_ewb_forderungen_aufwand": {"konto": "2451", "bezeichnung": "Einstellungen in die Einzelwertberichtigung auf Forderungen (Aufwand)"},
+      "pwb_forderungen_kurz": {"konto": "0996", "bezeichnung": "Pauschalwertberichtigung auf Forderungen aus Lieferungen und Leistungen - Restlaufzeit bis 1 Jahr (passives Wertberichtigungs-Konto)"},
+      "pwb_forderungen_lang": {"konto": "0997", "bezeichnung": "Pauschalwertberichtigung auf Forderungen aLuL - Restlaufzeit groesser 1 Jahr"},
+      "ewb_forderungen_kurz": {"konto": "0998", "bezeichnung": "Einzelwertberichtigungen auf Forderungen aus Lieferungen und Leistungen - Restlaufzeit bis 1 Jahr"},
+      "ewb_forderungen_lang": {"konto": "0999", "bezeichnung": "Einzelwertberichtigungen auf Forderungen aLuL - Restlaufzeit groesser 1 Jahr"},
       "versicherungen_aufwand": {"konto": "4360", "bezeichnung": "Versicherungen"},
       "_hinweis_§13b_aufwand": "Fuer Sonstige Leistungen eines im anderen EU-Land ansaessigen Unternehmens (§ 13b Abs. 1) wird Aufwand auf Konto 3123 gebucht"
     }
@@ -137,7 +141,14 @@
       "abschreibungen_immaterielle": {"konto": "6200", "bezeichnung": "Abschreibungen auf immaterielle Vermoegensgegenstaende"},
       "abschreibungen_sav": {"konto": "6220", "bezeichnung": "Abschreibungen auf Sachanlagen"},
       "ausserplanmaessige_abschreibungen_immateriell": {"konto": "6210", "bezeichnung": "Ausserplanmaessige Abschreibungen (auf immaterielle VG)"},
-      "einstellung_pwb_forderungen": {"konto": "6920", "bezeichnung": "Einstellung in die Pauschalwertberichtigung (PWB)"},
+      "einstellung_pwb_forderungen_aufwand": {"konto": "6920", "bezeichnung": "Einstellung in die Pauschalwertberichtigung auf Forderungen (Aufwand)"},
+      "einstellung_ewb_forderungen_aufwand": {"konto": "6923", "bezeichnung": "Einstellung in die Einzelwertberichtigung auf Forderungen (Aufwand)"},
+      "ewb_forderungen_kurz": {"konto": "1246", "bezeichnung": "Einzelwertberichtigungen auf Forderungen - Restlaufzeit bis 1 Jahr (Aktiv-Korrekturposten)"},
+      "ewb_forderungen_lang": {"konto": "1247", "bezeichnung": "Einzelwertberichtigungen auf Forderungen - Restlaufzeit groesser 1 Jahr"},
+      "pwb_forderungen_kurz": {"konto": "1248", "bezeichnung": "Pauschalwertberichtigung auf Forderungen - Restlaufzeit bis 1 Jahr (Aktiv-Korrekturposten)"},
+      "pwb_forderungen_lang": {"konto": "1249", "bezeichnung": "Pauschalwertberichtigung auf Forderungen - Restlaufzeit groesser 1 Jahr"},
+      "ertrag_pwb_aufloesung": {"konto": "4920", "bezeichnung": "Ertraege aus der Herabsetzung der Pauschalwertberichtigung auf Forderungen"},
+      "ertrag_ewb_aufloesung": {"konto": "4923", "bezeichnung": "Ertraege aus der Herabsetzung der Einzelwertberichtigung auf Forderungen"},
       "periodenfremde_aufwendungen": {"konto": "6960", "bezeichnung": "Periodenfremde Aufwendungen"},
       "koerperschaftsteuer_aufwand": {"konto": "7600", "bezeichnung": "Koerperschaftsteuer"},
       "gewerbesteuer_aufwand": {"konto": "7610", "bezeichnung": "Gewerbesteuer"}
@@ -150,6 +161,7 @@
     "SKR04 Abschreibungen SAV: 6200 -> 6220 (6200 ist 'Abschreibungen auf immaterielle VG')",
     "SKR03 Loehne 4100 + Gehaelter 4120 jetzt separat gelistet (vorher unter einem Key)",
     "Neue Konten ergaenzt: KSt-Aufwand (2200/7600), GewSt-Aufwand (4320/7610), Steuer-/Pensions-Rueckstellungs-Konten, ARAP/PRAP, Aufwand Altersversorgung (4165/6140), USt §13b-Konten, ig-Erwerb-Konten, Verb-SV-Konten korrekt (1742/3740 fuer SV; 1740 = Lohn-und-Gehalt-Brutto-Verb.)",
+    "Wertberichtigungs-Konten ergaenzt nach DATEV 2026: SKR03 in Klasse 0 (0996/0997 PWB; 0998/0999 EWB); SKR04 in Klasse 1 (1246/1247 EWB; 1248/1249 PWB); Aufwand SKR03 2450/2451; Aufwand SKR04 6920/6923 (NICHT 6921 — das existiert nicht)",
     "Quelle: DATEV-Kontenrahmenbeschreibung 2026 (PDF Art.-Nr. 11174 SKR03 und 11175 SKR04, beide vom 2026-01-01)"
   ]
 }
