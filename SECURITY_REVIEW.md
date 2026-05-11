@@ -181,3 +181,59 @@ content might be wrong, but the file format itself cannot harm you.
 **Operational hardening still required** before deploying near production
 data — see RECOMMENDATIONS.md for the four-step pre-deployment checklist
 (MCP pruning, content review, version pinning, annual rate-table maintenance).
+
+---
+
+## 2026-05-11 — Independent verification pass
+
+A second pass was run to independently verify the original 2026-05-08
+review against the now-vendored upstream source (the initial publish
+only contained the wrapper docs; the upstream `commands/`, `skills/`,
+and `config/` directories were re-vendored on 2026-05-11, restoring the
+full set of 30 files plus the audit metadata).
+
+### What was independently re-verified
+
+- **File-tree completeness**: `sha256sum -c SHA256SUMS` → 28 OK, 1
+  intentional FAIL on `./.mcp.json` (pruned by design; `.mcp.json.original`
+  matches the upstream hash).
+- **Hidden Unicode scan** across all files: 0 hits.
+- **Prompt-injection patterns** across all 11 SKILL.md files and 10
+  command files (`ignore previous`, `disregard`, `forget`, German
+  equivalents `verschweige`/`heimlich`/`im hintergrund`,
+  `without telling`, `send the data`, `webhook`, etc.): 0 hits.
+- **URL inventory**: matches the original review exactly; no new URLs
+  introduced.
+- **Code-execution markers** in skill/command markdown (`curl`, `wget`,
+  `bash -c`, `powershell -`, `base64 -d`, `eval`, `exec`): 0 hits.
+
+### Secret scan over full git history
+
+- **gitleaks 8.30.1** (default ruleset): 4 commits, 335 KB, **0 leaks**.
+- **trufflehog 3.95.2** (`--only-verified`): 64 chunks, 337 KB,
+  **0 verified, 0 unverified candidates**.
+
+Two independent scanners over all commits (including the upstream
+history): no secrets present at any point.
+
+### Dependency CVE scan
+
+Not applicable. The plugin declares no dependencies (no `package.json`,
+no `pyproject.toml`, no install scripts). Zero CVE surface.
+
+### Updated verdict
+
+✅ **Cleared on technical security** (unchanged from 2026-05-08).
+The independent verification confirmed every specific factual claim of
+the original review.
+
+### What's still left to be done
+
+| Item | Status |
+|---|---|
+| IT security static review | ✅ Complete |
+| Secret scan (gitleaks + trufflehog over full history) | ✅ Complete |
+| Dependency CVE scan | N/A (no dependencies) |
+| Runtime sandbox test | **Not required** — there is no executable code; a "runtime test" would test Claude itself, not the plugin |
+| Accounting content review (§-references, rates-2026.json values, GoBD/IDW alignment) | ⏳ **Owed before reliance on output** — Steuerberater / Wirtschaftsprüfer task, out of IT scope |
+| Annual rate-table maintenance (`config/rates-2026.json` will go stale) | ⏳ Operational, ongoing |
