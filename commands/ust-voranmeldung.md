@@ -12,17 +12,19 @@ Erstellt die Umsatzsteuer-Voranmeldung (USt-VA) fuer die elektronische Uebermitt
 
 ## Workflow
 
-1. **Voranmeldungszeitraum bestimmen** — Klaere:
+1. **Voranmeldungszeitraum bestimmen** — Klaere (Schwellen ab 2025 gemaess Wachstumschancengesetz):
    - Monatliche oder quartalsweise Abgabe (abhaengig von Vorjahres-Zahllast)
-   - Vorjahres-Zahllast > 7.500 EUR: monatlich
-   - Vorjahres-Zahllast 1.000–7.500 EUR: quartalsweise
-   - Vorjahres-Zahllast < 1.000 EUR: Befreiung moeglich
-   - Dauerfristverlaengerung vorhanden? (1 Monat Aufschub)
+   - Vorjahres-Zahllast > **9.000 EUR**: monatlich
+   - Vorjahres-Zahllast **2.001–9.000 EUR**: quartalsweise
+   - Vorjahres-Zahllast **<= 2.000 EUR**: Befreiung moeglich (nur Jahreserklaerung)
+   - Dauerfristverlaengerung vorhanden? (1 Monat Aufschub; bei monatlicher Abgabe 1/11 Sondervorauszahlung)
+   - Existenzgruender: keine Sonder-Pflicht zur monatlichen VA mehr (Aussetzung BEG III bis VZ 2026)
 
-2. **Kleinunternehmerregelung pruefen** — Pruefe §19 UStG:
-   - Vorjahresumsatz <= 22.000 EUR und laufendes Jahr voraussichtlich <= 50.000 EUR
+2. **Kleinunternehmerregelung pruefen** — Pruefe §19 UStG (ab 2025 Wachstumschancengesetz):
+   - Vorjahresumsatz **<= 25.000 EUR** und laufendes Jahr voraussichtlich **<= 100.000 EUR**
+   - Bei Ueberschreitung der 100.000-EUR-Grenze im laufenden Jahr: **ab dem ueberschreitenden Umsatz** sofortige Pflicht zur Regelbesteuerung
    - Falls Kleinunternehmer: keine USt-VA erforderlich, entsprechenden Hinweis geben
-   - Falls Option zur Regelbesteuerung: normal fortfahren
+   - Falls Option zur Regelbesteuerung: normal fortfahren (5-Jahres-Bindung gemaess §19 Abs. 2 UStG)
 
 3. **Umsatzsteuer- und Vorsteuer-Daten erfassen** — Sammle:
    - Steuerpflichtige Umsaetze (19 %, 7 %)
@@ -88,4 +90,4 @@ Erstellt die Umsatzsteuer-Voranmeldung (USt-VA) fuer die elektronische Uebermitt
 - Abgabefrist: 10. des Folgemonats (mit Dauerfristverlaengerung: 10. des uebernachsten Monats).
 - Sondervorauszahlung bei Dauerfristverlaengerung: 1/11 der Vorjahres-Zahllast.
 - Zusammenfassende Meldung (ZM) bei ig. Lieferungen separat pruefen.
-- Alle Betraege auf volle Euro gerundet (§20 Satz 1 UStG i.V.m. §1 Abs. 1 Satz 1 KStG analog).
+- USt-Betraege werden mit Cent-Genauigkeit erfasst und an ELSTER uebermittelt; Rundungs-Differenzen aus Buchhaltung vs. Voranmeldung dürfen 1,00 EUR (Rundungstoleranz) nicht uebersteigen.

@@ -40,7 +40,7 @@ Jeder Buchungssatz besteht aus folgenden Pflichtfeldern:
 | Soll-Konto     | 4-stellig (SKR)        | Konto gemäß config/kontenrahmen.json  |
 | Haben-Konto    | 4-stellig (SKR)        | Konto gemäß config/kontenrahmen.json  |
 | Betrag         | 1.234,56 €             | Buchungsbetrag in EUR                 |
-| Buchungstext   | Freitext (max. 120 Z.) | Beschreibung des Geschäftsvorfalls    |
+| Buchungstext   | Freitext (max. 60 Z.)  | Beschreibung des Geschäftsvorfalls (DATEV-Export-Pflichtgrenze)    |
 | Beleg-Nr.      | JJJJ-NNNNN             | Eindeutige Belegnummer                |
 
 ### 1.2 Betragsformat
@@ -246,8 +246,8 @@ Steuersätze aus `config/rates-2026.json` → `umsatzsteuer`:
 | Ermäßigter Satz  | 7 %   | Lebensmittel, Bücher, ÖPNV u.a.       |
 | Steuerfrei       | 0 %   | §4 UStG (Ausfuhr, Heilberufe etc.)    |
 | Reverse Charge   | —     | §13b UStG (Steuerschuldnerschaft)      |
-| Innergemeinsch.  | —     | §4b UStG (ig Erwerb/Lieferung)        |
-| Kleinunternehmer | —     | §19 UStG (≤25.000 € Vorjahr)          |
+| Innergemeinsch.  | —     | §4 Nr.1b UStG i.V.m. §6a UStG (i.g. Lief.); §1a UStG (i.g. Erwerb)  |
+| Kleinunternehmer | —     | §19 UStG (≤25.000 € Vorjahr / ≤100.000 € lfd. Jahr ab 2025)        |
 
 **Vorsteuer-Konten (SKR03):** 1570–1579
 **Vorsteuer-Konten (SKR04):** 1400–1409
@@ -318,28 +318,29 @@ Abschnitt 3).
 
 ### 5.3 Lohn- und Gehaltsbuchung
 
-**Sachverhalt:** Bruttogehalt 4.500,00 €, AG-SV-Anteile 951,75 €
-(Sätze aus `config/rates-2026.json`).
+**Sachverhalt:** Bruttogehalt 4.500,00 €, AG-SV-Anteile 951,75 € (KV+RV+AV+PV mit Kind, Nicht-Sachsen), AN-SV-Anteile 951,75 € (analog), Lohnsteuer 1.200,00 €. Netto = 4.500 − 1.200 − 951,75 = **2.348,25 €** (Sätze aus `config/rates-2026.json`).
 
-**SKR03:**
-
-| Datum      | Konto | Soll (EUR) | Haben (EUR) | Buchungstext               | Beleg-Nr.   |
-|------------|-------|------------|-------------|----------------------------|-------------|
-| 31.03.2026 | 4100  | 4.500,00   |             | Gehalt März 2026           | 2026-LG-003 |
-| 31.03.2026 | 4130  |   951,75   |             | AG-SV März 2026            | 2026-LG-003 |
-| 31.03.2026 | 1740  |            |   951,75    | Verb. SV März 2026         | 2026-LG-003 |
-| 31.03.2026 | 1741  |            | 1.200,00    | Verb. Lohnsteuer März 2026 | 2026-LG-003 |
-| 31.03.2026 | 1200  |            | 3.300,00    | Nettolohn März 2026        | 2026-LG-003 |
-
-**SKR04:**
+**SKR03** (Konten gemäß DATEV-SKR03 2026 — 1740 ist "Verb. Lohn und Gehalt", 1741 ist "Verb. Lohn- und Kirchensteuer (kombiniert)", **1742 ist "Verb. soziale Sicherheit" = Verb. SV**):
 
 | Datum      | Konto | Soll (EUR) | Haben (EUR) | Buchungstext               | Beleg-Nr.   |
 |------------|-------|------------|-------------|----------------------------|-------------|
-| 31.03.2026 | 6000  | 4.500,00   |             | Gehalt März 2026           | 2026-LG-003 |
-| 31.03.2026 | 6100  |   951,75   |             | AG-SV März 2026            | 2026-LG-003 |
-| 31.03.2026 | 3740  |            |   951,75    | Verb. SV März 2026         | 2026-LG-003 |
-| 31.03.2026 | 3730  |            | 1.200,00    | Verb. Lohnsteuer März 2026 | 2026-LG-003 |
-| 31.03.2026 | 1800  |            | 3.300,00    | Nettolohn März 2026        | 2026-LG-003 |
+| 31.03.2026 | 4120  | 4.500,00   |             | Bruttogehalt März 2026     | 2026-LG-003 |
+| 31.03.2026 | 4130  |   951,75   |             | AG-Anteil SV März 2026     | 2026-LG-003 |
+| 31.03.2026 | 1742  |            | 1.903,50    | Verb. SV (AG+AN) März 2026 | 2026-LG-003 |
+| 31.03.2026 | 1741  |            | 1.200,00    | Verb. LSt/KiSt März 2026   | 2026-LG-003 |
+| 31.03.2026 | 1200  |            | 2.348,25    | Nettolohn Auszahlung       | 2026-LG-003 |
+
+Soll = 5.451,75 €; Haben = 5.451,75 € ✓ ausgeglichen.
+
+**SKR04** (Konten gemäß DATEV-SKR04 2026 — 3730 ist "Verb. Lohn- und Kirchensteuer (kombiniert)", **3740 ist "Verb. soziale Sicherheit" = Verb. SV**):
+
+| Datum      | Konto | Soll (EUR) | Haben (EUR) | Buchungstext               | Beleg-Nr.   |
+|------------|-------|------------|-------------|----------------------------|-------------|
+| 31.03.2026 | 6020  | 4.500,00   |             | Bruttogehalt März 2026     | 2026-LG-003 |
+| 31.03.2026 | 6100  |   951,75   |             | AG-Anteil SV März 2026     | 2026-LG-003 |
+| 31.03.2026 | 3740  |            | 1.903,50    | Verb. SV (AG+AN) März 2026 | 2026-LG-003 |
+| 31.03.2026 | 3730  |            | 1.200,00    | Verb. LSt/KiSt März 2026   | 2026-LG-003 |
+| 31.03.2026 | 1800  |            | 2.348,25    | Nettolohn Auszahlung       | 2026-LG-003 |
 
 ### 5.4 Planmäßige Abschreibung
 
@@ -353,11 +354,11 @@ Monatliche AfA: 500,00 €.
 | 31.03.2026 | 4830  |   500,00   |             | AfA Maschine M-2024-01    | 2026-AFA-03 |
 | 31.03.2026 | 0210  |            |   500,00    | Maschine M-2024-01        | 2026-AFA-03 |
 
-**SKR04:**
+**SKR04** (Konto 6220 ist "Abschreibungen auf Sachanlagen" gemäß DATEV-SKR04 2026 — 6200 ist "Abschreibungen auf immaterielle VG"):
 
 | Datum      | Konto | Soll (EUR) | Haben (EUR) | Buchungstext              | Beleg-Nr.   |
 |------------|-------|------------|-------------|---------------------------|-------------|
-| 31.03.2026 | 6200  |   500,00   |             | AfA Maschine M-2024-01    | 2026-AFA-03 |
+| 31.03.2026 | 6220  |   500,00   |             | AfA Maschine M-2024-01    | 2026-AFA-03 |
 | 31.03.2026 | 0440  |            |   500,00    | Maschine M-2024-01        | 2026-AFA-03 |
 
 ### 5.5 Bankzahlung einer Eingangsrechnung
@@ -455,8 +456,8 @@ Buchungssätze können im **DATEV-Buchungsstapel-Format** exportiert
 werden:
 
 - Feldtrenner: Semikolon (;)
-- Zeichensatz: UTF-8
-- Datumsformat: TTMM (4-stellig, ohne Punkt)
+- Zeichensatz: Windows-ANSI (Codepage 1252) als Default; UTF-8 mit BOM optional bei neueren DATEV-Versionen
+- Datumsformat: TTMM (4-stellig, ohne Punkt; Jahr aus Header-Wirtschaftsjahr)
 - Betragsformat: Komma als Dezimaltrennzeichen, kein Tausenderpunkt
 - Soll/Haben-Kennzeichen: S/H
 

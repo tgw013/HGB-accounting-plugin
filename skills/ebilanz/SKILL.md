@@ -194,7 +194,7 @@ Basierend auf `config/kontenrahmen.json`:
 |-------------|--------------------------|---------------------------------------------------|
 | 0800        | Gezeichnetes Kapital     | Eigenkapital → Gezeichnetes Kapital               |
 | 0860        | Gewinnvortrag            | Eigenkapital → Gewinnvortrag                      |
-| 0968        | Urlaubsrückstellung      | Rückstellungen → Sonstige Rückstellungen           |
+| 0961        | Urlaubsrückstellungen    | Rückstellungen → Sonstige Rückstellungen (Sub: Urlaubsverpflichtungen) |
 | 0970        | Sonstige Rückstellungen  | Rückstellungen → Sonstige Rückstellungen           |
 | 1000        | Kasse                    | Umlaufvermögen → Kassenbestand                    |
 | 1200        | Bank                     | Umlaufvermögen → Guthaben bei Kreditinstituten    |
@@ -213,7 +213,7 @@ Basierend auf `config/kontenrahmen.json`:
 |-------------|--------------------------|---------------------------------------------------|
 | 2000        | Gezeichnetes Kapital     | Eigenkapital → Gezeichnetes Kapital               |
 | 2970        | Gewinnvortrag            | Eigenkapital → Gewinnvortrag                      |
-| 3050        | Urlaubsrückstellung      | Rückstellungen → Sonstige Rückstellungen           |
+| 3079        | Urlaubsrückstellungen    | Rückstellungen → Sonstige Rückstellungen (Sub: Urlaubsverpflichtungen) |
 | 3070        | Sonstige Rückstellungen  | Rückstellungen → Sonstige Rückstellungen           |
 | 1600        | Kasse                    | Umlaufvermögen → Kassenbestand                    |
 | 1800        | Bank                     | Umlaufvermögen → Guthaben bei Kreditinstituten    |
@@ -346,12 +346,13 @@ werden, um in die nächste Größenklasse aufzusteigen (§267 HGB).
 
 Aus `config/rates-2026.json` → `aufbewahrungsfristen`:
 
-| Dokument                                  | Frist         |
-|-------------------------------------------|---------------|
-| Jahresabschlüsse und Buchungsbelege       | 10 Jahre      |
-| Buchungsbelege (ab 2025 entstanden)       | 8 Jahre       |
-| Handelsbriefe                             | 6 Jahre       |
-| E-Bilanz (XBRL-Datensatz + Transferticket)| 10 Jahre     |
+| Dokument                                              | Frist         |
+|-------------------------------------------------------|---------------|
+| Jahresabschlüsse, Bilanzen, Inventare, Lageberichte   | 10 Jahre      |
+| Buchungsbelege (bis 31.12.2024 entstanden)            | 10 Jahre      |
+| Buchungsbelege (ab 01.01.2025 entstanden)             | 8 Jahre (BEG IV) |
+| Handelsbriefe                                         | 6 Jahre       |
+| E-Bilanz (XBRL-Datensatz + Transferticket)            | 10 Jahre      |
 
 ---
 

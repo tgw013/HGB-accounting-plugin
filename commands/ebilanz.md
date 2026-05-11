@@ -18,18 +18,18 @@ Bereitet die E-Bilanz-Daten fuer die elektronische Uebermittlung im XBRL-Format 
    - Rechtsform bestimmt die anzuwendende Taxonomie (Kern, Ergaenzung, Branche)
 
 2. **Taxonomie bestimmen** — Waehle die korrekte XBRL-Taxonomie:
-   - **Kerntaxonomie** (6.8 oder aktuell): Standardtaxonomie fuer alle Rechtsformen
+   - **Kerntaxonomie 6.9** (vom 01.04.2025, BMF-Schreiben 10.06.2025): **Pflichtanwendung fuer Geschaeftsjahre ab 2026**
    - **Ergaenzungstaxonomien**: Krankenhaeuser, Pflegeeinrichtungen, Land- und Forstwirtschaft, etc.
    - **Branchentaxonomien**: Banken (RechKredV), Versicherungen (RechVersV)
    - Taxonomie-Version dem Wirtschaftsjahr zuordnen
 
-3. **Konten auf Taxonomiepositionen mappen** — Ordne jeden Kontenrahmen-Eintrag (SKR03/SKR04) der entsprechenden Taxonomieposition zu:
+3. **Konten auf Taxonomiepositionen mappen** — Ordne jeden Kontenrahmen-Eintrag (SKR03/SKR04) der entsprechenden Taxonomieposition zu (Beispiele illustrativ; exakte XBRL-IDs aus der jeweiligen Taxonomie-Veroeffentlichung):
    ```
-   SKR03-Konto | Bezeichnung              | Taxonomieposition
-   ──────────────────────────────────────────────────────────
-   0400        | Technische Anlagen       | bs.ass.fixAss.tan.worksEquip
-   1200        | Forderungen a. LuL       | bs.ass.currAss.worksEquip
-   1800        | Bank                     | bs.ass.currAss.worksEquip
+   SKR03-Konto | DATEV-Bezeichnung 2026                 | Taxonomie-Bereich
+   ──────────────────────────────────────────────────────────────────────
+   0440        | Werkzeuge                              | Sachanlagen → Werkzeuge / Betriebsausstattung
+   1200        | Bank                                   | Umlaufvermoegen → Guthaben bei Kreditinstituten
+   1400        | Forderungen aus L+L                    | Umlaufvermoegen → Forderungen aus L+L
    ...
    ```
 
@@ -84,6 +84,6 @@ Bereitet die E-Bilanz-Daten fuer die elektronische Uebermittlung im XBRL-Format 
 
 - E-Bilanz-Pflicht besteht seit 2013 fuer alle bilanzierenden Steuerpflichtigen.
 - Uebermittlung ueber ELSTER (ERiC-Schnittstelle) oder zertifizierte Software.
-- Abgabefrist entspricht der Steuererklaerungsfrist (regulaer 31. Juli des Folgejahres, mit Steuerberater 28./29. Februar des uebernachsten Jahres).
+- Abgabefrist entspricht der Steuererklaerungsfrist nach § 149 AO: **31.07. des Folgejahres** (ohne StB, § 149 Abs. 2 AO); **28.02. des Zweitfolgejahres** (mit StB, § 149 Abs. 3 AO — fuer VZ 2025 und folgende; in Schaltjahren faellt der 28.02. nicht auf den 29.02., da die gesetzliche Frist explizit "Februar" / Monatsende ist).
 - Taxonomie-Updates jaehrlich pruefen — die Version muss zum Wirtschaftsjahr passen.
 - Auffangpositionen nur nutzen, wenn eine genaue Zuordnung nicht moeglich ist.

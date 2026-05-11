@@ -264,9 +264,9 @@ KiSt = LSt × 8% (BW/BY) bzw. 9% (übrige)
 ### 4.4 Solidaritätszuschlag
 
 - **Satz:** 5,5 % der Lohnsteuer
-- **Freigrenze:** Seit 2021 stark angehoben — für ca. 90 % der AN entfällt der SolZ
-- Bei LSt bis 18.130 € (Einzelveranlagung) / 36.260 € (Zusammenveranlagung) p.a.: kein SolZ
-- Gleitzone oberhalb der Freigrenze
+- **Freigrenze 2026:** Bei jährlicher LSt bis **20.350 € (Einzelveranlagung)** bzw. **40.700 € (Zusammenveranlagung)** kein SolZ (Werte 2026 gemäß Inflationsausgleich; bei 2024 waren es 18.130 / 36.260 €)
+- Seit 2021 für ca. 90 % der AN keine SolZ-Belastung
+- **Milderungszone** oberhalb der Freigrenze: max. 11,9 % des die Freigrenze übersteigenden Betrags
 
 ---
 
@@ -417,26 +417,29 @@ Gesamtkosten AG:                        5.620,80 €
 
 ### 8.1 Konten im SKR03 (aus `config/kontenrahmen.json`)
 
-| Beschreibung               | SKR03-Konto | SKR04-Konto | Soll/Haben |
-|----------------------------|-------------|-------------|------------|
-| Löhne und Gehälter         | 4100        | 6000        | Soll       |
-| AG-Anteil Sozialversicherung | 4130      | 6100        | Soll       |
-| Verbindlichkeiten LSt      | (1741)      | (3730)      | Haben      |
-| Verbindlichkeiten KiSt     | (1742)      | (3730)      | Haben      |
-| Verbindlichkeiten SV       | (1740)      | (3740)      | Haben      |
-| Nettolohn (Bank)           | 1200        | 1800        | Haben      |
+| Beschreibung                          | SKR03-Konto | SKR04-Konto | Soll/Haben |
+|---------------------------------------|-------------|-------------|------------|
+| Löhne (Stundenlöhner)                 | 4100        | 6000 (Sammel) | Soll     |
+| Gehälter (Angestellte)                | 4120        | 6020          | Soll     |
+| AG-Anteil Sozialversicherung          | 4130        | 6100          | Soll     |
+| Verb. aus Lohn- und Kirchensteuer (kombiniert) | 1741   | 3730          | Haben    |
+| Verb. im Rahmen der sozialen Sicherheit (= Verb. SV, AG+AN) | **1742** | **3740** | Haben |
+| Verb. aus Lohn und Gehalt (Brutto-Verb. AN, vor Abzug) | 1740 | 1740er-Bereich nicht analog SKR04 | Haben |
+| Nettolohn (Bank-Auszahlung)           | 1200        | 1800          | Haben    |
+
+> **WICHTIG (gemäß DATEV-SKR03 2026):** In SKR03 ist **1742** das Konto für Verbindlichkeiten gegenüber Sozialversicherungsträgern (NICHT 1740 wie früher fälschlich angenommen). 1740 ist "Verbindlichkeiten aus Lohn und Gehalt" (Brutto-Verbindlichkeit gegenüber AN selbst). 1741 enthält LSt und KiSt zusammen. In SKR04 sind die Verhältnisse: 3730 (LSt/KiSt) und 3740 (SV).
 
 ### 8.2 Buchungsbeispiel (vereinfacht)
 
 ```
 Brutto 4.500,00 €, StKl I, keine Kinder, ev. KiSt 9%, Nicht-Sachsen
 
-Buchungssatz:
-  Löhne/Gehälter (4100)           4.500,00 €  (Soll)
+Buchungssatz (SKR03):
+  Gehälter (4120)                 4.500,00 €  (Soll)
   AG-Anteil SV (4130)               951,75 €  (Soll)
-  an Verb. LSt/SolZ/KiSt          (xxx,xx) €  (Haben)
-  an Verb. Sozialversicherung    1.903,50 €  (Haben)
-  an Bank (1200)                 (xxx,xx) €  (Haben)
+  an Verb. LSt/KiSt (1741)        (xxx,xx) €  (Haben)
+  an Verb. Sozialversicherung (1742) 1.903,50 €  (Haben — AG+AN-SV-Anteil)
+  an Bank (1200)                 (xxx,xx) €  (Haben — Netto = Brutto − LSt/KiSt − AN-SV)
 ```
 
 Die genaue LSt hängt von den individuellen ELStAM ab und wird über die
@@ -450,13 +453,15 @@ Lohnsteuertabelle oder den Programmablaufplan (PAP) des BMF berechnet.
 
 | Zuschlagsart                | Steuerfrei bis | SV-frei bis    |
 |-----------------------------|----------------|----------------|
-| Sonntagszuschlag            | 50 % des GL    | 50 % (max. 50 €/Std.) |
-| Feiertagszuschlag           | 125 % des GL   | 125 % (max. 50 €/Std.) |
-| Nachtarbeit (20–6 Uhr)     | 25 % des GL    | 25 % (max. 50 €/Std.) |
-| Nachtarbeit (0–4 Uhr, wenn vor 0 Uhr begonnen) | 40 % des GL | 40 % (max. 50 €/Std.) |
+| Sonntagszuschlag            | 50 % des GL    | 50 % (Grundlohn-Grenze SV: 25 €/Std.) |
+| Feiertagszuschlag           | 125 % des GL   | 125 % (Grundlohn-Grenze SV: 25 €/Std.) |
+| Nachtarbeit (20–6 Uhr)     | 25 % des GL    | 25 % (Grundlohn-Grenze SV: 25 €/Std.) |
+| Nachtarbeit (0–4 Uhr, wenn vor 0 Uhr begonnen) | 40 % des GL | 40 % (Grundlohn-Grenze SV: 25 €/Std.) |
 
-GL = Grundlohn. Für die Steuerfreiheit darf der Grundlohn max. 50,00 €/Std. betragen.
-Für die SV-Freiheit ebenfalls max. 50,00 €/Std.
+GL = Grundlohn. **Wichtig — unterschiedliche Grenzen für Steuer- und SV-Freiheit:**
+- **Steuerfreiheit nach § 3b EStG:** Grundlohn max. **50,00 €/Std.**
+- **SV-Freiheit nach § 1 Abs. 1 S. 1 Nr. 1 SvEV:** Grundlohn max. **25,00 €/Std.** (niedrigere Grenze!)
+- Bei Grundlohn 25,01–50,00 €/Std. sind die Zuschläge **steuerfrei, aber sv-pflichtig**.
 
 ### 9.2 Sachbezüge und geldwerte Vorteile
 
@@ -464,7 +469,7 @@ Für die SV-Freiheit ebenfalls max. 50,00 €/Std.
 |------------------------------|--------------------------------------------|
 | Dienstwagen (privat)         | 1 %-Regelung oder Fahrtenbuch              |
 | Jobticket                    | Steuerfrei (§3 Nr. 15 EStG), SV-frei      |
-| Essenszuschuss               | Sachbezugswert 2026 (ca. 4,23 € Mittag)   |
+| Essenszuschuss               | Sachbezugswert 2026: 4,57 € (Mittag/Abend), 2,37 € (Frühstück) — SvEV 2026 (Bundesrat 19.12.2025)   |
 | 50-€-Sachbezugsgrenze        | Bis 50,00 €/Mon. steuerfrei (§8 Abs. 2 S. 11 EStG) |
 | Erholungsbeihilfe            | 156 €/AN, 104 €/Ehegatte, 52 €/Kind p.a. (pauschal 25 % LSt) |
 

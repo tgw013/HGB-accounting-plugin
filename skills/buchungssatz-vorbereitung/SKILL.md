@@ -63,11 +63,15 @@ Begründung, warum kein Fremdbeleg vorliegt).
 
 ### 1.4 Aufbewahrungsfristen
 
-| Belegart                         | Frist    | Grundlage         |
-|----------------------------------|----------|--------------------|
-| Jahresabschlüsse, Buchungsbelege | 10 Jahre | §257 Abs.4 HGB    |
-| Buchungsbelege (ab 01.01.2025)   | 8 Jahre  | §257 Abs.4 HGB    |
-| Handelsbriefe                    | 6 Jahre  | §257 Abs.4 HGB    |
+| Belegart                                              | Frist    | Grundlage              |
+|-------------------------------------------------------|----------|------------------------|
+| Jahresabschlüsse, Bilanzen, Inventare, Lageberichte   | 10 Jahre | §257 Abs.4 Nr.1 HGB    |
+| Buchungsbelege (bis 31.12.2024 entstanden)            | 10 Jahre | §257 Abs.4 HGB a.F.    |
+| Buchungsbelege (ab 01.01.2025 entstanden)             | 8 Jahre  | §257 Abs.4 HGB n.F. (BEG IV) |
+| Rechnungen (ab 01.01.2025)                            | 8 Jahre  | §14b UStG n.F.         |
+| Handelsbriefe                                         | 6 Jahre  | §257 Abs.4 Nr.2 HGB    |
+| Lohnunterlagen                                        | 6 Jahre  | §41 EStG               |
+| Verfahrensdokumentation (GoBD)                        | 10 Jahre | GoBD Tz. 151           |
 
 Werte aus `config/rates-2026.json` → `aufbewahrungsfristen`.
 
@@ -125,10 +129,12 @@ Rückstellung = 261,68 € × 5 = 1.308,42 €
 
 #### Buchungssatz
 
-| Kontenrahmen | Soll                              | Haben                              |
-|--------------|-----------------------------------|-------------------------------------|
-| **SKR03**    | 4900 Personalaufwand              | 0968 Urlaubsrückstellung           |
-| **SKR04**    | 6960 Personalaufwand              | 3050 Urlaubsrückstellung           |
+| Kontenrahmen | Soll                                  | Haben                              |
+|--------------|---------------------------------------|-------------------------------------|
+| **SKR03**    | 4920 Soziale Aufwendungen (oder geeignetes Personalaufwand-Konto) | 0961 Urlaubsrückstellungen |
+| **SKR04**    | 6160/6140 Aufwendungen für Altersversorgung/Unterstützung (bzw. spezifisches Personalkonto) | 3079 Urlaubsrückstellungen |
+
+> **Hinweis:** Korrekte DATEV-Konten gemäß SKR03/04 2026. **0968 ist NICHT Urlaubsrückstellung** (= Passive latente Steuern), **3050 ist NICHT Urlaubsrückstellung** (= Steuerrückstellung aus Steuerstundungen). Korrekt: SKR03 0961, SKR04 3079.
 
 ### 2.2 Tantieme- und Bonus-Rückstellungen
 
@@ -235,32 +241,25 @@ Aus `config/rates-2026.json` → `betriebliche_altersvorsorge`:
 Direktzusagen erfordern die Bildung einer Pensionsrückstellung:
 
 - **Bewertung**: Anwartschaftsbarwertverfahren (Projected Unit Credit)
-- **Abzinsungssatz**: 10-Jahres-Durchschnittszins (Deutsche Bundesbank)
+- **Abzinsungssatz**: Für Pensionsrückstellungen gilt §253 Abs.2 S.2 HGB n.F. (seit BilMoG-Anpassung 2016) der **15-Jahres-Durchschnittszinssatz** (sonstige Rückstellungen: 7-Jahres-Durchschnitt nach §253 Abs.2 S.1 HGB)
 - **Vereinfachungsregel**: §253 Abs.2 S.2 HGB — pauschaler Abzinsungssatz
   für Restlaufzeit > 1 Jahr
+- **Steuerlich**: §6a EStG (Teilwertverfahren mit 6% Abzinsung) — unabhängig vom handelsrechtlichen Wert
 
 #### Buchungssätze bAV
 
-**Entgeltumwandlung (Direktversicherung):**
+> **Wichtig:** Die Entgeltumwandlung selbst erzeugt KEINEN zusätzlichen Aufwand — sie reduziert das SV-pflichtige und steuerliche Brutto. Buchhalterisch wird sie als Umlenkung der Bruttolohn-Verbindlichkeit gegen die Versicherung gebucht. Nur der **AG-Zuschuss von 15 %** (§ 1a Abs. 1a BetrAVG, Neuverträge seit 2019, Altverträge seit 01.01.2022) ist ein zusätzlicher Personalaufwand.
 
-| Kontenrahmen | Soll                          | Haben                          |
-|--------------|-------------------------------|--------------------------------|
-| **SKR03**    | 4170 Vermögensw. Leistungen   | 1200 Bank                      |
-| **SKR04**    | 6170 Vermögensw. Leistungen   | 1800 Bank                      |
+**Konten gemäß DATEV-SKR03/SKR04 2026:**
 
-**AG-Zuschuss:**
+| Vorgang | SKR03 | SKR04 |
+|---|---|---|
+| AG-Zuschuss bAV (Aufwand) | **4165 Aufwendungen für Altersversorgung** | **6140 Aufwendungen für Altersversorgung** |
+| Zuführung zur Pensionsrückstellung (Aufwand) | 4165 / spezifisches Sub-Konto Altersversorgung | 6140 / spezifisches Sub-Konto Altersversorgung |
+| Pensionsrückstellung (Passivkonto) | 0953 Rückstellungen für Direktzusagen | 3000 Rückstellungen für Pensionen und ähnliche Verpflichtungen |
+| Verbindlichkeit gegenüber Versicherung | 1750er-Bereich (oder Direktbuchung gegen Bank bei Sofortzahlung) | 3700er-Bereich (analog) |
 
-| Kontenrahmen | Soll                          | Haben                          |
-|--------------|-------------------------------|--------------------------------|
-| **SKR03**    | 4172 AG-Zuschuss bAV          | 1200 Bank                      |
-| **SKR04**    | 6175 AG-Zuschuss bAV          | 1800 Bank                      |
-
-**Pensionsrückstellung (Zuführung):**
-
-| Kontenrahmen | Soll                          | Haben                          |
-|--------------|-------------------------------|--------------------------------|
-| **SKR03**    | 4190 Zuführung Pensionsrückst. | 0953 Pensionsrückstellungen    |
-| **SKR04**    | 6190 Zuführung Pensionsrückst. | 3020 Pensionsrückstellungen    |
+> **WICHTIG:** Konten **4170/6170 sind NICHT bAV** — 4170 = "Vermögenswirksame Leistungen" (5. VermBG, ein anderer Tatbestand), 6170 = "Sonstige soziale Abgaben". Konten **4172/6175** existieren nicht standardmäßig in DATEV-SKR03/04. Konto **4190 = Aushilfslöhne** (NICHT Pensionsrückstellungs-Zuführung).
 
 ### 2.6 Umsatzerlöse — Realisationsprinzip (§252 Abs.1 Nr.4 HGB)
 
@@ -300,9 +299,9 @@ bestimmt sich nach:
 | Methode                     | Grundlage       | Anwendung                              |
 |-----------------------------|-----------------|----------------------------------------|
 | Linear                      | §7 Abs.1 EStG  | Standard; gleichmäßig über ND          |
-| Degressiv                   | §7 Abs.2 EStG  | Max. 25 % (das 2,5-fache des linearen) |
+| Degressiv                   | §7 Abs.2 EStG  | **Aktuell für Anschaffungen ab 01.01.2026 NICHT zulässig.** Letzte Wiedereinführungen: Wachstumschancengesetz (01.04.–31.12.2024) und JStG 2024 (01.07.–31.12.2025), jeweils 2-fach mit max. 20 %. Historisch (Anschaffungen bis 31.12.2022) galten 2,5-fach / max. 25 % — diese Sätze sind **nicht mehr aktuell**. |
 | Leistungsbedingt            | §7 Abs.1 S.6   | Maschinenauslastung o.ä.               |
-| Sonder-AfA §7g              | §7g Abs.5 EStG | 40 % im Jahr der Anschaffung (KMU)     |
+| Sonder-AfA §7g              | §7g Abs.5 EStG | **Bis zu 40 % insgesamt, verteilt auf Anschaffungsjahr + 4 Folgejahre** (KMU; freie jährliche Verteilung). NICHT „40 % im Anschaffungsjahr". |
 
 #### 2.7.3 Geschäfts- oder Firmenwert (GoF)
 

@@ -17,15 +17,22 @@ Prueft das Interne Kontrollsystem (IKS) gemaess IDW PS 261 und bewertet die Wirk
    - Bezugszeitraum
    - Rechtsform und Groesse des Unternehmens
 
-2. **9 Kontrollbereiche bewerten** — Pruefe systematisch die folgenden Bereiche nach IDW PS 261:
+2. **IKS bewerten** — Pruefe systematisch nach IDW PS 261 (5 Framework-Komponenten + 4 operative Audit-Schwerpunkte):
 
-   | Nr. | Kontrollbereich | Pruefungsschwerpunkte |
-   |-----|-----------------|----------------------|
+   **A. IDW PS 261 / COSO Komponenten (Framework-Ebene)**
+
+   | Nr. | Komponente | Pruefungsschwerpunkte |
+   |-----|------------|----------------------|
    | 1 | Kontrollumfeld | Tone at the Top, Verhaltenskodex, Organisationsstruktur |
    | 2 | Risikobeurteilung | Risikoidentifikation, -bewertung, -steuerung |
    | 3 | Kontrollaktivitaeten | Genehmigungsverfahren, Funktionstrennung, Vier-Augen-Prinzip |
    | 4 | Information und Kommunikation | Berichtswesen, IT-Systeme, Dokumentation |
    | 5 | Ueberwachung | Interne Revision, Prozessueberwachung |
+
+   **B. Operative Audit-Schwerpunkte (Detailebene)**
+
+   | Nr. | Bereich | Pruefungsschwerpunkte |
+   |-----|---------|----------------------|
    | 6 | IT-Kontrollen | Zugriffsrechte, Datensicherung, Aenderungsmanagement |
    | 7 | Einkauf und Beschaffung | Bestellfreigabe, Wareneingang, Rechnungspruefung |
    | 8 | Zahlungsverkehr | Bankvollmachten, Zahlungsfreigabe, Kontenabstimmung |

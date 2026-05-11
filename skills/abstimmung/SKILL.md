@@ -152,20 +152,26 @@ Bei Differenzen:
 Bei konkreten Ausfallrisiken (Insolvenz, Zahlungsverzug > 90 Tage,
 gerichtliches Mahnverfahren):
 
-| Kontenrahmen | Soll                              | Haben                           |
-|--------------|------------------------------------|----------------------------------|
-| **SKR03**    | 2450 Einstellung EWB Ford.        | 1499 EWB Forderungen LuL        |
-| **SKR04**    | 6920 Einstellung EWB Ford.        | 1290 EWB Forderungen LuL        |
+| Kontenrahmen | Soll                                          | Haben                                  |
+|--------------|------------------------------------------------|-----------------------------------------|
+| **SKR03**    | **2451 Einstellung Einzelwertberichtigung**   | **(Wertberichtigungs-Gegenkonto im 1470er-Bereich; alternativ 1499 als Gegenkonto)** |
+| **SKR04**    | **(Konto verify gegen DATEV-SKR04)**          | **(Verify gegen DATEV-SKR04 — 1290 ist Forderungen gegen Gesellschafter, NICHT EWB-Forderungen)** |
 
 #### Pauschalwertberichtigung (PWB)
 
 Für das allgemeine Kreditrisiko des Forderungsbestands (typisch 1–5 %
 der nicht einzelwertberichtigten Nettoforderungen):
 
-| Kontenrahmen | Soll                              | Haben                           |
-|--------------|------------------------------------|----------------------------------|
-| **SKR03**    | 2451 Einstellung PWB Ford.        | 1498 PWB Forderungen LuL        |
-| **SKR04**    | 6921 Einstellung PWB Ford.        | 1289 PWB Forderungen LuL        |
+| Kontenrahmen | Soll                                          | Haben                                  |
+|--------------|------------------------------------------------|-----------------------------------------|
+| **SKR03**    | **2450 Einstellung Pauschalwertberichtigung** | **(Wertberichtigungs-Gegenkonto; 1498 als Gegenkonto möglich)** |
+| **SKR04**    | **6920 Einstellung in die Pauschalwertberichtigung** | **(Verify; 1289 ist nicht standardmäßig belegt)** |
+
+> **WICHTIG (gemäß DATEV-SKR03 2026):**
+> - **2450 = Einstellungen in die Pauschalwertberichtigung (PWB)** — NICHT EWB
+> - **2451 = Einstellungen in die Einzelwertberichtigung (EWB)** — NICHT PWB
+> - **SKR04 6920 = Einstellung in die Pauschalwertberichtigung** — NICHT EWB
+> - SKR04 1289/1290 sind NICHT EWB/PWB-Forderungs-Gegenkonten (1290 ist Forderungen gegen Gesellschafter; 1289 nicht standardmäßig belegt) — die EWB/PWB-Gegenkonten in SKR04 liegen im 1276/1296er-Bereich. Verify mit DATEV-SKR04-Veröffentlichung.
 
 ---
 

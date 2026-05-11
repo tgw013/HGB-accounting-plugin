@@ -44,15 +44,22 @@ des Vorjahres (Zeile 83 der USt-Jahreserklärung).
 | > 9.000,00 €                    | Monatlich       | 10. des Folgemonats     | §18 Abs. 2 S. 2    |
 | 2.001,00 € – 9.000,00 €        | Vierteljährlich | 10. nach Quartalsende   | §18 Abs. 2 S. 1    |
 | ≤ 2.000,00 €                   | Befreiung möglich| Nur Jahreserklärung    | §18 Abs. 2 S. 3    |
-| Existenzgründer (erste 2 Jahre) | Monatlich       | 10. des Folgemonats     | §18 Abs. 2 S. 4    |
+| Existenzgründer (erste 2 Jahre) | ~~Monatlich~~ **Keine Sonder-Pflicht** — gleiche Schwellenwerte wie oben (BEG III hat die Pflicht für VZ 2021–2026 ausgesetzt) | n.a. | BEG III (BGBl. 2019 I 1746) |
 
 **Hinweis:** Die Schwellenwerte sind in `config/rates-2026.json` unter `umsatzsteuer.voranmeldung_schwelle_monatlich` (9.000 €), `umsatzsteuer.voranmeldung_schwelle_vierteljaehrlich_min` (2.001 €) und `umsatzsteuer.befreiung_schwelle` (2.000 €) hinterlegt.
 
-### 1.3 Existenzgründer-Regelung
+### 1.3 Existenzgründer-Regelung — Aussetzung 2021–2026
 
-Unternehmer, die ihre berufliche oder gewerbliche Tätigkeit neu aufnehmen, müssen in den
-**ersten beiden Kalenderjahren** grundsätzlich **monatliche** Voranmeldungen abgeben —
-unabhängig von der Höhe der voraussichtlichen Zahllast.
+Die historische Pflicht zur monatlichen USt-Voranmeldung in den ersten beiden Kalenderjahren
+nach Existenzgründung (§ 18 Abs. 2 UStG a.F.) wurde durch das **Bürokratieentlastungsgesetz III**
+(BGBl. 2019 I 1746) für die Veranlagungszeiträume **2021 bis einschließlich 2026 ausgesetzt**.
+
+Existenzgründer unterliegen damit in 2026 den normalen Schwellenwerten gemäß **geschätzter
+voraussichtlicher Steuerlast**. Eine freiwillige monatliche Abgabe bleibt möglich (insbesondere
+bei voraussichtlichem Vorsteuerüberhang).
+
+**Achtung:** Verlängerung über 2026 hinaus zur Zeit nicht beschlossen — ab VZ 2027 könnte die
+ursprüngliche Regel wieder gelten.
 
 ### 1.4 Erstattungsfall
 

@@ -324,10 +324,12 @@ herangezogen.
 
 | Nr. | Pflicht                                    | Frist           | Rechtsgrundlage       | Status |
 |-----|--------------------------------------------|-----------------|-----------------------|--------|
-| 1   | Jahresabschluss aufstellen                 | 30.06. (6 Mon.) | § 264 Abs. 1 HGB     | [ ]    |
+| 1   | Jahresabschluss aufstellen (mittelgr./gross) | 31.03. (3 Mon.) | § 264 Abs. 1 S. 3 HGB | [ ]    |
+| 1a  | Jahresabschluss aufstellen (klein/kleinst)   | 30.06. (6 Mon.) | § 264 Abs. 1 S. 4 HGB | [ ]    |
 | 2   | Jahresabschluss offenlegen                 | 31.12. (12 Mon.)| § 325 HGB             | [ ]    |
-| 3   | eBilanz uebermitteln                       | 31.07.          | § 5b EStG             | [ ]    |
-| 4   | Steuererklaerungen (mit StB)               | 31.07. uen. J.  | § 149 Abs. 3 AO      | [ ]    |
+| 3   | eBilanz uebermitteln (ohne StB)            | 31.07. Folgejahr | § 5b EStG i.V.m. § 149 Abs. 2 AO | [ ]    |
+| 4a  | Steuererklaerungen (ohne StB)              | 31.07. Folgejahr | § 149 Abs. 2 AO      | [ ]    |
+| 4b  | Steuererklaerungen (mit StB)               | **28.02. Zweitfolgejahr** | § 149 Abs. 3 AO | [ ]    |
 | 5   | Verfahrensdokumentation aktualisieren      | Laufend         | GoBD                  | [ ]    |
 | 6   | IKS-Bewertung durchfuehren                 | Jaehrlich       | IDW PS 261            | [ ]    |
 | 7   | Risikoinventur aktualisieren               | Jaehrlich       | § 91 Abs. 2 AktG     | [ ]    |

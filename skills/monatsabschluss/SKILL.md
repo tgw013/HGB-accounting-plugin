@@ -84,7 +84,7 @@ die Ueberleitung zum Reporting/Abschlusspaket.
 - [ ] Steuerrueckstellungen aktualisiert
   - KSt 15 % + SolZ 5,5 % (effektiv 15,825 %) → siehe `config/rates-2026.json`
   - GewSt: Messzahl 3,5 % × Hebesatz Standort
-- [ ] Urlaubsrueckstellung berechnet (Konto 0968 SKR03 / 3050 SKR04)
+- [ ] Urlaubsrueckstellung berechnet (Konto **0961 SKR03 / 3079 SKR04** — gemäß DATEV 2026; NICHT 0968 oder 3050)
   - Formel: (Resturlaubstage × Tagesgehalt) × (1 + AG-SV-Anteil ca. 20–21 %)
 - [ ] Sonstige Rueckstellungen geprueft (Konto 0970 SKR03 / 3070 SKR04)
   - Jahresabschlusskosten, Prozessrisiken, Garantien, Boni, Tantiemen
@@ -233,17 +233,14 @@ Steuersaetze 2026 aus `config/rates-2026.json`:
 
 | Pflicht                            | Frist                         | Rechtsgrundlage          |
 |------------------------------------|-------------------------------|--------------------------|
-| Aufstellung Jahresabschluss        | 6 Monate nach GJ-Ende        | § 264 Abs. 1 HGB        |
-|   (kleine Kapitalges.)             | (= 30.06. bei KJ = GJ)       |                          |
-| Aufstellung (kleinstkapitalges.)   | 6 Monate nach GJ-Ende        | § 264 Abs. 1 S. 4 HGB   |
+| Aufstellung Jahresabschluss (mittelgross/gross) | **3 Monate nach GJ-Ende** | § 264 Abs. 1 S. 3 HGB |
+| Aufstellung (klein + kleinst KapGes) | 6 Monate nach GJ-Ende (= 30.06. bei KJ = GJ) | § 264 Abs. 1 S. 4 HGB |
 | Pruefung (mittelgross/gross)       | vor Feststellung              | § 316 HGB                |
 | Feststellung                       | 8 Monate (AG), 11 Mon. (GmbH)| § 175 AktG / Satzung     |
-| Offenlegung/Hinterlegung           | 12 Monate nach GJ-Ende       | § 325 HGB                |
-|                                    | (= 31.12. bei KJ = GJ)       |                          |
-| eBilanz (elektronische Bilanz)     | 31.07. Folgejahr              | § 5b EStG                |
-|   (mit Verlaengerung)              | bis 28.02. uebernaechstes Jahr| Auf Antrag               |
-| Steuererklaerungen (mit StB)       | 31.07. des uebern. Jahres    | § 149 Abs. 3 AO (ab 2024)|
-|   (ohne Steuerberater)             | 31.07. des Folgejahres        | § 149 Abs. 2 AO         |
+| Offenlegung/Hinterlegung           | 12 Monate nach GJ-Ende (= 31.12. bei KJ = GJ) | § 325 HGB |
+| eBilanz (elektronische Bilanz)     | 31.07. Folgejahr (ohne StB)   | § 5b EStG                |
+| Steuererklaerung (ohne Steuerberater) | 31.07. des Folgejahres     | § 149 Abs. 2 AO          |
+| Steuererklaerung (mit Steuerberater) | **28.02. des Zweitfolgejahres** (Rückkehr aus Corona-Verlängerung; für VZ 2024 noch 30.04.2026, ab VZ 2025 wieder regulär 28.02.) | § 149 Abs. 3 AO |
 
 ### Offenlegung nach Groessenklasse
 
@@ -323,7 +320,7 @@ Wichtige Konten im Monatsabschluss:
 | Loehne und Gehaelter        | 4100   | 6000   | Loehne und Gehaelter           |
 | AG-Anteil SV                | 4130   | 6100   | AG-Anteil Sozialversicherung   |
 | Abschreibungen SAV          | 4830   | 6200   | Abschreibungen SAV             |
-| Urlaubsrueckstellung        | 0968   | 3050   | Rueckstellungen Urlaub         |
+| Urlaubsrueckstellung        | **0961** | **3079** | Urlaubsrueckstellungen (DATEV 2026; nicht 0968/3050) |
 | Sonstige Rueckstellungen    | 0970   | 3070   | Sonstige Rueckstellungen       |
 
 ## Qualitaetssicherung

@@ -490,12 +490,17 @@ Berechnung der Gesamtsteuerbelastung (Beispiel München):
 Die voraussichtliche Steuerbelastung ist als Steuerrückstellung zu
 passivieren:
 
-| Kontenrahmen | Soll                           | Haben                            |
-|--------------|--------------------------------|----------------------------------|
-| **SKR03**    | 4320 Gewerbesteuer-Aufwand     | 0955 Gewerbesteuerrückstellung   |
-| **SKR03**    | 4300 KSt-Aufwand               | 0956 KSt-Rückstellung            |
-| **SKR04**    | 7610 Gewerbesteuer-Aufwand     | 3030 Gewerbesteuerrückstellung   |
-| **SKR04**    | 7600 KSt-Aufwand               | 3035 KSt-Rückstellung            |
+| Kontenrahmen | Soll                                                 | Haben                                          |
+|--------------|------------------------------------------------------|------------------------------------------------|
+| **SKR03**    | **4320 Gewerbesteuer (Aufwand)**                     | **0956 Gewerbesteuerrückstellung**             |
+| **SKR03**    | **2200 Körperschaftsteuer (Aufwand)**                | **0963 Körperschaftsteuerrückstellung**        |
+| **SKR04**    | 7610 Gewerbesteuer (Aufwand)                         | 3035 Gewerbesteuerrückstellung                 |
+| **SKR04**    | 7600 Körperschaftsteuer (Aufwand)                    | (KSt-Rückstellung im 3020er-Bereich; verify exakte Sub-Nummer) |
+
+> **WICHTIG (gemäß DATEV-SKR03/SKR04 2026):**
+> - **SKR03 2200 = Körperschaftsteuer** (Aufwand, Klasse 2 "Steuern vom Einkommen"). Konto **4300 = "Nicht abziehbare Vorsteuer"**, NICHT KSt-Aufwand.
+> - **SKR03 0956 = Gewerbesteuerrückstellung**, NICHT KSt-Rückstellung. **0955 = Steuerrückstellungen (Sammelkonto)**. **0963 = Körperschaftsteuerrückstellung**.
+> - **SKR04 3035 = Gewerbesteuerrückstellung**, NICHT KSt-Rückstellung. Die KSt-Rückstellung liegt im 3020er-Steuerrückstellungs-Bereich.
 
 ---
 
@@ -589,10 +594,11 @@ und abzüglich eines Verlustvortrags den Betrag übersteigen.
 
 | Pflicht                       | Frist                                    |
 |-------------------------------|------------------------------------------|
-| Aufstellung Jahresabschluss   | 3 Monate nach Stichtag (kleine)          |
-|                               | 6 Monate nach Stichtag (große/mittelgr.) |
+| Aufstellung Jahresabschluss (mittelgroße + große KapGes) | **3 Monate nach Stichtag** (§ 264 Abs. 1 S. 3 HGB) |
+| Aufstellung Jahresabschluss (kleine + Kleinst KapGes) | **6 Monate nach Stichtag** (§ 264 Abs. 1 S. 4 HGB) |
 | Offenlegung (Bundesanzeiger)  | 12 Monate nach Stichtag                  |
-| Steuererklärung (mit StB)     | 31.07. des Zweitfolgejahres (regulär)    |
+| Steuererklärung (ohne StB)    | 31.07. des Folgejahres (§ 149 Abs. 2 AO) |
+| Steuererklärung (mit StB)     | **28.02. des Zweitfolgejahres** (§ 149 Abs. 3 AO; reguläre Frist nach Rückkehr aus Corona-Verlängerungen) |
 
 ---
 

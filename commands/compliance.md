@@ -37,17 +37,19 @@ Prueft die Einhaltung von GoBD, Hinweisgeberschutzgesetz (HinSchG), DCGK und Auf
    - Anonyme Meldemoeglickeit pruefen
    - Dokumentation und Fristeneinhaltung (3 Monate Rueckmeldung)
 
-4. **Aufbewahrungsfristen verifizieren** — Pruefe die Einhaltung der gesetzlichen Fristen:
+4. **Aufbewahrungsfristen verifizieren** — Pruefe die Einhaltung der gesetzlichen Fristen (BEG IV / JStG 2024):
 
    | Dokumentenart | Frist | Rechtsgrundlage |
    |---------------|-------|-----------------|
-   | Buchungsbelege | 10 Jahre | §257 HGB, §147 AO |
-   | Jahresabschluesse | 10 Jahre | §257 HGB |
-   | Handelsbriefe | 6 Jahre | §257 HGB |
-   | Rechnungen | 10 Jahre | §14b UStG |
+   | Jahresabschluesse, Bilanzen, Inventare, Lageberichte | **10 Jahre** | §257 Abs. 4 Nr. 1 HGB |
+   | Buchungsbelege (bis 31.12.2024 entstanden) | 10 Jahre | §257 Abs. 4 HGB a.F. |
+   | Buchungsbelege (ab 01.01.2025 entstanden) | **8 Jahre** | §257 Abs. 4 HGB n.F. / §147 Abs. 3 AO n.F. |
+   | Rechnungen (ab 01.01.2025) | **8 Jahre** | §14b UStG n.F. |
+   | Rechnungen (vor 01.01.2025) | 10 Jahre | §14b UStG a.F. |
+   | Handelsbriefe | 6 Jahre | §257 Abs. 4 Nr. 2 HGB |
    | Lohnunterlagen | 6 Jahre | §41 EStG |
-   | Vertraege | 6-10 Jahre | je nach Art |
-   | Verfahrensdokumentation | 10 Jahre | GoBD |
+   | Vertraege | 6-10 Jahre | je nach Art (Handelsbrief 6 J., Dauerschuld 10 J.) |
+   | Verfahrensdokumentation | 10 Jahre | GoBD Tz. 151 |
 
 5. **Compliance-Score berechnen** — Bewerte die Gesamtcompliance:
    - Je Bereich (GoBD, HinSchG, DCGK, Aufbewahrung): 0-100 %
@@ -88,7 +90,8 @@ Prueft die Einhaltung von GoBD, Hinweisgeberschutzgesetz (HinSchG), DCGK und Auf
 
 ## Hinweise
 
-- GoBD betrifft alle buchfuehrungspflichtigen Unternehmen.
-- HinSchG gilt seit Juli 2023, Bussgeldrahmen bis 50.000 EUR.
-- DCGK nur fuer boersennotierte Gesellschaften relevant (Comply or Explain).
-- Aufbewahrungsfristen beginnen mit Ablauf des Kalenderjahres der Erstellung.
+- GoBD betrifft alle buchfuehrungspflichtigen Unternehmen. Aktueller Stand: BMF-Schreiben vom 28.11.2019, aktualisiert per 14.07.2025 (2. Aenderung wegen E-Rechnungs-Pflicht).
+- HinSchG gilt seit 02.07.2023 (50-249 MA seit 17.12.2023); Bussgeldrahmen gemaess § 40 HinSchG: **bis 500.000 EUR** fuer Behinderung von Meldungen, Vergeltungsmassnahmen oder Vertraulichkeitsbruch; **bis 20.000 EUR** fuer mangelhafte interne Meldestelle.
+- DCGK (Fassung 28.04.2022) nur fuer boersennotierte AG verpflichtend (Comply or Explain nach § 161 AktG); fuer GmbH als Best Practice empfohlen.
+- Aufbewahrungsfristen beginnen mit Ablauf des Kalenderjahres der Erstellung/Empfang.
+- E-Rechnungs-Pflicht: 01.01.2025 Empfangspflicht (alle Unternehmen); 01.01.2027 Versandpflicht (Umsatz > 800.000 EUR Vorjahr); 01.01.2028 Versandpflicht (alle).

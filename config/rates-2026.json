@@ -67,7 +67,9 @@
   "mindestlohn": {
     "stundensatz_2026": 13.90,
     "stundensatz_ab_2027": 14.60,
-    "vollzeit_40h_brutto_monatlich": 2410
+    "vollzeit_40h_brutto_monatlich_exakt": 2408.67,
+    "vollzeit_40h_brutto_monatlich_gerundet": 2410,
+    "berechnung": "Stundensatz x 40 Std. x 52 Wochen / 12 Monate"
   },
   "umsatzsteuer": {
     "normalsatz": 19,
@@ -128,8 +130,37 @@
     }
   },
   "aufbewahrungsfristen": {
-    "jahresabschluesse_buchungsbelege": 10,
-    "buchungsbelege_ab_2025": 8,
-    "handelsbriefe": 6
+    "_hinweis": "Verkuerzung der Aufbewahrungsfrist fuer Buchungsbelege auf 8 Jahre durch das Vierte Buerokratieentlastungsgesetz (BEG IV) - gilt fuer ab 1.1.2025 entstandene Buchungsbelege",
+    "jahresabschluesse_bilanzen_inventare_lageberichte": 10,
+    "buchungsbelege_bis_31_12_2024": 10,
+    "buchungsbelege_ab_01_01_2025": 8,
+    "rechnungen_ab_01_01_2025_§14b_UStG": 8,
+    "handelsbriefe": 6,
+    "lohnunterlagen_§41_EStG": 6,
+    "verfahrensdokumentation_gobd": 10
+  },
+  "solidaritaetszuschlag_freigrenze_2026": {
+    "_quelle": "Steuerfortentwicklungsgesetz / Inflationsausgleich",
+    "einzelveranlagung_jaehrlich_eur": 20350,
+    "zusammenveranlagung_jaehrlich_eur": 40700,
+    "milderungszone_max_anteil_prozent": 11.9
+  },
+  "sachbezugswerte_2026": {
+    "_quelle": "Sozialversicherungsentgeltverordnung (SvEV) 2026, Bundesrat 19.12.2025",
+    "fruehstueck_eur": 2.37,
+    "mittag_abend_eur": 4.57,
+    "mahlzeit_monat_eur": 137,
+    "verpflegung_monat_gesamt_eur": 345
+  },
+  "gwg_und_afa_grenzen": {
+    "_quelle": "§ 6 Abs. 2 + Abs. 2a EStG",
+    "sofortabschreibung_grenze_netto_eur": 250,
+    "gwg_grenze_netto_eur": 800,
+    "sammelposten_pool_min_eur": 250.01,
+    "sammelposten_pool_max_eur": 1000,
+    "sammelposten_abschreibung_jahre": 5,
+    "degressive_afa_2026": "Aktuell NICHT zulaessig nach § 7 Abs. 2 EStG (letzte Anwendung: Anschaffungen 01.07.2025-31.12.2025 mit 2-fach max. 20%)",
+    "sonder_afa_7g_max_prozent": 40,
+    "sonder_afa_7g_zeitraum": "verteilt auf Anschaffungsjahr und 4 Folgejahre (insgesamt max. 40 %)"
   }
 }
