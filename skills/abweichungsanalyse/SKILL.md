@@ -65,7 +65,7 @@ Wichtige Kontenklassen fuer die Abweichungsanalyse:
 | Umsatzerloese 7%     | 8300          | 4300          |
 | Materialaufwand      | 3xxx          | 5xxx          |
 | Personalaufwand      | 4100          | 6000          |
-| Abschreibungen       | 4830          | 6200          |
+| Abschreibungen (Sachanlagen) | 4830  | **6220**      |
 
 ## Wesentlichkeit (Materialitaet)
 

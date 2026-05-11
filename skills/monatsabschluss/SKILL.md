@@ -92,7 +92,7 @@ die Ueberleitung zum Reporting/Abschlusspaket.
 
 #### Abschreibungen
 
-- [ ] Planmaessige AfA gebucht (Konto 4830 SKR03 / 6200 SKR04)
+- [ ] Planmaessige AfA gebucht (Konto **4830 SKR03 / 6220 SKR04** für Sachanlagen; SKR04 6200 ist nur für **immaterielle VG**)
 - [ ] AfA-Tabellen beachtet (BMF amtliche AfA-Tabellen)
 - [ ] Neuzugaenge im Anlagevermögen erfasst
 - [ ] GWG-Regelung beachtet:
@@ -319,7 +319,7 @@ Wichtige Konten im Monatsabschluss:
 | USt-Zahllast                | 1780   | —      | USt-Zahllast                   |
 | Loehne und Gehaelter        | 4100   | 6000   | Loehne und Gehaelter           |
 | AG-Anteil SV                | 4130   | 6100   | AG-Anteil Sozialversicherung   |
-| Abschreibungen SAV          | 4830   | 6200   | Abschreibungen SAV             |
+| Abschreibungen SAV (Sachanlagen) | 4830   | **6220** | DATEV 2026; SKR04 6200 = immaterielle VG |
 | Urlaubsrueckstellung        | **0961** | **3079** | Urlaubsrueckstellungen (DATEV 2026; nicht 0968/3050) |
 | Sonstige Rueckstellungen    | 0970   | 3070   | Sonstige Rueckstellungen       |
 

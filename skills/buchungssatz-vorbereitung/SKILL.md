@@ -147,10 +147,12 @@ zu bilden, wenn:
 
 #### Buchungssatz
 
-| Kontenrahmen | Soll                                | Haben                               |
-|--------------|-------------------------------------|---------------------------------------|
-| **SKR03**    | 4900 Personalaufwand                | 0970 Sonstige Rückstellungen         |
-| **SKR04**    | 6960 Personalaufwand                | 3070 Sonstige Rückstellungen         |
+| Kontenrahmen | Soll                                                          | Haben                               |
+|--------------|---------------------------------------------------------------|---------------------------------------|
+| **SKR03**    | 4140 Freiwillige soziale Aufwendungen (lohnsteuerfrei) / spezifisches Tantieme-Konto | 0970 Sonstige Rückstellungen |
+| **SKR04**    | 6130 Aufwendungen für Altersversorgung / sonstiges Personalkonto | 3070 Sonstige Rückstellungen |
+
+> **Hinweis:** Konto-Wahl unternehmensspezifisch. SKR04 6960 ist "Periodenfremde Aufwendungen" laut DATEV 2026, NICHT Personalaufwand. SKR03 4900 ist "Sonstige betriebliche Aufwendungen" (akzeptabel als Sammelkonto, aber für Personalaufwand wäre 41xx-Bereich präziser).
 
 ### 2.3 Überstundenrückstellungen
 
@@ -202,10 +204,12 @@ Fälligkeitsverschiebung: SV-Beiträge für Monat M sind spätestens am
 drittletzten Bankarbeitstag des Monats M fällig. Bei Gehaltsabrechnung
 nach Fälligkeitstermin ist eine Abgrenzung erforderlich.
 
-| Kontenrahmen | Soll                     | Haben                           |
-|--------------|--------------------------|----------------------------------|
-| **SKR03**    | 4130 AG-Anteil SV        | 1740 Verb. aus SV               |
-| **SKR04**    | 6100 AG-Anteil SV        | 3740 Verb. aus SV               |
+| Kontenrahmen | Soll                                                            | Haben                                                                       |
+|--------------|------------------------------------------------------------------|------------------------------------------------------------------------------|
+| **SKR03**    | 4130 Gesetzliche soziale Aufwendungen (AG-Anteil SV)             | **1742 Verbindlichkeiten im Rahmen der sozialen Sicherheit (= Verb. SV)** |
+| **SKR04**    | 6100 Soziale Abgaben und Aufwendungen (AG-Anteil SV)             | 3740 Verbindlichkeiten im Rahmen der sozialen Sicherheit (= Verb. SV)      |
+
+> **WICHTIG:** SKR03 **1742** ist das Konto für Verb. SV (NICHT 1740 — das ist "Verb. aus Lohn und Gehalt", Brutto-Verbindlichkeit gegenüber AN).
 
 ### 2.5 Betriebliche Altersvorsorge (bAV)
 
@@ -322,17 +326,19 @@ Niederstwertprinzip (§253 Abs.3 S.5/6 HGB): Abschreibung bei
 
 #### Buchungssätze Abschreibung
 
-| Kontenrahmen | Soll                          | Haben                          |
-|--------------|-------------------------------|--------------------------------|
-| **SKR03**    | 4830 Abschreibungen SAV       | 0xxx Anlagekonto               |
-| **SKR04**    | 6200 Abschreibungen SAV       | 0xxx Anlagekonto               |
+| Kontenrahmen | Soll                                                  | Haben                          |
+|--------------|-------------------------------------------------------|--------------------------------|
+| **SKR03**    | 4830 Abschreibungen auf Sachanlagen                   | 0xxx Anlagekonto               |
+| **SKR04**    | **6220 Abschreibungen auf Sachanlagen** (NICHT 6200 — das ist immaterielle VG; für AfA auf immaterielle VG: 6200) | 0xxx Anlagekonto |
 
 **Außerplanmäßige Abschreibung:**
 
-| Kontenrahmen | Soll                              | Haben                          |
-|--------------|-----------------------------------|--------------------------------|
-| **SKR03**    | 4840 Außerplanm. Abschreibungen   | 0xxx Anlagekonto               |
-| **SKR04**    | 6210 Außerplanm. Abschreibungen   | 0xxx Anlagekonto               |
+| Kontenrahmen | Soll                                                  | Haben                          |
+|--------------|-------------------------------------------------------|--------------------------------|
+| **SKR03**    | 4840 Außerplanmäßige Abschreibungen                   | 0xxx Anlagekonto               |
+| **SKR04**    | 6210 Außerplanmäßige Abschreibungen auf immaterielle VG / 6230er-Bereich für SAV | 0xxx Anlagekonto |
+
+> **Hinweis:** In SKR04 sind die Abschreibungs-Konten nach VG-Art differenziert: 6200/6210 für immaterielle VG, **6220/6230er für Sachanlagen**, 6240 für Sonder-AfA § 7b, etc. — gemäß DATEV-SKR04 2026.
 
 ---
 

@@ -222,7 +222,8 @@ Basierend auf `config/kontenrahmen.json`:
 | 3300        | Verbindlichkeiten aus LuL| Fremdkapital → Verbindlichkeiten aus LuL          |
 | 6000        | Löhne und Gehälter       | GuV → Personalaufwand → Löhne und Gehälter        |
 | 6100        | AG-Anteil Sozialvers.    | GuV → Personalaufwand → Soziale Abgaben           |
-| 6200        | Abschreibungen SAV       | GuV → Abschreibungen auf SAV                      |
+| 6220        | Abschreibungen auf Sachanlagen | GuV → Abschreibungen auf SAV                |
+| 6200        | Abschreibungen auf immaterielle VG | GuV → Abschreibungen auf immaterielle VG  |
 | 4300        | Umsatzerlöse 7 %         | GuV → Umsatzerlöse                                |
 | 4400        | Umsatzerlöse 19 %        | GuV → Umsatzerlöse                                |
 
