@@ -24,7 +24,7 @@
       "kreditoren": "70000-99999"
     },
     "haeufige_konten": {
-      "_hinweis_2026": "Alle Bezeichnungen verbatim aus DATEV-SKR03 2026-01-01 (Art.-Nr. 11174)",
+      "_hinweis_2026": "Konto-Nummern verifiziert gegen DATEV-SKR03 2026-01-01 (Art.-Nr. 11174). Bezeichnungen sind paraphrasierte ASCII-Versionen mit ergaenzenden Klammer-Erlaeuterungen — NICHT wortwoertlich DATEV. Bei Zweifel Original-PDF prüfen oder scripts/extract_datev_pdf.py + .skr03-clean.tsv nutzen.",
       "kasse": {"konto": "1000", "bezeichnung": "Kasse"},
       "bank": {"konto": "1200", "bezeichnung": "Bank"},
       "forderungen_lul": {"konto": "1400", "bezeichnung": "Forderungen aus Lieferungen und Leistungen"},
@@ -111,7 +111,7 @@
       "kreditoren": "70000-99999"
     },
     "haeufige_konten": {
-      "_hinweis_2026": "Alle Bezeichnungen verbatim aus DATEV-SKR04 2026-01-01 (Art.-Nr. 11175)",
+      "_hinweis_2026": "Konto-Nummern verifiziert gegen DATEV-SKR04 2026-01-01 (Art.-Nr. 11175). Bezeichnungen sind paraphrasierte ASCII-Versionen mit ergaenzenden Klammer-Erlaeuterungen — NICHT wortwoertlich DATEV. Bei Zweifel Original-PDF prüfen oder scripts/extract_datev_pdf.py + .skr04-clean.tsv nutzen.",
       "forderungen_lul": {"konto": "1200", "bezeichnung": "Forderungen aus Lieferungen und Leistungen"},
       "abziehbare_vorsteuer_sammel": {"konto": "1400", "bezeichnung": "Abziehbare Vorsteuer"},
       "vorsteuer_7": {"konto": "1401", "bezeichnung": "Abziehbare Vorsteuer 7 %"},
