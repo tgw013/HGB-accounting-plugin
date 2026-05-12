@@ -19,3 +19,12 @@ Thumbs.db
 .idea/
 .vscode/
 test-outputs-docx/
+
+# Lokale DATEV-PDF-Text-Extrakte (Urheberrecht DATEV — nicht versionieren)
+.skr03-extract.txt
+.skr04-extract.txt
+.skr03-clean.tsv
+.skr04-clean.tsv
+konten-verification.tsv
+.skr03-2025-clean.tsv
+.skr04-2025-clean.tsv

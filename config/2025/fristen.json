@@ -1,0 +1,33 @@
+{
+  "_purpose": "Konsolidierter Steuer- und Meldefristen-Kalender für VZ 2025",
+  "_anwendung": "Wird von monatsabschluss, ust-voranmeldung, lohnabrechnung und jahresabschluss konsumiert",
+  "_hinweis_2025_vs_2026": "Strukturell identisch zu 2026. Die Corona-bedingten Fristverlängerungen (Viertes Corona-Steuerhilfegesetz) gelten letztmalig für VZ 2024 — ab VZ 2025 wieder Regelfristen.",
+  "monatlich": {
+    "ust_voranmeldung_ohne_dfv": {"tag_im_folgemonat": 10, "rechtsgrundlage": "§ 18 Abs. 1 UStG"},
+    "ust_voranmeldung_mit_dfv": {"tag_im_uebernaechsten_monat": 10, "rechtsgrundlage": "§ 46 UStDV"},
+    "lst_anmeldung": {"tag_im_folgemonat": 10, "rechtsgrundlage": "§ 41a Abs. 1 EStG"},
+    "sv_beitragsnachweis": {"vor_faelligkeit": "5 Arbeitstage", "rechtsgrundlage": "§ 28h SGB IV"},
+    "sv_beitrag_faellig": {"bankarbeitstag": "drittletzter", "rechtsgrundlage": "§ 23 Abs. 1 SGB IV"},
+    "kassenabschluss": {"intervall": "taeglich", "rechtsgrundlage": "GoBD / § 146 Abs. 1 AO"}
+  },
+  "vierteljaehrlich": {
+    "ust_va_ohne_dfv": {"tag_nach_quartalsende": 10},
+    "gewerbesteuer_vorauszahlung": {"termine": ["15.02", "15.05", "15.08", "15.11"], "rechtsgrundlage": "§ 19 GewStG"},
+    "kst_solz_vorauszahlung": {"termine": ["10.03", "10.06", "10.09", "10.12"], "rechtsgrundlage": "§ 31 KStG i.V.m. § 37 EStG"},
+    "zusammenfassende_meldung": {"tag_nach_quartalsende": 25, "schwelle_eur": 50000, "rechtsgrundlage": "§ 18a UStG"}
+  },
+  "jaehrlich": {
+    "ja_aufstellung_kleine_kapges": {"frist_monate_nach_stichtag": 6, "rechtsgrundlage": "§ 264 Abs. 1 S. 4 HGB"},
+    "ja_aufstellung_mittelgr_grosse_kapges": {"frist_monate_nach_stichtag": 3, "rechtsgrundlage": "§ 264 Abs. 1 S. 3 HGB"},
+    "ja_offenlegung_bundesanzeiger": {"frist_monate_nach_stichtag": 12, "rechtsgrundlage": "§ 325 HGB"},
+    "ebilanz_uebermittlung_ohne_stb": {"frist": "31.07.2026", "rechtsgrundlage": "§ 5b EStG i.V.m. § 149 Abs. 2 AO"},
+    "steuererklaerung_mit_stb": {"frist": "28.02.2027", "rechtsgrundlage": "§ 149 Abs. 3 AO"},
+    "lst_jahresmeldung_lstb": {"frist": "28.02.2026", "rechtsgrundlage": "§ 41b EStG"},
+    "sv_jahresmeldung": {"frist": "15.02.2026", "rechtsgrundlage": "DEUEV"},
+    "uv_jahresmeldung_bg": {"frist": "16.02.2026"}
+  },
+  "hinweis_feiertage_wochenende": {
+    "rechtsgrundlage": "§ 108 Abs. 3 AO",
+    "regel": "Faellt die Frist auf einen Samstag, Sonntag oder gesetzlichen Feiertag, verschiebt sie sich auf den naechsten Werktag"
+  }
+}

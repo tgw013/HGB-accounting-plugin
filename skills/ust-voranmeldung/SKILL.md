@@ -1,424 +1,125 @@
 ---
 name: ust-voranmeldung
-description: "Vollständiger USt-Voranmeldungs-Workflow von der Datenerfassung bis zur ELSTER-Übermittlung"
-version: "1.0.0"
-author: "germany-finance-plugin"
-tags: ["umsatzsteuer", "voranmeldung", "elster", "ust-va", "mehrwertsteuer"]
-config_files:
-  - "config/rates-2026.json"
-  - "config/kontenrahmen.json"
-locale: "de-DE"
-number_format: "1.234,56 €"
-date_format: "TT.MM.JJJJ"
+description: USt-Voranmeldung vorbereiten — BMF Vordruckmuster USt 1 A 2026, KZ-Mapping, Dauerfristverlängerung, ELSTER-fähige Datenaufstellung.
 ---
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
 
+# USt-Voranmeldung
 
-# USt-Voranmeldung — Vollständiger Workflow
-
-## Überblick
-
-Die Umsatzsteuer-Voranmeldung (USt-VA) ist die periodische Erklärung der Umsatzsteuer
-gegenüber dem Finanzamt. Dieser Skill deckt den gesamten Prozess ab: Ermittlung des
-Voranmeldungszeitraums, Berechnung der Zahllast, Plausibilitätsprüfung und elektronische
-Übermittlung via ELSTER.
-
-**Rechtsgrundlagen:** §18 UStG, §§46-48 UStDV, §19 UStG (Kleinunternehmer)
-
-**Konfigurationsdateien:**
-- Steuersätze und Schwellenwerte: `config/rates-2026.json`
-- Kontenrahmen (SKR03/SKR04): `config/kontenrahmen.json`
+**Typ:** `workflow`
+**Anthropic-Pendant:** (neu — kein direktes US-Pendant)
+**Geltungsbereich:** GmbH, UG
+**Config:** `config/{active_year}/kz-codes-ust-va.json`, `rates.json`, `fristen.json`
+**Knowledge-Base:** `buchung-grundlagen`
 
 ---
 
-## 1. Voranmeldungszeitraum bestimmen (§18 Abs. 2 UStG)
+## 1. Zweck
 
-### 1.1 Ermittlung der Vorjahres-Zahllast
+Sammelt USt-relevante Buchungen eines Voranmeldungs-Zeitraums (Monat oder Quartal), mappt sie auf die KZ-Codes des BMF-Vordruckmusters **USt 1 A 2026**, berechnet die Zahllast/Erstattung und produziert eine **Aufstellung zur Übernahme in ELSTER**. Plugin übermittelt nicht direkt — Aufgabe von Anwender/StB.
 
-Die Vorjahres-USt-Zahllast bestimmt den Voranmeldungszeitraum für das laufende Jahr.
-Die Zahllast berechnet sich als Summe aller USt-Schulden abzüglich aller Vorsteuerbeträge
-des Vorjahres (Zeile 83 der USt-Jahreserklärung).
+## 2. Eingaben
 
-### 1.2 Zuordnungstabelle
+**Pflicht:**
+- Voranmeldungs-Zeitraum (z.B. "2026-04" oder "2026-Q2")
+- Buchungs-Salden je relevantem Konto (entweder Saldenliste oder Buchungsjournal des Zeitraums)
+- SKR-Variante (SKR03 / SKR04)
+- Anmelde-Rhythmus: monatlich (default ab Zahllast 9.000 €/Vorjahr) oder vierteljährlich
+- Dauerfristverlängerung: ja/nein (§ 46 UStDV)
 
-| Vorjahres-Zahllast              | Zeitraum        | Abgabefrist             | Rechtsgrundlage     |
-|---------------------------------|-----------------|-------------------------|---------------------|
-| > 9.000,00 €                    | Monatlich       | 10. des Folgemonats     | §18 Abs. 2 S. 2    |
-| 2.001,00 € – 9.000,00 €        | Vierteljährlich | 10. nach Quartalsende   | §18 Abs. 2 S. 1    |
-| ≤ 2.000,00 €                   | Befreiung möglich| Nur Jahreserklärung    | §18 Abs. 2 S. 3    |
-| Existenzgründer (erste 2 Jahre) | ~~Monatlich~~ **Keine Sonder-Pflicht** — gleiche Schwellenwerte wie oben (BEG III hat die Pflicht für VZ 2021–2026 ausgesetzt) | n.a. | BEG III (BGBl. 2019 I 1746) |
+**Optional, aber empfohlen:**
+- Vorjahres-Zahllast (für Sondervorauszahlung 1/11)
+- Saldo SV-Konten zur Plausibilität gegen Lohnabrechnung
+- Hinweise auf §-13b-Sachverhalte, ig-Erwerbe, ig-Lieferungen, Drittland
 
-**Hinweis:** Die Schwellenwerte sind in `config/rates-2026.json` unter `umsatzsteuer.voranmeldung_schwelle_monatlich` (9.000 €), `umsatzsteuer.voranmeldung_schwelle_vierteljaehrlich_min` (2.001 €) und `umsatzsteuer.befreiung_schwelle` (2.000 €) hinterlegt.
+## 3. Workflow
 
-### 1.3 Existenzgründer-Regelung — Aussetzung 2021–2026
+1. **Zeitraum-Abgrenzung**: Buchungen mit Leistungs- bzw. Vereinnahmungsdatum im VA-Zeitraum (SOLL- vs IST-Versteuerung § 20 UStG beachten)
+2. **KZ-Mapping** je Buchungs-Sachverhalt aus `config/{active_year}/kz-codes-ust-va.json`:
+   - Umsätze 19% → KZ **81** (Bemessungsgrundlage); Steuer wird vom System errechnet
+   - Umsätze 7% → KZ **86**
+   - ig-Erwerbe 19% → KZ **89** / 7% → KZ **93**
+   - § 13b Abs. 1 (EU-Sonstige) → KZ **46** (BG) / **47** (Steuer), Zeile 30
+   - § 13b Abs. 2 Nr. 3 (GrEStG) → KZ **73** / **74**, Zeile 31
+   - § 13b Abs. 2 Nr. 1, 2, 4–12 (u.a. Bau, Reinigung, Schrott, Mobilfunk) → KZ **84** / **85**, Zeile 32
+   - Eigene §-13b-Umsätze (als Leistender) → KZ **60**, Zeile 34
+   - ig-Lieferungen § 6a → KZ **41**
+   - Ausfuhren Drittland § 4 Nr. 1a → KZ **43**
+   - Andere steuerfrei mit VSt → KZ **44**
+   - Vorsteuer aus Rechnungen → KZ **66**
+   - Vorsteuer aus ig-Erwerben → KZ **61**
+   - Vorsteuer aus § 13b → KZ **67**, Zeile 41
+   - Sondervorauszahlung anrechnen (Dezember-VA) → KZ **39**
+3. **Aggregation**: Summen je KZ über alle relevanten Buchungen
+4. **Zahllast/Erstattung** → KZ **83**
+5. **Plausibilität**:
+   - § 13b: Steuer aus BG-KZ rechnerisch = automatischer Steuer-KZ
+   - VSt aus § 13b ≤ § 13b-Steuer (sofern voll vorsteuerabzugsberechtigt)
+   - Frist-Check gegen `config/{active_year}/fristen.json`
+6. **Ausgabe**: Markdown-Tabelle KZ → Betrag + DATEV-Export-Option
 
-Die historische Pflicht zur monatlichen USt-Voranmeldung in den ersten beiden Kalenderjahren
-nach Existenzgründung (§ 18 Abs. 2 UStG a.F.) wurde durch das **Bürokratieentlastungsgesetz III**
-(BGBl. 2019 I 1746) für die Veranlagungszeiträume **2021 bis einschließlich 2026 ausgesetzt**.
-
-Existenzgründer unterliegen damit in 2026 den normalen Schwellenwerten gemäß **geschätzter
-voraussichtlicher Steuerlast**. Eine freiwillige monatliche Abgabe bleibt möglich (insbesondere
-bei voraussichtlichem Vorsteuerüberhang).
-
-**Achtung:** Verlängerung über 2026 hinaus zur Zeit nicht beschlossen — ab VZ 2027 könnte die
-ursprüngliche Regel wieder gelten.
-
-### 1.4 Erstattungsfall
-
-Ergibt sich im Vorjahr ein **Vorsteuerüberhang** (negative Zahllast), kann der Unternehmer
-freiwillig monatliche Voranmeldungen wählen, um schneller Erstattungen zu erhalten.
-
----
-
-## 2. Dauerfristverlängerung (§§46–48 UStDV)
-
-### 2.1 Voraussetzungen und Antrag
-
-- **Einmaliger Antrag** via ELSTER (Formular USt 1 H)
-- Gewährt **1 Monat Aufschub** für die Abgabefrist
-- Gilt bis auf Widerruf — muss nicht jährlich erneuert werden
-- Antragstellung am besten im Januar des laufenden Jahres
-
-### 2.2 Sondervorauszahlung
-
-| Voranmeldungszeitraum | Sondervorauszahlung (SVZ)                     |
-|------------------------|-----------------------------------------------|
-| Monatlich              | **1/11** der Vorjahres-Zahllast, fällig 10.02 |
-| Vierteljährlich        | **Keine** SVZ erforderlich                    |
-
-**Berechnung Sondervorauszahlung:**
-```
-SVZ = Vorjahres-Zahllast / 11
-(kaufmännisch gerundet auf volle Euro)
-```
-
-Die SVZ wird in der Dezember-VA (KZ 39) wieder angerechnet.
-
-### 2.3 Fristenübersicht mit Dauerfristverlängerung
-
-| Zeitraum    | Ohne Verlängerung | Mit Verlängerung |
-|-------------|-------------------|------------------|
-| Januar      | 10.02.            | 10.03.           |
-| Februar     | 10.03.            | 10.04.           |
-| März        | 10.04.            | 10.05.           |
-| Q1          | 10.04.            | 10.05.           |
-| …           | …                 | …                |
-| Dezember    | 10.01.            | 10.02.           |
-
-Fällt der 10. auf einen Samstag, Sonntag oder Feiertag, verschiebt sich die Frist auf
-den nächsten Werktag (§108 Abs. 3 AO).
-
----
-
-## 3. Berechnung der Zahllast
-
-### 3.1 Schema der USt-VA
-
-Die Zahllast ergibt sich aus folgendem Berechnungsschema. Die Kennziffern (KZ) beziehen
-sich auf die Felder im amtlichen Formular USt 1 A.
+## 4. Output-Format
 
 ```
-  USt auf steuerpflichtige Lieferungen und Leistungen
-    KZ 81: Umsätze zum Normalsatz (19%)             × 0,19
-    KZ 86: Umsätze zum ermäßigten Satz (7%)         × 0,07
+**USt-Voranmeldung 04/2026** (GmbH, SKR04, SOLL-Versteuerung)
 
-+ USt auf innergemeinschaftliche Erwerbe
-    KZ 89: ig. Erwerbe zum Normalsatz (19%)          × 0,19
+Frist (mit DFV): 10.06.2026  [§ 46 UStDV]
+Frist (ohne DFV): 10.05.2026 [§ 18 Abs. 1 UStG]
 
-+ Steuerschuldnerschaft des Leistungsempfängers (§13b UStG)
-    Zeile 30 — § 13b Abs. 1 (EU sonstige Leistungen § 3a Abs. 2):
-      KZ 46 (Bemessungsgrundlage) / KZ 47 (Steuer)
-    Zeile 31 — § 13b Abs. 2 Nr. 3 (GrEStG-Umsätze):
-      KZ 73 (Bemessungsgrundlage) / KZ 74 (Steuer)
-    Zeile 32 — § 13b Abs. 2 Nr. 1, 2, 4-12 (Bauleistungen, Schrott, Gold, Mobilfunk etc.):
-      KZ 84 (Bemessungsgrundlage) / KZ 85 (Steuer)
+A. Umsätze
+KZ 81 (BG 19%)            48.500,00 €  →  USt automatisch  9.215,00 €
+KZ 86 (BG  7%)             2.800,00 €  →  USt automatisch    196,00 €
 
-– Vorsteuer aus Eingangsrechnungen
-    KZ 66: Abziehbare Vorsteuerabzugsbeträge
+C. ig-Erwerbe
+KZ 89 (BG 19%)             1.200,00 €  →  USt automatisch    228,00 €
 
-– Vorsteuer aus innergemeinschaftlichen Erwerben
-    KZ 61: Vorsteuer ig. Erwerbe
+D. § 13b — Leistungsempfänger
+KZ 46 (BG, Z.30)           1.500,00 €
+KZ 47 (Steuer, Z.30)         285,00 €
 
-– Vorsteuer aus §13b-Leistungen
-    Zeile 41 — KZ 67: Vorsteuerbeträge aus § 13b UStG (§ 15 Abs. 1 S. 1 Nr. 4 UStG)
+E. Steuerfreie Umsätze
+KZ 41 (ig-Lief.)           5.000,00 €
+KZ 43 (Ausfuhr Drittland)  3.200,00 €
 
-──────────────────────────────────────────────────
-= Zahllast (positiv) / Erstattung (negativ)        → KZ 83
+F. Vorsteuer
+KZ 66 (aus Rechnungen)                          -2.940,00 €
+KZ 61 (aus ig-Erwerben)                           -228,00 €
+KZ 67 (aus § 13b, Z.41)                           -285,00 €
+
+H. Dauerfristverlängerung
+KZ 39 (Sondervorauszahlung, nur Dez-VA)          0,00 €
+
+────────────────────────────────────────────
+KZ 83  Zahllast                              6.471,00 €
+────────────────────────────────────────────
+
+Quellen-Buchungen: siehe Anhang (Journal-Auszug)
 ```
 
-### 3.2 Steuersätze (Stand 2026)
-
-Aus `config/rates-2026.json`:
-
-| Satz          | Prozent | Beispiele                                              |
-|---------------|---------|--------------------------------------------------------|
-| Normalsatz    | 19 %    | Standardlieferungen, Dienstleistungen, ig. Erwerbe     |
-| Ermäßigter Satz | 7 %  | Lebensmittel, Bücher, ÖPNV, Zeitschriften              |
-
-### 3.3 Konten im SKR03 (aus `config/kontenrahmen.json`)
-
-| Beschreibung            | SKR03-Konto | SKR04-Konto |
-|-------------------------|-------------|-------------|
-| Vorsteuer 19 %          | 1576        | 1406        |
-| Abziehbare Vorsteuer    | 1570        | —           |
-| Umsatzsteuer 19 %       | 1776        | 3806        |
-| USt-Zahllast             | 1780        | —           |
-| Umsatzerlöse 19 %       | 8400        | 4400        |
-| Umsatzerlöse 7 %        | 8300        | 4300        |
-
-### 3.4 Berechnungsbeispiel
-
-```
-Umsätze 19 % (KZ 81):           120.000,00 €  → USt:  22.800,00 €
-Umsätze 7 % (KZ 86):             15.000,00 €  → USt:   1.050,00 €
-ig. Erwerbe 19 % (KZ 89):         8.000,00 €  → USt:   1.520,00 €
-§13b Leistungen (KZ 46):          5.000,00 €  → USt:     950,00 €
-                                                ─────────────────
-Summe Steuer:                                    26.320,00 €
-
-Vorsteuer Eingangsrechnungen (KZ 66):          – 18.500,00 €
-Vorsteuer ig. Erwerbe (KZ 61):                 –  1.520,00 €
-Vorsteuer §13b (KZ 67):                        –    950,00 €
-                                                ─────────────────
-Zahllast (KZ 83):                                 5.350,00 €
-```
-
----
-
-## 4. Sonderfälle
-
-### 4.1 Innergemeinschaftliche Lieferungen (§4 Nr. 1b UStG)
-
-- Steuerfreie Lieferung an Unternehmer mit gültiger USt-IdNr. in anderem EU-Staat
-- Nachweis: Gelangensbestätigung oder Alternativnachweise (§17a UStDV)
-- Meldung in KZ 41 (steuerfrei mit Vorsteuerabzug)
-- **Zusammenfassende Meldung (ZM)** erforderlich — Schwelle für vierteljährliche
-  Meldung: 50.000,00 € (aus `config/rates-2026.json` → `umsatzsteuer.zm_schwelle_vierteljaehrlich`)
-
-### 4.2 Reverse-Charge / §13b UStG — Steuerschuldnerschaft des Leistungsempfängers
-
-Fälle, in denen der Leistungsempfänger die USt schuldet:
-- Werklieferungen/sonstige Leistungen eines im Ausland ansässigen Unternehmers (§13b Abs. 1)
-- Bauleistungen (§13b Abs. 2 Nr. 4)
-- Gebäudereinigung (§13b Abs. 2 Nr. 8)
-- Lieferung von Mobilfunkgeräten, Tablets etc. über 5.000,00 € (§13b Abs. 2 Nr. 10)
-
-**Buchung §13b in der USt-VA (gemäß BMF-Vordruckmuster USt 1 A 2026):**
-- Bemessungsgrundlage (je nach Tatbestand):
-  - § 13b Abs. 1 EU sonstige Leistungen → **KZ 46** (Zeile 30), Steuer → KZ 47
-  - § 13b Abs. 2 Nr. 3 GrEStG-Umsätze → **KZ 73** (Zeile 31), Steuer → KZ 74
-  - § 13b Abs. 2 Nr. 1, 2, 4-12 (Bauleistungen, Schrott, Mobilfunk etc.) → **KZ 84** (Zeile 32), Steuer → KZ 85
-- Gleichzeitiger Vorsteuerabzug: **KZ 67** (Zeile 41), sofern vorsteuerabzugsberechtigt (§ 15 Abs. 1 S. 1 Nr. 4 UStG)
-- Saldo bei vollem Vorsteuerabzug: 0,00 €
-
-### 4.3 Innergemeinschaftliche Erwerbe (§1a UStG)
-
-- Erwerb von Gegenständen aus anderem EU-Mitgliedstaat
-- USt im Bestimmungsland (Deutschland) geschuldet
-- Meldung: KZ 89 (Bemessungsgrundlage) → Steuer fließt in Zahllast
-- Vorsteuerabzug: KZ 61 (korrespondierend)
-- OSS-Schwelle für B2C: 10.000,00 € (`config/rates-2026.json` → `umsatzsteuer.oss_schwelle`)
-
----
-
-## 5. Kleinunternehmerregelung (§19 UStG)
-
-### 5.1 Voraussetzungen (Stand 2026)
-
-| Kriterium               | Schwelle          | Quelle                                         |
-|--------------------------|-------------------|-------------------------------------------------|
-| Vorjahresumsatz          | ≤ 25.000,00 €    | `config/rates-2026.json` → `kleinunternehmer_grenze_vorjahr`  |
-| Laufender Jahresumsatz   | ≤ 100.000,00 €   | `config/rates-2026.json` → `kleinunternehmer_grenze_laufend`  |
-
-Beide Grenzen müssen **gleichzeitig** eingehalten werden.
-
-### 5.2 Rechtsfolgen
-
-- **Keine Umsatzsteuer** auf eigene Rechnungen (kein Steuerausweis)
-- **Kein Vorsteuerabzug** aus Eingangsrechnungen
-- **Keine USt-Voranmeldung** erforderlich (nur Jahreserklärung, sofern angefordert)
-- Hinweis auf Rechnungen: „Gemäß §19 UStG wird keine Umsatzsteuer berechnet."
-
-### 5.3 Option zur Regelbesteuerung
-
-- Freiwillige Option nach §19 Abs. 2 UStG möglich
-- **Bindung: 5 Kalenderjahre**
-- Sinnvoll bei hohen Vorsteuerbeträgen (z. B. Investitionsphase)
-
-### 5.4 Überschreitung der Grenze
-
-Wird die Grenze von 100.000,00 € im laufenden Jahr überschritten, entfällt die
-Kleinunternehmerregelung **ab dem Umsatz, der die Grenze überschreitet** (seit 2025).
-Es besteht sofortige Pflicht zur Regelbesteuerung und USt-Voranmeldung.
-
----
-
-## 6. ELSTER-Übermittlung
-
-### 6.1 Technische Voraussetzungen
-
-| Komponente                 | Beschreibung                                          |
-|----------------------------|-------------------------------------------------------|
-| Organisationszertifikat    | ELSTER-Zertifikatsdatei (.pfx), registriert über MeinELSTER |
-| ERiC-Bibliothek            | ELSTER Rich Client — Programmierschnittstelle für die elektronische Übermittlung |
-| Formular                   | **USt 1 A** (Voranmeldung), USt 1 H (Dauerfristverlängerung) |
-| SEPA-Lastschriftmandat     | Empfohlen zur automatischen Abbuchung der Zahllast    |
-| Transferticket             | Bestätigung der erfolgreichen Übermittlung             |
-
-### 6.2 Übermittlungsprozess
-
-1. **Zertifikat laden** — Organisationszertifikat (.pfx) mit PIN bereitstellen
-2. **Daten befüllen** — KZ-Werte gemäß Berechnungsschema (Abschnitt 3.1) eintragen
-3. **Plausibilitätsprüfung** — ERiC-interne Validierung vor Versand
-4. **Versand** — Übertragung via HTTPS an das ELSTER-Rechenzentrum
-5. **Transferticket** — Empfangsbestätigung sichern und archivieren
-6. **Zahlung** — Zahllast per SEPA-Lastschrift oder Überweisung bis zur Frist
-
-### 6.3 SEPA-Lastschriftmandat
-
-- Einmalige Einrichtung über MeinELSTER oder Formular beim Finanzamt
-- Empfohlen, da Säumniszuschläge bei verspäteter Zahlung drohen (§240 AO)
-- Lastschrifteinzug erfolgt am Fälligkeitstag
-
----
-
-## 7. Prüfschritte und Plausibilitätskontrollen
-
-### 7.1 Vor Übermittlung
-
-| Nr. | Prüfschritt                                              | Ergebnis   |
-|-----|----------------------------------------------------------|------------|
-| 1   | Voranmeldungszeitraum korrekt bestimmt?                  | [ ] OK     |
-| 2   | Alle Ausgangsrechnungen des Zeitraums erfasst?           | [ ] OK     |
-| 3   | Alle Eingangsrechnungen mit Vorsteuer gebucht?           | [ ] OK     |
-| 4   | Vorsteuerabzug nur bei ordnungsgemäßer Rechnung (§14)?   | [ ] OK     |
-| 5   | §13b-Sachverhalte korrekt als USt und VoSt gebucht?      | [ ] OK     |
-| 6   | ig. Erwerbe in KZ 89 und KZ 61 gegengebucht?             | [ ] OK     |
-| 7   | ig. Lieferungen in KZ 41 mit Gelangensbestätigung?        | [ ] OK     |
-| 8   | ZM für ig. Lieferungen/Dreiecksgeschäfte erstellt?        | [ ] OK     |
-| 9   | Abgleich USt-Konten in FiBu mit VA-Werten?               | [ ] OK     |
-| 10  | Dauerfristverlängerung berücksichtigt (SVZ in KZ 39)?     | [ ] OK     |
-
-### 7.2 Plausibilitätsregeln
-
-- **Saldoverprobung:** Summe der USt-Konten (SKR03: 1776, 1780) muss der Summe
-  KZ 81×19% + KZ 86×7% + KZ 89×19% + KZ 46/47 entsprechen
-- **Vorsteuerverprobung:** Konto 1576 (SKR03) / 1406 (SKR04) muss KZ 66 entsprechen
-- **Nullsaldo §13b:** KZ 46/47 und KZ 67 müssen betragsmäßig identisch sein
-  (bei vollem Vorsteuerabzug)
-- **Periodenabgrenzung:** Leistungsdatum prüfen — maßgeblich ist der Zeitpunkt
-  der Leistungserbringung, nicht das Rechnungsdatum
-- **10-Tage-Regel (§11 Abs. 2 EStG):** Regelmäßig wiederkehrende Zahlungen um den
-  Jahreswechsel beachten
-
----
-
-## 8. Template: USt-VA-Vorbereitung
-
-### 8.1 Datenerfassung
-
-```
-═══════════════════════════════════════════════════════════════
-  USt-Voranmeldung — Vorbereitungs-Template
-═══════════════════════════════════════════════════════════════
-
-  Unternehmen:        ___________________________
-  Steuernummer:       ___________________________
-  USt-IdNr.:          DE___________________________
-  Voranmeldungszeitraum: [ ] Monat ____/2026
-                         [ ] Quartal Q__/2026
-
-  Dauerfristverlängerung: [ ] Ja  [ ] Nein
-  Abgabefrist:            __.__.2026
-
-───────────────────────────────────────────────────────────────
-  UMSÄTZE (STEUER)
-───────────────────────────────────────────────────────────────
-  KZ 81 — Umsätze 19 %:
-    Bemessungsgrundlage netto:          _______________ €
-    USt (×0,19):                        _______________ €
-
-  KZ 86 — Umsätze 7 %:
-    Bemessungsgrundlage netto:          _______________ €
-    USt (×0,07):                        _______________ €
-
-  KZ 41 — Steuerfreie ig. Lieferungen:
-    Bemessungsgrundlage:                _______________ €
-
-  KZ 89 — ig. Erwerbe 19 %:
-    Bemessungsgrundlage:                _______________ €
-    USt (×0,19):                        _______________ €
-
-  KZ 46 — §13b (im Ausland ansässig):
-    Bemessungsgrundlage:                _______________ €
-    USt:                                _______________ €
-
-  KZ 47 — §13b (sonstige):
-    Bemessungsgrundlage:                _______________ €
-    USt:                                _______________ €
-
-───────────────────────────────────────────────────────────────
-  VORSTEUER (ABZUG)
-───────────────────────────────────────────────────────────────
-  KZ 66 — Vorsteuer Eingangsrechnungen: _______________ €
-  KZ 61 — Vorsteuer ig. Erwerbe:        _______________ €
-  KZ 67 — Vorsteuer §13b:               _______________ €
-
-──────────────────────���────────────────────────────────────────
-  ERGEBNIS
-───────────────────────────────────────────────────────────────
-  Summe USt:                             _______________ €
-  Summe Vorsteuer:                       _______________ €
-  KZ 83 — Zahllast (+) / Erstattung (–): _______________ €
-
-  KZ 39 — Anrechenbare SVZ (nur Dez.):  _______________ €
-  Verbleibende Zahllast/Erstattung:      _______________ €
-
-───────────────────────────────────────────────────────────────
-  FREIGABE
-───────────────────────────────────────────────────────────────
-  Erstellt von:       _________________ Datum: __.__.2026
-  Geprüft von:        _________________ Datum: __.__.2026
-  ELSTER-Übermittlung: _________________ Transferticket: ____
-═══════════════════════════════════════════════════════════════
-```
-
-### 8.2 Workflow-Schritte
-
-1. **Buchhaltung abschließen** — Alle Ein- und Ausgangsrechnungen des Zeitraums verbuchen
-2. **Kontenabstimmung** — USt-Konten im SKR03/SKR04 abstimmen (siehe `config/kontenrahmen.json`)
-3. **Template ausfüllen** — Werte aus der FiBu in das Vorbereitungs-Template übertragen
-4. **Plausibilitätsprüfung** — Checkliste (Abschnitt 7.1) durchgehen
-5. **Vier-Augen-Prinzip** — Zweite Person prüft und zeichnet gegen
-6. **ELSTER-Übermittlung** — Daten via ERiC oder MeinELSTER übertragen
-7. **Transferticket archivieren** — Empfangsbestätigung revisionssicher ablegen
-8. **Zahlung sicherstellen** — SEPA-Mandat prüfen oder Überweisung veranlassen
-
----
-
-## 9. Häufige Fehler und Hinweise
-
-| Fehler                                          | Konsequenz                              | Vermeidung                                |
-|-------------------------------------------------|-----------------------------------------|-------------------------------------------|
-| Fristversäumnis                                 | Verspätungszuschlag (§152 AO)           | Dauerfristverlängerung, Kalendereinträge  |
-| Vorsteuerabzug ohne ordnungsgemäße Rechnung     | Versagung des Vorsteuerabzugs           | Eingangsrechnungsprüfung (§14 UStG)       |
-| §13b nicht als USt + VoSt gebucht               | Falsche Zahllast                        | Automatische Buchungsregeln               |
-| ig. Erwerbe nur als Aufwand gebucht             | Fehlende USt-Schuld                     | Kontierungsrichtlinien                    |
-| Falscher Voranmeldungszeitraum                  | Bußgeld, Schätzung                      | Jährliche Prüfung der Schwellenwerte      |
-| Istversteuerung ohne Genehmigung                | Nachzahlung + Zinsen                    | Genehmigung §20 UStG vorab einholen       |
-
----
-
-## 10. Relevante Fristen 2026
-
-| Monat/Quartal | Ohne Verlängerung | Mit Verlängerung | Zahlung fällig      |
-|---------------|-------------------|------------------|---------------------|
-| Januar 2026   | 10.02.2026        | 10.03.2026       | = Abgabefrist       |
-| Februar 2026  | 10.03.2026        | 10.04.2026       | = Abgabefrist       |
-| März 2026     | 10.04.2026        | 11.05.2026*      | = Abgabefrist       |
-| Q1 2026       | 10.04.2026        | 11.05.2026*      | = Abgabefrist       |
-| April 2026    | 11.05.2026*       | 10.06.2026       | = Abgabefrist       |
-| …             | …                 | …                | …                   |
-
-*) 10.05.2026 ist ein Sonntag → Verschiebung auf 11.05.2026 (§108 Abs. 3 AO)
+## 5. Validierung
+
+- **KZ-Existenz** in `kz-codes-ust-va.json` (BMF-Verbatim)
+- **Steuersatz-Plausibilität**: BG × Satz ≈ rechnerische Steuer (Rundung ≤ 0,01 €)
+- **§13b-Doppelung**: Empfänger-Steuer auf Eingangsseite muss gegenüber Vorsteuer ausgeglichen sein (sofern voll abzugsberechtigt)
+- **Frist-Check** via `fristen.json`: Wochenende/Feiertag-Verschiebung § 108 Abs. 3 AO
+- **DFV-Logik**: bei DFV verschiebt sich Abgabe + Zahlung um 1 Monat; Sondervorauszahlung 1/11 in Dezember-VA anzurechnen
+- **Saldo-Sanity**: Erlöskonten-Saldo SKR04 (4xxx) entspricht USt-relevanten Erlösen
+- **Out-of-Scope-Hinweis**: Reiseleistungen § 25, Differenzbesteuerung § 25a, OSS/IOSS — wenn erkannt, Steuerberater einbeziehen
+
+## 6. Quellen
+
+- UStG §§ 18, 18a, 18b, 13b, 15, 20 — gesetze-im-internet.de/ustg_1980/
+- UStDV § 46 (Dauerfristverlängerung)
+- BMF-Vordruckmuster USt 1 A 2026, BMF-Schreiben 29.12.2025 (GZ III C 3 - S 7344/00040/008/034)
+- `config/2026/kz-codes-ust-va.json` (verbatim aus BMF-Quelle)
+- `config/2026/fristen.json` (Frist-Kalender)
+- AO § 108 Abs. 3 (Fristenende auf Werktag)
+
+## 7. Verwandte Skills
+
+- `buchungssatz` — liefert die einzelnen Buchungen, die hier aggregiert werden
+- `monatsabschluss` — USt-VA ist Teil des Monats-Closing
+- `datev-export` — Buchungsstapel + VA-Aufstellung in DATEV importieren
+- `steuerberater-handoff` — falls StB die ELSTER-Übermittlung übernimmt
+- `abstimmung` — Verprobung USt-Konten gegen Saldo

@@ -1,0 +1,12 @@
+{
+  "_purpose": "Format-Konventionen, die jahresunabhaengig gelten",
+  "currency": "EUR",
+  "currency_symbol": "€",
+  "decimal_separator": ",",
+  "thousands_separator": ".",
+  "date_format": "TT.MM.JJJJ",
+  "amount_format_example": "1.234,56 €",
+  "percentage_format_example": "12,5 %",
+  "negative_format": "-1.234,56 €",
+  "encoding_datev_export": "Windows-ANSI (Codepage 1252) als Default; UTF-8 mit BOM optional"
+}

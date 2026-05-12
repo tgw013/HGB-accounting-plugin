@@ -1,657 +1,116 @@
 ---
 name: jahresabschluss
-type: command
-language: de
-version: "2026"
-description: >
-  Erstellung von Jahresabschlüssen nach HGB: Bilanz (§266),
-  GuV Gesamtkostenverfahren (§275 Abs.2), GuV Umsatzkostenverfahren
-  (§275 Abs.3), EÜR (§4 Abs.3 EStG). Größenklassen, Steuern
-  und latente Steuern.
-config:
-  rates: config/rates-2026.json
-  accounts: config/kontenrahmen.json
-tags:
-  - jahresabschluss
-  - bilanz
-  - guv
-  - euer
-  - hgb
-  - steuer
+description: HGB-Jahresabschluss-Aufstellung GmbH/UG — Bilanz §266, GuV §275, Anhang §284-288, Größenklassen §267, Offenlegung §325.
 ---
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
 
-
 # Jahresabschluss
 
-Dieses Skill steuert die Erstellung von Jahresabschlüssen nach dem
-Handelsgesetzbuch (HGB). Es unterstützt sowohl die doppelte
-Buchführung (Bilanzierung) als auch die Einnahmen-Überschuss-Rechnung
-(EÜR) für kleinere Unternehmen.
+**Typ:** `workflow`
+**Anthropic-Pendant:** `annual-close` (sinngemäß)
+**Geltungsbereich:** GmbH, UG
+**Config:** `config/{active_year}/`
+**Knowledge-Base:** `buchung-grundlagen`
 
 ---
 
-## 1. Größenklassen nach HGB
-
-### 1.1 Schwellenwerte
-
-Die Größenklasse bestimmt Umfang der Offenlegungspflichten, Prüfungs-
-pflicht und anwendbare Erleichterungen. Zwei der drei Merkmale müssen
-an zwei aufeinanderfolgenden Stichtagen überschritten werden.
-
-Werte aus `config/rates-2026.json` → `hgb_groessenklassen`:
-
-| Größenklasse            | Bilanzsumme      | Umsatzerlöse     | Arbeitnehmer | Grundlage     |
-|-------------------------|------------------|-------------------|--------------|---------------|
-| **Kleinstkapitalges.**  | ≤ 450.000 €     | ≤ 900.000 €      | ≤ 10         | §267a HGB     |
-| **Klein**               | ≤ 7.500.000 €   | ≤ 15.000.000 €   | ≤ 50         | §267 Abs.1    |
-| **Mittelgroß**          | ≤ 25.000.000 €  | ≤ 50.000.000 €   | ≤ 250        | §267 Abs.2    |
-| **Groß**                | > 25.000.000 €  | > 50.000.000 €   | > 250        | §267 Abs.3    |
-
-Seit 17.04.2024 gelten die erhöhten Schwellenwerte (BGBl. 2024 I Nr. 120).
-
-### 1.2 Pflichten nach Größenklasse
-
-| Pflicht                    | Kleinst | Klein  | Mittelgroß | Groß   |
-|----------------------------|---------|--------|------------|--------|
-| Bilanz                     | Verkürzt| Verkürzt| Vollständig| Vollständig|
-| GuV                        | Entfällt| Verkürzt| Vollständig| Vollständig|
-| Anhang                     | Entfällt| Verkürzt| Vollständig| Vollständig|
-| Lagebericht                | Nein    | Nein   | Ja         | Ja     |
-| Kapitalflussrechnung       | Nein    | Nein   | Nein       | Ja     |
-| Eigenkapitalspiegel        | Nein    | Nein   | Nein       | Ja     |
-| Prüfungspflicht            | Nein    | Nein   | Ja         | Ja     |
-| Offenlegung                | Hinterl.| Offenl.| Offenl.   | Offenl.|
-| Latente Steuern (§274)     | Nein    | Nein   | Ja         | Ja     |
-
-### 1.3 EÜR-Berechtigung
-
-Die Einnahmen-Überschuss-Rechnung nach **§4 Abs.3 EStG** ist zulässig,
-wenn die Schwelle des **§241a HGB** nicht überschritten wird:
-
-| Merkmal             | Schwelle      |
-|---------------------|---------------|
-| Umsatzerlöse        | 800.000 €     |
-| Jahresüberschuss    | 80.000 €      |
-
-Bei Überschreitung: Buchführungspflicht ab dem folgenden Geschäftsjahr
-(§141 AO).
-
----
-
-## 2. Bilanz (§266 HGB)
-
-### 2.1 Aktivseite
-
-```
-AKTIVA
-═══════════════════════════════════════════════════════════════
-
-A. Anlagevermögen
-
-   I.   Immaterielle Vermögensgegenstände
-        1. Selbst geschaffene gewerbliche Schutzrechte
-           und ähnliche Rechte und Werte
-        2. Entgeltlich erworbene Konzessionen, gewerbliche
-           Schutzrechte und ähnliche Rechte und Werte
-           sowie Lizenzen an solchen Rechten und Werten
-        3. Geschäfts- oder Firmenwert
-        4. Geleistete Anzahlungen
-
-   II.  Sachanlagen
-        1. Grundstücke, grundstücksgleiche Rechte und
-           Bauten einschließlich der Bauten auf
-           fremden Grundstücken
-        2. Technische Anlagen und Maschinen
-        3. Andere Anlagen, Betriebs- und
-           Geschäftsausstattung
-        4. Geleistete Anzahlungen und Anlagen im Bau
-
-   III. Finanzanlagen
-        1. Anteile an verbundenen Unternehmen
-        2. Ausleihungen an verbundene Unternehmen
-        3. Beteiligungen
-        4. Ausleihungen an Unternehmen, mit denen ein
-           Beteiligungsverhältnis besteht
-        5. Wertpapiere des Anlagevermögens
-        6. Sonstige Ausleihungen
-
-B. Umlaufvermögen
-
-   I.   Vorräte
-        1. Roh-, Hilfs- und Betriebsstoffe
-        2. Unfertige Erzeugnisse, unfertige Leistungen
-        3. Fertige Erzeugnisse und Waren
-        4. Geleistete Anzahlungen
-
-   II.  Forderungen und sonstige Vermögensgegenstände
-        1. Forderungen aus Lieferungen und Leistungen
-        2. Forderungen gegen verbundene Unternehmen
-        3. Forderungen gegen Unternehmen, mit denen ein
-           Beteiligungsverhältnis besteht
-        4. Sonstige Vermögensgegenstände
-
-   III. Wertpapiere
-        1. Anteile an verbundenen Unternehmen
-        2. Sonstige Wertpapiere
-
-   IV.  Kassenbestand, Bundesbankguthaben, Guthaben
-        bei Kreditinstituten und Schecks
-
-C. Rechnungsabgrenzungsposten
-
-D. Aktive latente Steuern (nur mittelgroß/groß, §274 Abs.1)
-
-E. Aktiver Unterschiedsbetrag aus der Vermögensverrechnung
-```
-
-### 2.2 Passivseite
-
-```
-PASSIVA
-═══════════════════════════════════════════════════════════════
-
-A. Eigenkapital
-
-   I.    Gezeichnetes Kapital
-   II.   Kapitalrücklage
-   III.  Gewinnrücklagen
-         1. Gesetzliche Rücklage
-         2. Rücklage für Anteile an einem herrschenden
-            oder mehrheitlich beteiligten Unternehmen
-         3. Satzungsmäßige Rücklagen
-         4. Andere Gewinnrücklagen
-   IV.   Gewinnvortrag / Verlustvortrag
-   V.    Jahresüberschuss / Jahresfehlbetrag
-
-B. Rückstellungen
-
-   1. Rückstellungen für Pensionen und ähnliche
-      Verpflichtungen
-   2. Steuerrückstellungen
-   3. Sonstige Rückstellungen
-
-C. Verbindlichkeiten
-
-   1. Anleihen
-      davon konvertibel
-   2. Verbindlichkeiten gegenüber Kreditinstituten
-   3. Erhaltene Anzahlungen auf Bestellungen
-   4. Verbindlichkeiten aus Lieferungen und Leistungen
-   5. Verbindlichkeiten aus der Annahme gezogener
-      Wechsel und der Ausstellung eigener Wechsel
-   6. Verbindlichkeiten gegenüber verbundenen
-      Unternehmen
-   7. Verbindlichkeiten gegenüber Unternehmen, mit
-      denen ein Beteiligungsverhältnis besteht
-   8. Sonstige Verbindlichkeiten
-      davon aus Steuern
-      davon im Rahmen der sozialen Sicherheit
-
-D. Rechnungsabgrenzungsposten
-
-E. Passive latente Steuern (nur mittelgroß/groß, §274 Abs.1)
-```
-
-### 2.3 Bilanzierungsgrundsätze
-
-| Grundsatz                   | Norm                | Beschreibung                           |
-|-----------------------------|---------------------|----------------------------------------|
-| Bilanzidentität             | §252 Abs.1 Nr.1    | Eröffnungsbilanz = Vorjahresschluss    |
-| Unternehmensfortführung     | §252 Abs.1 Nr.2    | Going Concern                          |
-| Einzelbewertung             | §252 Abs.1 Nr.3    | Jeder VG einzeln bewerten              |
-| Vorsichtsprinzip            | §252 Abs.1 Nr.4    | Verluste antizipieren, Gewinne nicht   |
-| Periodenabgrenzung          | §252 Abs.1 Nr.5    | Aufwand/Ertrag periodengerecht         |
-| Bewertungsstetigkeit        | §252 Abs.1 Nr.6    | Methoden beibehalten                   |
-
----
-
-## 3. Gewinn- und Verlustrechnung
-
-### 3.1 Gesamtkostenverfahren (§275 Abs.2 HGB)
-
-```
-GEWINN- UND VERLUSTRECHNUNG
-(Gesamtkostenverfahren nach §275 Abs.2 HGB)
-═════════════════════════════════���═════════════════════════════
-
- 1. Umsatzerlöse                                    XX.XXX.XXX,XX €
-
- 2. Erhöhung oder Verminderung des Bestands
-    an fertigen und unfertigen Erzeugnissen           X.XXX.XXX,XX €
-
- 3. Andere aktivierte Eigenleistungen                   XXX.XXX,XX €
-
- 4. Sonstige betriebliche Erträge                     X.XXX.XXX,XX €
-    davon Erträge aus Währungsumrechnung
-
- 5. Materialaufwand
-    a) Aufwendungen für Roh-, Hilfs- und
-       Betriebsstoffe und für bezogene Waren         X.XXX.XXX,XX €
-    b) Aufwendungen für bezogene Leistungen            XXX.XXX,XX €
-
- 6. Personalaufwand
-    a) Löhne und Gehälter                            X.XXX.XXX,XX €
-    b) Soziale Abgaben und Aufwendungen für
-       Altersversorgung und für Unterstützung          XXX.XXX,XX €
-       davon für Altersversorgung
-
- 7. Abschreibungen
-    a) auf immaterielle Vermögensgegenstände
-       des Anlagevermögens und Sachanlagen              XXX.XXX,XX €
-    b) auf Vermögensgegenstände des
-       Umlaufvermögens, soweit diese die in
-       der Kapitalgesellschaft üblichen
-       Abschreibungen überschreiten                     XXX.XXX,XX €
-
- 8. Sonstige betriebliche Aufwendungen                X.XXX.XXX,XX €
-    davon Aufwendungen aus Währungsumrechnung
-                                                  ─────────────────
- 9. Erträge aus Beteiligungen                           XXX.XXX,XX €
-    davon aus verbundenen Unternehmen
-
-10. Erträge aus anderen Wertpapieren und
-    Ausleihungen des Finanzanlagevermögens              XXX.XXX,XX €
-    davon aus verbundenen Unternehmen
-
-11. Sonstige Zinsen und ähnliche Erträge                XXX.XXX,XX €
-    davon aus verbundenen Unternehmen
-
-12. Abschreibungen auf Finanzanlagen und auf
-    Wertpapiere des Umlaufvermögens                     XXX.XXX,XX €
-
-13. Zinsen und ähnliche Aufwendungen                    XXX.XXX,XX €
-    davon an verbundene Unternehmen
-                                                  ─────────────────
-14. Steuern vom Einkommen und vom Ertrag                XXX.XXX,XX €
-
-15. Ergebnis nach Steuern                            X.XXX.XXX,XX €
-
-16. Sonstige Steuern                                    XXX.XXX,XX €
-
-17. Jahresüberschuss / Jahresfehlbetrag               X.XXX.XXX,XX €
-```
-
-### 3.2 Umsatzkostenverfahren (§275 Abs.3 HGB)
-
-```
-GEWINN- UND VERLUSTRECHNUNG
-(Umsatzkostenverfahren nach §275 Abs.3 HGB)
-═══════════════════════════════════════════════════════════════
-
- 1. Umsatzerlöse                                    XX.XXX.XXX,XX €
-
- 2. Herstellungskosten der zur Erzielung der
-    Umsatzerlöse erbrachten Leistungen              XX.XXX.XXX,XX €
-                                                  ─────────────────
- 3. Bruttoergebnis vom Umsatz                        X.XXX.XXX,XX €
-
- 4. Vertriebskosten                                  X.XXX.XXX,XX €
-
- 5. Allgemeine Verwaltungskosten                     X.XXX.XXX,XX €
-
- 6. Sonstige betriebliche Erträge                      XXX.XXX,XX €
-    davon Erträge aus Währungsumrechnung
-
- 7. Sonstige betriebliche Aufwendungen                 XXX.XXX,XX €
-    davon Aufwendungen aus Währungsumrechnung
-                                                  ─────────────────
- 8. Erträge aus Beteiligungen                           XXX.XXX,XX €
-    davon aus verbundenen Unternehmen
-
- 9. Erträge aus anderen Wertpapieren und
-    Ausleihungen des Finanzanlagevermögens              XXX.XXX,XX €
-    davon aus verbundenen Unternehmen
-
-10. Sonstige Zinsen und ähnliche Erträge                XXX.XXX,XX €
-    davon aus verbundenen Unternehmen
-
-11. Abschreibungen auf Finanzanlagen und auf
-    Wertpapiere des Umlaufvermögens                     XXX.XXX,XX €
-
-12. Zinsen und ähnliche Aufwendungen                    XXX.XXX,XX €
-    davon an verbundene Unternehmen
-                                                  ─────────────────
-13. Steuern vom Einkommen und vom Ertrag                XXX.XXX,XX €
-
-14. Ergebnis nach Steuern                            X.XXX.XXX,XX €
-
-15. Sonstige Steuern                                    XXX.XXX,XX €
-
-16. Jahresüberschuss / Jahresfehlbetrag               X.XXX.XXX,XX €
-```
-
-### 3.3 Gesamtkosten- vs. Umsatzkostenverfahren
-
-| Merkmal                | Gesamtkostenverfahren      | Umsatzkostenverfahren       |
-|------------------------|----------------------------|-----------------------------|
-| Gliederung             | Nach Aufwandsarten         | Nach Funktionsbereichen     |
-| Bestandsveränderungen  | Explizit ausgewiesen       | In HK der Umsätze enthalten|
-| Verbreitung DE         | Sehr häufig (Standard)     | Selten (eher int. Konzerne) |
-| Detailtiefe Material   | Hoch (Einzelausweis)       | In HK aggregiert            |
-| Kostenstellenrechnung  | Nicht zwingend             | Erforderlich                |
-
----
-
-## 4. Einnahmen-Überschuss-Rechnung (§4 Abs.3 EStG)
-
-### 4.1 Anwendungsbereich
-
-Die EÜR steht folgenden Steuerpflichtigen offen:
-
-- Freiberufler (§18 EStG) — grundsätzlich, unabhängig von der Höhe
-- Gewerbetreibende unterhalb der §241a-Schwelle (800.000 € Umsatz
-  oder 80.000 € Gewinn)
-- Land- und Forstwirte unterhalb der Buchführungsgrenzen
-
-### 4.2 Grundstruktur
-
-```
-EINNAHMEN-ÜBERSCHUSS-RECHNUNG (§4 Abs.3 EStG)
-═══════════════════════════════════════════════════════════════
-
-I.  BETRIEBSEINNAHMEN
-
-    1. Umsatzerlöse (Honorare, Warenverkauf)       XXX.XXX,XX €
-    2. Vereinnahmte Umsatzsteuer                     XX.XXX,XX €
-    3. Erstattete Vorsteuer (USt-Erstattung FA)       X.XXX,XX €
-    4. Private Kfz-Nutzung (1 %-Regelung)             X.XXX,XX €
-    5. Auflösung von Rücklagen                             0,00 €
-    6. Sonstige Betriebseinnahmen                      X.XXX,XX €
-                                                  ─────────────────
-    Summe Betriebseinnahmen                         XXX.XXX,XX €
-
-II. BETRIEBSAUSGABEN
-
-    1. Waren, Roh- und Hilfsstoffe                   XX.XXX,XX €
-    2. Bezogene Fremdleistungen                       XX.XXX,XX €
-    3. Personalkosten (Löhne, Gehälter, SV)          XX.XXX,XX €
-    4. Abschreibungen (AfA)                            X.XXX,XX €
-    5. Raumkosten (Miete, Nebenkosten)                 X.XXX,XX €
-    6. Versicherungen                                  X.XXX,XX €
-    7. Kfz-Kosten                                      X.XXX,XX €
-    8. Reisekosten                                     X.XXX,XX €
-    9. Bewirtungskosten (70 %)                           XXX,XX €
-   10. Telefon/Internet                                  XXX,XX €
-   11. Bürobedarf                                        XXX,XX €
-   12. Fortbildungskosten                                XXX,XX €
-   13. Rechts- und Beratungskosten                     X.XXX,XX €
-   14. Gezahlte Vorsteuer                              XX.XXX,XX €
-   15. Gezahlte USt (USt-Vorauszahlungen an FA)        XX.XXX,XX €
-   16. Sonstige Betriebsausgaben                       X.XXX,XX €
-                                                  ─────────────────
-    Summe Betriebsausgaben                          XXX.XXX,XX €
-
-III. GEWINN / VERLUST
-
-     Betriebseinnahmen                              XXX.XXX,XX €
-     ./. Betriebsausgaben                           XXX.XXX,XX €
-                                                  ────────��────────
-     = Gewinn / Verlust                              XX.XXX,XX €
-```
-
-### 4.3 Zufluss-/Abflussprinzip (§11 EStG)
-
-| Zeitpunkt        | Zufluss (Einnahme)                    | Abfluss (Ausgabe)                     |
-|------------------|---------------------------------------|---------------------------------------|
-| Grundregel       | Kalenderjahr des Zuflusses            | Kalenderjahr des Abflusses            |
-| 10-Tage-Regel    | Regelmäßige Einnahmen ±10 Tage um    | Regelmäßige Ausgaben ±10 Tage um      |
-|                  | den Jahreswechsel → wirtschaftl. Jahr | den Jahreswechsel → wirtschaftl. Jahr |
-| Abschreibungen   | —                                     | Über Nutzungsdauer verteilt           |
-| GWG ≤ 800 €     | —                                     | Sofort im Jahr der Anschaffung        |
-| GWG 250,01–1.000 €| —                                   | Sammelposten 5 Jahre (Wahlrecht)      |
-
-### 4.4 Besonderheiten der EÜR
-
-- **Keine Rückstellungen**: Weder Urlaubsrückstellungen noch sonstige
-  Rückstellungen sind zulässig.
-- **Keine Rechnungsabgrenzung**: Ausnahme bei Vorauszahlungen > 1 Jahr.
-- **USt als Betriebseinnahme/-ausgabe**: Siehe Abschnitt 4.2 Posten 2,
-  3, 14, 15.
-- **Anlage EÜR**: Pflicht zur elektronischen Übermittlung an das
-  Finanzamt (Anlage EÜR der Einkommensteuererklärung).
-
----
-
-## 5. Steuern
-
-### 5.1 Körperschaftsteuer (§23 KStG)
-
-Aus `config/rates-2026.json` → `koerperschaftsteuer`:
-
-| Zeitraum    | KSt-Satz | SolZ (5,5 %) | Effektiv (KSt + SolZ) |
-|-------------|----------|--------------|------------------------|
-| 2025–2027   | 15,00 %  | 0,825 %      | 15,825 %               |
-| 2028        | 14,00 %  | 0,770 %      | 14,770 %               |
-| 2029        | 13,00 %  | 0,715 %      | 13,715 %               |
-| 2030        | 12,00 %  | 0,660 %      | 12,660 %               |
-| 2031        | 11,00 %  | 0,605 %      | 11,605 %               |
-| Ab 2032     | 10,00 %  | 0,550 %      | 10,550 %               |
-
-**Vorauszahlungstermine**: 10.03., 10.06., 10.09., 10.12.
-
-### 5.2 Solidaritätszuschlag
-
-- **Satz**: 5,5 % auf die KSt (bzw. ESt bei natürlichen Personen)
-- **Effektiver Zuschlag auf Bemessungsgrundlage**: 0,825 % (bei
-  KSt-Satz 15 %)
-
-### 5.3 Gewerbesteuer
-
-Aus `config/rates-2026.json` → `gewerbesteuer`:
-
-#### Berechnung
-
-```
-Gewerbesteuer = Gewerbeertrag × Steuermesszahl × Hebesatz ÷ 100
-
-Steuermesszahl: 3,5 %
-Mindesthebesatz: 200 %
-
-Beispiel (München, Hebesatz 490 %):
-    100.000,00 € × 3,5 % × 490 % = 17.150,00 €
-    Effektiver Steuersatz: 17,15 %
-```
-
-#### Referenz-Hebesätze 2026
-
-| Stadt       | Hebesatz | Effektiver GewSt-Satz |
-|-------------|----------|-----------------------|
-| Berlin      | 410 %    | 14,35 %               |
-| München     | 490 %    | 17,15 %               |
-| Hamburg     | 470 %    | 16,45 %               |
-| Frankfurt   | 460 %    | 16,10 %               |
-| Durchschnitt| 438 %    | 15,33 %               |
-
-#### Besonderheiten
-
-- **Freibetrag Personengesellschaften**: 24.500,00 € (§11 Abs.1 Nr.1 GewStG)
-- **Freiberufler**: Keine Gewerbesteuer (§2 Abs.1 GewStG — nur
-  Gewerbebetriebe sind gewerbesteuerpflichtig)
-- **GewSt-Anrechnung ESt**: §35 EStG, max. 4,0-facher Messbetrag
-
-**Vorauszahlungstermine**: 15.02., 15.05., 15.08., 15.11.
-
-### 5.4 Gesamtsteuerbelastung Kapitalgesellschaft
-
-```
-Berechnung der Gesamtsteuerbelastung (Beispiel München):
-
-    Gewerbeertrag / zu versteuerndes Einkommen:   100.000,00 €
-
-    Körperschaftsteuer  (15,000 %)                  15.000,00 €
-    Solidaritätszuschlag ( 0,825 %)                    825,00 €
-    Gewerbesteuer       (17,150 %)                  17.150,00 €
-                                                 ─────────────
-    Gesamtsteuer                                    32.975,00 €
-    Effektiver Gesamtsteuersatz                     32,975 %
-```
-
-### 5.5 Steuerrückstellung zum Jahresabschluss
-
-Die voraussichtliche Steuerbelastung ist als Steuerrückstellung zu
-passivieren:
-
-| Kontenrahmen | Soll                                                 | Haben                                          |
-|--------------|------------------------------------------------------|------------------------------------------------|
-| **SKR03**    | **4320 Gewerbesteuer (Aufwand)**                     | **0956 Gewerbesteuerrückstellung**             |
-| **SKR03**    | **2200 Körperschaftsteuer (Aufwand)**                | **0963 Körperschaftsteuerrückstellung**        |
-| **SKR04**    | 7610 Gewerbesteuer (Aufwand)                         | 3035 Gewerbesteuerrückstellung                 |
-| **SKR04**    | 7600 Körperschaftsteuer (Aufwand)                    | **3040 Körperschaftsteuerrückstellung** |
-
-> **WICHTIG (gemäß DATEV-SKR03/SKR04 2026):**
-> - **SKR03 2200 = Körperschaftsteuer** (Aufwand, Klasse 2 "Steuern vom Einkommen"). Konto **4300 = "Nicht abziehbare Vorsteuer"**, NICHT KSt-Aufwand.
-> - **SKR03 0956 = Gewerbesteuerrückstellung**, NICHT KSt-Rückstellung. **0955 = Steuerrückstellungen (Sammelkonto)**. **0963 = Körperschaftsteuerrückstellung**.
-> - **SKR04 3035 = Gewerbesteuerrückstellung**, NICHT KSt-Rückstellung. Die KSt-Rückstellung liegt im 3020er-Steuerrückstellungs-Bereich.
-
----
-
-## 6. Latente Steuern (§274 HGB)
-
-### 6.1 Anwendungsbereich
-
-Latente Steuern sind **nur für mittelgroße und große
-Kapitalgesellschaften** relevant (§274a Nr.5 HGB). Kleinst- und kleine
-Kapitalgesellschaften sind befreit.
-
-### 6.2 Konzept
-
-Latente Steuern entstehen aus **temporären Differenzen** zwischen
-Handelsbilanz und Steuerbilanz:
-
-| Differenzart                                | Latente Steuer |
-|---------------------------------------------|----------------|
-| HB-Vermögenswert > StB-Vermögenswert       | Passiv         |
-| HB-Vermögenswert < StB-Vermögenswert       | Aktiv          |
-| HB-Schuld > StB-Schuld                     | Aktiv          |
-| HB-Schuld < StB-Schuld                     | Passiv         |
-
-### 6.3 Häufige Ursachen
-
-| Sachverhalt                           | Typische Differenz           |
-|---------------------------------------|------------------------------|
-| Unterschiedliche Abschreibungsdauer   | HB ≠ StB Restbuchwert       |
-| Drohverlustrückstellungen             | HB ja, StB nein (§5 Abs.4a) |
-| Pensionsrückstellungen (§6a EStG)     | HB > StB (Teilwert vs. BilMoG)|
-| Firmenwert (10J HGB vs. 15J steuerl.)| Temporäre Differenz         |
-| §7g-Sonderabschreibung               | StB < HB Restbuchwert       |
-
-### 6.4 Bewertung
-
-```
-Latente Steuer = Temporäre Differenz × unternehmensindividueller Steuersatz
-
-Steuersatz = KSt + SolZ + GewSt
-           = 15 % + 0,825 % + (3,5 % × Hebesatz / 100)
-
-Beispiel (München):
-    Steuersatz = 15 % + 0,825 % + 17,15 % = 32,975 %
-    Temporäre Differenz: 50.000,00 €
-    Latente Steuer: 50.000,00 € × 32,975 % = 16.487,50 €
-```
-
-### 6.5 Bilanzausweis
-
-| Art               | Position                | Anmerkung                           |
-|-------------------|-------------------------|-------------------------------------|
-| Aktive latent     | Aktiva D (§266 Abs.2)  | Wahlrecht zur Aktivierung           |
-| Passive latent    | Passiva E (§266 Abs.3) | Pflicht zur Passivierung            |
-| Saldierung        | Zulässig (§274 Abs.1 S.3)| Wahlrecht zur Verrechnung        |
-
-### 6.6 Ausschüttungssperre
-
-Aktivierte latente Steuern unterliegen einer **Ausschüttungssperre**
-(§268 Abs.8 HGB). Der aktivierte Betrag darf nur ausgeschüttet werden,
-soweit die frei verfügbaren Rücklagen zuzüglich eines Gewinnvortrags
-und abzüglich eines Verlustvortrags den Betrag übersteigen.
-
----
-
-## 7. Abschlussarbeiten-Checkliste
-
-### 7.1 Vorbereitende Arbeiten
-
-| Nr. | Arbeitsschritt                               | Frist          |
-|-----|----------------------------------------------|----------------|
-| 1   | Inventur durchführen (§240 HGB)              | Stichtag ±10T  |
-| 2   | Anlagenspiegel aktualisieren                 | Bis Abschluss  |
-| 3   | Forderungsbestand wertberichtigen            | Bis Abschluss  |
-| 4   | Rückstellungen bilden/auflösen               | Bis Abschluss  |
-| 5   | Rechnungsabgrenzung (ARAP/PRAP)              | Bis Abschluss  |
-| 6   | Intercompany-Abstimmung abschließen          | Bis Abschluss  |
-| 7   | USt-Jahresabstimmung                         | Bis Abschluss  |
-
-### 7.2 Abschlussarbeiten
-
-| Nr. | Arbeitsschritt                               | Frist          |
-|-----|----------------------------------------------|----------------|
-| 8   | GuV aufstellen                               | Bis Abschluss  |
-| 9   | Bilanz aufstellen                            | Bis Abschluss  |
-| 10  | Steuerberechnung und -rückstellung           | Bis Abschluss  |
-| 11  | Latente Steuern berechnen (wenn anwendbar)   | Bis Abschluss  |
-| 12  | Anhang erstellen (wenn anwendbar)            | Bis Abschluss  |
-| 13  | Lagebericht erstellen (mittelgroß/groß)      | Bis Abschluss  |
-
-### 7.3 Fristen
-
-| Pflicht                       | Frist                                    |
-|-------------------------------|------------------------------------------|
-| Aufstellung Jahresabschluss (mittelgroße + große KapGes) | **3 Monate nach Stichtag** (§ 264 Abs. 1 S. 3 HGB) |
-| Aufstellung Jahresabschluss (kleine + Kleinst KapGes) | **6 Monate nach Stichtag** (§ 264 Abs. 1 S. 4 HGB) |
-| Offenlegung (Bundesanzeiger)  | 12 Monate nach Stichtag                  |
-| Steuererklärung (ohne StB)    | 31.07. des Folgejahres (§ 149 Abs. 2 AO) |
-| Steuererklärung (mit StB)     | **28.02. des Zweitfolgejahres** (§ 149 Abs. 3 AO; reguläre Frist nach Rückkehr aus Corona-Verlängerungen) |
-
----
-
-## 7.1 GbR-Besonderheiten (post-MoPeG)
-
-Seit dem MoPeG (Gesetz zur Modernisierung des Personengesellschaftsrechts,
-01.01.2024) gelten für die GbR folgende Besonderheiten:
-
-> 🚨 **OFFENE RECHTSFRAGE — § 264a HGB & eGbR (Stand 2026-05)**
->
-> Die Anwendbarkeit von § 264a HGB auf die **eingetragene GbR (eGbR)**, deren Gesellschafter ausschließlich Kapitalgesellschaften sind (z. B. "GmbH & Co. eGbR"), ist seit Inkrafttreten des MoPeG (01.01.2024) in der Literatur **umstritten**:
-> - **Pro Analogie:** Der Schutzzweck des § 264a HGB (Schutz vor Bilanzlücken bei reiner Kapitalgesellschafts-Struktur) gilt gleichermaßen für die eGbR
-> - **Contra Wortlaut:** § 264a HGB nennt explizit nur OHG und KG. Das MoPeG hat keine entsprechende Anpassung gebracht — eine planwidrige Regelungslücke ist umstritten
->
-> Eine eindeutige BGH-Rechtsprechung oder BMF-Verwaltungsauffassung liegt **zum Stand 2026-05 nicht vor**. Das IDW hat sich (bisher) nicht abschließend positioniert.
->
-> **🛑 Wenn der vorliegende Sachverhalt eine eGbR oder GmbH & Co. eGbR betrifft, deren Gesellschafter ausschließlich Kapitalgesellschaften sind: ZWINGEND Steuerberater oder Wirtschaftsprüfer konsultieren — diese Skill kann hierzu KEINE verlässliche Empfehlung geben.**
->
-> Die folgenden Hinweise sind nur Orientierung, nicht Festlegung.
-
-### Buchführungspflicht
-- Eingetragene GbR (eGbR) im Gesellschaftsregister: **§ 264a HGB könnte greifen** (siehe Hinweis oben — offene Rechtsfrage), wenn alle Vollhafter keine natürlichen Personen sind
-- Nicht-eingetragene GbR: In der Regel keine Buchführungspflicht nach HGB,
-  EÜR nach §4 Abs.3 EStG zulässig (sofern Schwellenwerte §141 AO nicht überschritten)
-- Schwellenwerte für Buchführungspflicht: Umsatz > 800.000 € ODER Gewinn > 80.000 €
-
-### Kapitalkonten
-- Jeder Gesellschafter führt eigene Kapitalkonten (Kapitalkonto I und II üblich)
-- Kapitalkonto I: Feste Einlage laut Gesellschaftsvertrag
-- Kapitalkonto II: Variables Konto (Gewinnanteil, Entnahmen, Einlagen)
-- Jahresabschluss muss Kapitalkontenentwicklung je Gesellschafter zeigen
-
-### Gewinnverteilung
-- Nach Gesellschaftsvertrag (häufig: nach Köpfen oder nach Kapitalanteilen)
-- Wenn keine Regelung: §709 BGB n.F. — nach Anteilen der Gesellschafter
-- Sonderbetriebseinnahmen/-ausgaben je Gesellschafter in Sonderbilanz
-
-### Gewerbesteuer
-- GbR mit gewerblicher Tätigkeit: gewerbesteuerpflichtig
-- Freibetrag: 24.500 € (§11 Abs.1 Nr.1 GewStG)
-- Freiberufler-GbR: KEINE Gewerbesteuer (Achtung: Abfärbetheorie §15 Abs.3 Nr.1 EStG)
-
----
-
-## 8. Referenzen
-
-- `config/rates-2026.json` — Steuersätze, Größenklassen, SV-Beiträge
-- `config/kontenrahmen.json` — Kontenrahmen SKR03 und SKR04
-- Handelsgesetzbuch (HGB) — insb. §241a, §246–§274a, §266, §275
-- Einkommensteuergesetz (EStG) — insb. §4 Abs.3, §7, §11, §35
-- Körperschaftsteuergesetz (KStG) — insb. §23
-- Gewerbesteuergesetz (GewStG) — insb. §2, §7, §11
-- Abgabenordnung (AO) — insb. §141
+## 1. Zweck
+
+**Aufstellung** des HGB-Jahresabschlusses für GmbH/UG (Bilanz, GuV, Anhang) und Vorbereitung der Steuerpositionen (KSt, GewSt, Solz). Keine Prüfung, kein Bundesanzeiger-Versand — Übergabe an StB/WP via `steuerberater-handoff` oder eigene Übernahme in DATEV.
+
+## 2. Eingaben
+
+- Geschäftsjahr (i.d.R. KJ; abweichendes WJ möglich, § 240 Abs. 2 HGB)
+- Abschluss-Saldenliste (alle Konten, vor Umbuchungen)
+- Inventur-Ergebnisse (§ 240 HGB)
+- Anlagengitter / AfA-Tabellen (§ 7 EStG, AfA-Tabellen BMF)
+- Rückstellungs-Anforderungen (Tantieme, Urlaub, Pension, drohende Verluste, Garantien)
+- Vorjahres-Abschluss (für Vergleichsspalte § 265 Abs. 2 HGB)
+- Größenklassen-Status (§ 267, 267a HGB)
+
+## 3. Workflow
+
+### 3.1 Größenklasse bestimmen (§ 267, 267a HGB)
+Zwei der drei Schwellen in zwei aufeinanderfolgenden Jahren überschritten? Schwellen (Stand 2026, nach BilanzG-Anpassung):
+
+| Klasse | Bilanzsumme | Umsatz | MA-Zahl |
+|---|---|---|---|
+| Kleinstkapges (§ 267a) | ≤ 450 T€ | ≤ 900 T€ | ≤ 10 |
+| Klein (§ 267 Abs. 1) | ≤ 7,5 M€ | ≤ 15 M€ | ≤ 50 |
+| Mittel (§ 267 Abs. 2) | ≤ 25 M€ | ≤ 50 M€ | ≤ 250 |
+| Groß | darüber | darüber | darüber |
+
+Konsequenzen: Aufstellungsfristen, Prüfungspflicht (§ 316 HGB ab mittelgroß), Offenlegungstiefe (§ 326 ff. HGB).
+
+### 3.2 Anlage-/Umlaufvermögen
+- AfA-Lauf abschließen (lineare/degressive, GwG-Sammelposten)
+- Sonder-AfA prüfen (§ 7g EStG IAB/SoAfA — falls voraussetzungs-konform)
+- Niederstwertprinzip Umlaufvermögen (§ 253 Abs. 4 HGB)
+- Forderungen: Einzelwertberichtigung (EWB) und Pauschalwertberichtigung (PWB)
+  - SKR04: EWB 1246/1247, PWB 1248/1249, EWB-Aufwand 6923, PWB-Aufwand 6920
+  - SKR03: EWB 0998/0999, PWB 0996/0997, EWB-Aufwand 2451, PWB-Aufwand 2450
+
+### 3.3 Rückstellungen (§ 249 HGB)
+- **Steuerrückstellungen**: KSt + Solz, GewSt
+  - SKR04: KSt-RST **3040**, GewSt-RST **3035**, Aufwand KSt **7600**, GewSt **7610**
+  - SKR03: KSt-RST **0963**, GewSt-RST **0956**, Aufwand KSt **2200**, GewSt **2280**
+- **Sonstige Rückstellungen**: Urlaub, Tantieme, Prozesskosten, Gewährleistung, Aufbewahrung, Abschluss- und Prüfungskosten
+- Bewertung § 253 Abs. 1, 2 HGB: vernünftige kaufmännische Beurteilung; Abzinsung bei RLZ > 1 Jahr mit BBank-Durchschnittszins
+
+### 3.4 Eigenkapital
+- Jahresergebnis ermitteln (vorläufig, vor Steuern → nach Steuern)
+- UG-Sonderfall: Rücklagenpflicht § 5a Abs. 3 GmbHG (25% bis Stammkapital 25 T€ erreicht ist)
+- Gewinnverwendungsvorschlag (Vorbehalt Gesellschafterbeschluss)
+
+### 3.5 Bilanz / GuV erstellen
+- Bilanz nach § 266 HGB-Gliederung (klein vs. mittel/groß — § 266 Abs. 1 S. 3 erlaubt Verkürzung für kleine)
+- GuV nach § 275 HGB: Gesamtkostenverfahren (GKV) oder Umsatzkostenverfahren (UKV)
+- Vorjahres-Vergleichsspalte (§ 265 Abs. 2 HGB)
+
+### 3.6 Anhang (§§ 284–288 HGB)
+- Bilanzierungs- und Bewertungsmethoden
+- Anlagengitter (§ 284 Abs. 3)
+- Verbindlichkeitenspiegel (Restlaufzeiten § 285 Nr. 1)
+- Haftungsverhältnisse (§ 285 Nr. 3)
+- Organbezüge (§ 285 Nr. 9, mit Erleichterungen für kleine)
+- Mitarbeiterzahl (§ 285 Nr. 7)
+
+### 3.7 Lagebericht (entfällt für kleine + Kleinst, § 264 Abs. 1 S. 4)
+
+## 4. Output-Format
+
+- Bilanz und GuV als Markdown-Tabelle + Excel-Export-Option
+- Anhang als strukturiertes Markdown-Dokument
+- Steuerrückstellungs-Berechnungs-Begleitblatt (KSt/GewSt-Schätzung)
+- Hinweis-Liste auf StB-Klärungsbedarf
+
+## 5. Validierung
+
+- **Bilanzgleichung**: Aktiva = Passiva (Toleranz 0,00 €)
+- **GuV-Saldo** = Veränderung EK (Jahresergebnis)
+- **§-266-Gliederung** vollständig (keine Position vergessen)
+- **Vorjahres-Vergleichsspalte** vorhanden
+- **Größenklassen-Konsequenz** korrekt angewendet (Erleichterungen genutzt / Pflichten erfüllt)
+- **UG-Rücklagenpflicht** geprüft
+- **Aufstellungs-Frist** § 264 Abs. 1 HGB (3 Mon. mittelgr./groß, 6 Mon. klein/Kleinst)
+- **Offenlegungs-Frist** § 325 HGB (12 Mon., elektronisch zum Unternehmensregister seit 2022)
+
+## 6. Quellen
+
+- HGB §§ 240–289 (Buchführung, Aufstellung, Anhang, Lagebericht) — gesetze-im-internet.de/hgb/
+- HGB §§ 325, 326 (Offenlegung)
+- EStG §§ 5, 6, 7, 7g (Steuerbilanz, AfA, IAB)
+- KStG, GewStG (Steuern vom Einkommen und Ertrag)
+- GmbHG § 5a (UG-Rücklagenpflicht)
+- AfA-Tabellen BMF (allgemeine + branchenbezogene)
+- `config/2026/kontenrahmen.json`, `rates.json`, `fristen.json`
+
+## 7. Verwandte Skills
+
+- `buchung-grundlagen`, `monatsabschluss` — Vorarbeiten
+- `abstimmung` — Konten-Verprobung
+- `ebilanz` — XBRL-Datenpaket aus Jahresabschluss erzeugen
+- `steuerberater-handoff` — Übergabe an StB für ELSTER/Bundesanzeiger
+- `datev-export` — Sachkonten-Salden in DATEV
+- `iks-pruefung` — falls Prüfungspflicht (mittelgr./groß)

@@ -1,557 +1,118 @@
 ---
 name: abstimmung
-type: command
-language: de
-version: "2026"
-description: >
-  Kontenabstimmung und Saldenprüfung nach HGB/GoB:
-  Bankabstimmung, Debitorenabstimmung, USt-Abstimmung,
-  Kreditorenabstimmung. Enthält Eskalationsschwellen und
-  Abstimmungs-Templates.
-config:
-  rates: config/rates-2026.json
-  accounts: config/kontenrahmen.json
-tags:
-  - abstimmung
-  - reconciliation
-  - umsatzsteuer
-  - bank
-  - debitoren
-  - kreditoren
+description: Konten-Abstimmung Bank/Kasse/OP-Debitoren/OP-Kreditoren/USt/Intercompany — Differenz-Analyse, Klärungsvorschläge, EWB/PWB-Prüfung.
 ---
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
 
-
 # Abstimmung
 
-Dieses Skill beschreibt die Methodik zur Kontenabstimmung im deutschen
-Rechnungswesen. Es umfasst Bankabstimmung, Debitoren-/Kreditoren-
-abstimmung und die kritische USt-Abstimmung, die im deutschen
-Steuerrecht eine besondere Rolle spielt.
+**Typ:** `workflow`
+**Anthropic-Pendant:** `reconciliation` (sinngemäß)
+**Geltungsbereich:** GmbH, UG
+**Config:** `config/{active_year}/kontenrahmen.json`
+**Knowledge-Base:** `buchung-grundlagen`
 
 ---
 
-## 1. Bankabstimmung
+## 1. Zweck
 
-### 1.1 Zielsetzung
+Verprobt Konto-Salden gegen externe Belege/Listen, identifiziert und klassifiziert Differenzen, schlägt Korrektur- oder Wertberichtigungs-Buchungen vor. Standardlauf im Monats- und Jahres-Closing.
 
-Abgleich des **Buchführungssaldos** (Hauptbuch) mit dem **Bankauszugs-
-saldo** zum Stichtag. Offene Differenzen sind aufzuklären und zu
-dokumentieren.
+## 2. Eingaben
 
-### 1.2 Kontenreferenz
+- Stichtag (Monatsende / Jahresende)
+- Buchhaltungs-Salden (Konto-Salden zu Stichtag)
+- Externe Referenzen:
+  - Bankauszüge (alle Konten)
+  - Kassenbuch / Kassenbericht
+  - OP-Listen Debitoren + Kreditoren
+  - Inventur-Liste (Bestände)
+  - Lohnjournal (für SV-/LSt-Verb.)
+  - Saldenmitteilungen von verbundenen Unternehmen (Intercompany)
+- Eskalations-Schwellen (Default: > 100 € klärungspflichtig, > 1.000 € sofort melden)
 
-| Kontenrahmen | Konto | Bezeichnung          |
-|--------------|-------|----------------------|
-| **SKR03**    | 1200  | Bank                 |
-| **SKR04**    | 1800  | Bank                 |
+## 3. Workflow je Abstimmungs-Sektion
 
-Quelle: `config/kontenrahmen.json` → `haeufige_konten.bank`
+### 3.1 Bank
+- Endsaldo Bankauszug ≙ Konto-Saldo SKR04 **1800** / SKR03 **1200**
+- Differenzen klassifizieren: schwebende Buchung, Wertstellung, Bankgebühr ungebucht, Doppelbuchung
 
-### 1.3 Abstimmungsschema
+### 3.2 Kasse
+- Kassenbericht (täglich!) ≙ Konto SKR04 **1600** / SKR03 **1000**
+- Negativsalden → GoBD-Verstoß-Hinweis (Kasse kann nicht negativ werden)
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ BANKABSTIMMUNG                          Stichtag: TT.MM.JJJJ   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│ GL-Saldo lt. Buchhaltung (SKR03:1200 / SKR04:1800)              │
-│                                                    XX.XXX,XX €  │
-│                                                                  │
-│ + Gutschriften lt. Bankauszug, noch nicht gebucht   X.XXX,XX €  │
-│ - Belastungen lt. Bankauszug, noch nicht gebucht    X.XXX,XX €  │
-│ + Gebuchte Ausgangszahlungen, noch nicht valutiert  X.XXX,XX €  │
-│ - Gebuchte Eingangszahlungen, noch nicht valutiert  X.XXX,XX €  │
-│                                                ─────────────── │
-│ = Bereinigter GL-Saldo                         XX.XXX,XX €     │
-│                                                                  │
-│ Saldo lt. Bankauszug                            XX.XXX,XX €     │
-│                                                                  │
-│ DIFFERENZ                                            0,00 €     │
-│ STATUS: ✓ Abgestimmt / ✗ Differenz offen                       │
-└─────────────────────────────────────────────────────────────────┘
-```
+### 3.3 Debitoren (OP-Liste)
+- Summe Einzel-OP ≙ Sammelkonto SKR04 **1200** / SKR03 **1400**
+- Altersstruktur: 0–30 / 31–60 / 61–90 / 91–180 / > 180 Tage
+- **EWB-Prüfung**: konkrete Risiken (Insolvenz, Mahnstufe, Zahlungsverzug > 90 Tage)
+  - SKR04: EWB-Konto **1247**, Einstellung **6923**
+  - SKR03: EWB-Konto **0999**, Einstellung **2451**
+- **PWB-Prüfung**: Pauschal 1–3% Restbestand uneinbringliche Forderungen (Branchen-erfahrungswert)
+  - SKR04: PWB-Konto **1249**, Einstellung **6920**
+  - SKR03: PWB-Konto **0997**, Einstellung **2450**
 
-### 1.4 Schwebende Posten
+### 3.4 Kreditoren (OP-Liste)
+- Summe Einzel-OP ≙ Sammelkonto SKR04 **3300** / SKR03 **1600**
+- Altersstruktur: überfällige Verbindlichkeiten (Skonto-Verlust prüfen)
+- Saldo-Mitteilungen Lieferanten (saldenbestätigung-konform JA)
 
-#### SEPA-Überweisungen
+### 3.5 USt-Konten
+- USt 19% Saldo ≙ 19% der KZ-81-BG (Monat)
+- USt  7% Saldo ≙  7% der KZ-86-BG
+- Vorsteuer-Saldo ≙ Summe abzugsfähiger Vorsteuer aus Eingangsrechnungen
+- §-13b-Konten: Steuer + Vorsteuer-Pendant (i.d.R. saldennull bei voller Abzugsberechtigung)
 
-- **Ausgehend**: Buchung am Überweisungstag, Wertstellung i.d.R. T+1.
-  Zum Stichtag als schwebende Überweisung ausweisen.
-- **Eingehend**: Wertstellung am Eingangstag, Buchung ggf. am Folgetag.
+### 3.6 Lohnverbindlichkeiten
+- SKR04 **3730** (LSt) ≙ LSt-Anmeldung
+- SKR04 **3740** (SV) ≙ SV-Beitragsnachweis (alle Krankenkassen)
+- (SKR03 1741, 1742)
 
-#### SEPA-Lastschriften
+### 3.7 Anlagenkonten (jährlich)
+- Anlagengitter ≙ Saldenkonten (Anlagevermögen + kumulierte AfA)
 
-- **Eingezogene Lastschriften**: Wertstellung am Fälligkeitstag,
-  Rückgabefrist 8 Wochen (SEPA Core) bzw. keine (SEPA B2B).
-- **Erteilte Lastschriftmandate**: Überwachung offener Einzüge.
+### 3.8 Intercompany
+- Forderung Mutter ≙ Verbindlichkeit Tochter (und v.v.); Saldennull konsolidiert
 
-### 1.5 Prüfpunkte
-
-| Nr. | Prüfpunkt                                    | Schweregrad |
-|-----|----------------------------------------------|-------------|
-| 1   | GL-Saldo = Bankauszug (nach Bereinigung)     | Kritisch    |
-| 2   | Alle Bankbewegungen des Monats gebucht        | Kritisch    |
-| 3   | Schwebende Posten < 5 Bankarbeitstage alt     | Warnung     |
-| 4   | Keine unklaren Differenzen > 30 Tage offen   | Kritisch    |
-| 5   | Wertstellungsdifferenzen dokumentiert          | Information |
-
----
-
-## 2. Debitorenabstimmung
-
-### 2.1 Zielsetzung
-
-Abgleich der **Debitoren-Summe** (Nebenbuch) mit dem **Sammelkonto
-Forderungen aus Lieferungen und Leistungen** (Hauptbuch).
-
-### 2.2 Kontenreferenz
-
-| Kontenrahmen | Konto        | Bezeichnung                    |
-|--------------|--------------|--------------------------------|
-| **SKR03**    | 1400         | Forderungen aus LuL            |
-| **SKR04**    | 1200         | Forderungen aus LuL            |
-| **SKR03**    | 10000–69999  | Debitorenkonten (Personenkonten)|
-| **SKR04**    | 10000–69999  | Debitorenkonten (Personenkonten)|
-
-Quelle: `config/kontenrahmen.json` → `haeufige_konten.forderungen_lul`,
-`personenkonten.debitoren`
-
-### 2.3 Summenkontrolle
+## 4. Output-Format
 
 ```
-PRÜFUNG: Summe aller Debitoren-Einzelsalden == Saldo Konto 1400 (SKR03) / 1200 (SKR04)
-ERGEBNIS: ✓ Übereinstimmung / ✗ Differenz: X.XXX,XX €
+**Konten-Abstimmung 30.04.2026** (SKR04)
+
+Konto / Bereich                          | Soll-Saldo  | Ist-Saldo  | Differenz | Status
+1800 Bank Volksbank                      |  47.892,11  |  47.892,11 |     0,00  | ✓
+1600 Kasse                               |     320,50  |     320,50 |     0,00  | ✓
+1200 Debitoren (vs OP-Liste)             |  18.450,00  |  18.770,00 |   320,00  | !  Skonto Mandant X
+3300 Kreditoren (vs OP-Liste)            | -12.700,00  | -12.700,00 |     0,00  | ✓
+3806 USt 19%                             |   9.215,00  |   9.215,00 |     0,00  | ✓
+3730 LSt-Verb.                           |   4.230,00  |   4.230,00 |     0,00  | ✓
+3740 SV-Verb.                            |   8.812,00  |   8.815,40 |     3,40  | →  Rundung KV (ignorierbar)
+
+EWB-/PWB-VORSCHLÄGE
+- EWB Mandant Z (Insolvenz angemeldet): 100% auf 4.500 € → 6923/1247  4.500,00 €
+- PWB Restforderungen 13.625 € × 1% = 136,25 € → 6920/1249  136,25 €
+
+ESKALATIONEN
+- Debitor X 320 € → 8736 (Skonto-Aufwand 19% USt) /1200 — Buchungsvorschlag
 ```
 
-Bei Differenzen:
-1. Buchungen im Sammelkonto prüfen (direkte Buchungen auf Sammelkonto
-   sind unzulässig — nur über Personenkonten!)
-2. Stornierte Rechnungen/Gutschriften abgleichen
-3. Umbuchungen zwischen Personenkonten prüfen
+## 5. Validierung
 
-### 2.4 Altersstrukturanalyse (Fälligkeitsspiegel)
+- Differenz > Eskalations-Schwelle → in "Klärungspflichtig" markiert
+- Banken-Differenz 0 oder via "schwebende Buchung"-Liste erklärt
+- OP-Sammelkonto-Identität (Σ Einzel-OP = Sammel)
+- USt-Konten rechnerisch konsistent
+- EWB/PWB-Konto-Wahl korrekt je SKR (kein Verwechseln Aufwand vs. Wertberichtigung)
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ ALTERSSTRUKTURANALYSE DEBITOREN           Stichtag: TT.MM.JJJJ  │
-├──────────────┬──────────┬──────────┬──────────┬─────────┬───────┤
-│ Kategorie    │ Nicht    │ 1–30     │ 31–60    │ 61–90   │ >90   │
-│              │ fällig   │ Tage     │ Tage     │ Tage    │ Tage  │
-├──────────────┼──────────┼──────────┼──────────┼─────────┼───────┤
-│ Betrag (€)   │ XX.XXX   │ XX.XXX   │ XX.XXX   │ XX.XXX  │X.XXX │
-│ Anteil (%)   │   XX %   │   XX %   │   XX %   │   XX %  │  X % │
-│ Anzahl       │   XXX    │   XXX    │   XXX    │   XXX   │  XX  │
-├──────────────┼──────────┼──────────┼──────────┼─────────┼───────┤
-│ GESAMT       │                                    XXX.XXX,XX €  │
-└──────────────┴──────────────────────────────────────────────────┘
-```
+## 6. Quellen
 
-### 2.5 Wertberichtigungen auf Forderungen
+- HGB §§ 252, 253, 266 — gesetze-im-internet.de/hgb/
+- AO § 146 (Kasse, Festschreibung)
+- DATEV SKR03/04 Art.-Nr. 11174/11175 — `config/2026/kontenrahmen.json`
 
-#### Einzelwertberichtigung (EWB)
+## 7. Verwandte Skills
 
-Bei konkreten Ausfallrisiken (Insolvenz, Zahlungsverzug > 90 Tage,
-gerichtliches Mahnverfahren):
-
-**Buchung Einstellung in EWB** (gemäß DATEV-SKR03/04 2026):
-
-| Kontenrahmen | Soll                                                       | Haben                                                                 |
-|--------------|------------------------------------------------------------|------------------------------------------------------------------------|
-| **SKR03**    | **2451 Einstellungen in die Einzelwertberichtigung auf Forderungen** | **0998 Einzelwertberichtigungen auf Forderungen aus Lieferungen und Leistungen** (Restlaufzeit ≤ 1 Jahr) / **0999** (Restlaufzeit > 1 Jahr) |
-| **SKR04**    | **6923 Einstellung in die Einzelwertberichtigung auf Forderungen** | **1246 Einzelwertberichtigungen auf Forderungen** (Restlaufzeit ≤ 1 Jahr) / **1247** (Restlaufzeit > 1 Jahr) |
-
-#### Pauschalwertberichtigung (PWB)
-
-Für das allgemeine Kreditrisiko des Forderungsbestands (typisch 1–5 %
-der nicht einzelwertberichtigten Nettoforderungen):
-
-**Buchung Einstellung in PWB** (gemäß DATEV-SKR03/04 2026):
-
-| Kontenrahmen | Soll                                                            | Haben                                                                   |
-|--------------|------------------------------------------------------------------|--------------------------------------------------------------------------|
-| **SKR03**    | **2450 Einstellungen in die Pauschalwertberichtigung auf Forderungen** | **0996 Pauschalwertberichtigung auf Forderungen aus Lieferungen und Leistungen** (Restlaufzeit ≤ 1 Jahr) / **0997** (Restlaufzeit > 1 Jahr) |
-| **SKR04**    | **6920 Einstellung in die Pauschalwertberichtigung auf Forderungen** | **1248 Pauschalwertberichtigung auf Forderungen** (Restlaufzeit ≤ 1 Jahr) / **1249** (Restlaufzeit > 1 Jahr) |
-
-**Auflösung / Herabsetzung der Wertberichtigung** (Ertragskonten — bei Wegfall des Ausfallrisikos):
-
-| Kontenrahmen | EWB-Ertrag                                                | PWB-Ertrag                                                |
-|--------------|------------------------------------------------------------|------------------------------------------------------------|
-| **SKR03**    | (analog im Klasse-2-Bereich Erträge aus Wertberichtigungs-Auflösung) | (analog) |
-| **SKR04**    | **4923 Erträge aus der Herabsetzung der Einzelwertberichtigung auf Forderungen** | **4920 Erträge aus der Herabsetzung der Pauschalwertberichtigung auf Forderungen** |
-
-> **WICHTIG (gemäß DATEV-SKR03/SKR04 2026):**
-> - In **SKR03** liegen die Wertberichtigungs-Passivkonten in **Klasse 0** (Anlage- und Kapitalkonten): 0996/0997 (PWB kurz/lang) und 0998/0999 (EWB kurz/lang).
-> - In **SKR04** liegen sie in **Klasse 1** (Umlaufvermögen) als Aktiv-Korrekturposten zu den Forderungen: 1246/1247 (EWB) und 1248/1249 (PWB).
-> - Auf der Aufwandsseite: SKR03 **2450 = PWB** / **2451 = EWB**; SKR04 **6920 = PWB** / **6923 = EWB** (NICHT 6921 — das existiert nicht im DATEV-SKR04).
-> - Konten 1289/1290 (SKR04) sind KEINE Wertberichtigungs-Konten (1290 = Forderungen gegen Gesellschafter).
-
----
-
-## 3. Kreditorenabstimmung
-
-### 3.1 Kontenreferenz
-
-| Kontenrahmen | Konto        | Bezeichnung                    |
-|--------------|--------------|--------------------------------|
-| **SKR03**    | 1600         | Verbindlichkeiten aus LuL      |
-| **SKR04**    | 3300         | Verbindlichkeiten aus LuL      |
-| **SKR03**    | 70000–99999  | Kreditorenkonten               |
-| **SKR04**    | 70000–99999  | Kreditorenkonten               |
-
-### 3.2 Summenkontrolle
-
-```
-PRÜFUNG: Summe aller Kreditoren-Einzelsalden == Saldo Konto 1600 (SKR03) / 3300 (SKR04)
-ERGEBNIS: ✓ Übereinstimmung / ✗ Differenz: X.XXX,XX €
-```
-
-### 3.3 Prüfpunkte Kreditoren
-
-| Nr. | Prüfpunkt                                      | Schweregrad |
-|-----|-------------------------------------------------|-------------|
-| 1   | Nebenbuch = Hauptbuch                           | Kritisch    |
-| 2   | Keine debitorischen Kreditoren > 30 Tage        | Warnung     |
-| 3   | Skontofristen eingehalten                        | Information |
-| 4   | Offene Bestellungen ohne Rechnungseingang > 60T  | Warnung     |
-
----
-
-## 4. USt-Abstimmung (KRITISCH)
-
-### 4.1 Bedeutung
-
-Die Umsatzsteuer-Abstimmung ist eine der kritischsten Abstimmungen im
-deutschen Rechnungswesen. Fehler führen zu:
-
-- Falschen USt-Voranmeldungen (§18 UStG)
-- Steuerhinterziehung (§370 AO) oder leichtfertiger Steuerverkürzung
-  (§378 AO)
-- Zinsen auf Steuernachforderungen (§233a AO, 0,15 % pro Monat)
-- Verspätungszuschläge (§152 AO)
-
-### 4.2 Kontenreferenz
-
-#### Vorsteuer-Konten
-
-| Kontenrahmen | Kontenbereich | Bezeichnung                         |
-|--------------|---------------|-------------------------------------|
-| **SKR03**    | 1570–1579     | Abziehbare Vorsteuer                |
-| **SKR04**    | 1400–1409     | Abziehbare Vorsteuer                |
-
-Wichtige Einzelkonten:
-
-| SKR03 | SKR04 | Bezeichnung                              |
-|-------|-------|------------------------------------------|
-| 1570  | 1400  | Abziehbare Vorsteuer (allgemein)         |
-| 1571  | 1401  | Abziehbare Vorsteuer 7 %                |
-| 1576  | 1406  | Abziehbare Vorsteuer 19 %               |
-| 1577  | 1407  | Vorsteuer §13b UStG                     |
-| 1578  | 1408  | Vorsteuer ig Erwerb                      |
-
-#### Umsatzsteuer-Konten
-
-| Kontenrahmen | Kontenbereich | Bezeichnung                         |
-|--------------|---------------|-------------------------------------|
-| **SKR03**    | 1770–1779     | Umsatzsteuer                        |
-| **SKR04**    | 3800–3809     | Umsatzsteuer                        |
-
-Wichtige Einzelkonten:
-
-| SKR03 | SKR04 | Bezeichnung                              |
-|-------|-------|------------------------------------------|
-| 1770  | 3800  | Umsatzsteuer (allgemein)                 |
-| 1771  | 3801  | Umsatzsteuer 7 %                        |
-| 1776  | 3806  | Umsatzsteuer 19 %                       |
-| 1777  | 3807  | USt ig Lieferung                         |
-| 1787  | 3837  | USt §13b UStG                           |
-
-#### Zahllast-Konto
-
-| SKR03 | SKR04 | Bezeichnung                              |
-|-------|-------|------------------------------------------|
-| 1780  | 3820  | Umsatzsteuer-Vorauszahlung / Zahllast    |
-
-### 4.3 Abstimmungsschema Vorsteuer
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ VORSTEUER-ABSTIMMUNG                     Zeitraum: MM/JJJJ      │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ A. Vorsteuer lt. Buchhaltung                                     │
-│    Konto 1576/1406 (VSt 19 %)              XX.XXX,XX €          │
-│    Konto 1571/1401 (VSt 7 %)                X.XXX,XX €          │
-│    Konto 1577/1407 (VSt §13b)                X.XXX,XX €          │
-│    Konto 1578/1408 (VSt ig Erwerb)           X.XXX,XX €          │
-│    Sonstige VSt-Konten                         XXX,XX €          │
-│                                          ─────────────────      │
-│    Summe Vorsteuer                         XX.XXX,XX €          │
-│                                                                   │
-│ B. Vorsteuer lt. Eingangsrechnungen                              │
-│    Rechnungen 19 %: Netto XX.XXX × 19 %   XX.XXX,XX €          │
-│    Rechnungen  7 %: Netto  X.XXX ×  7 %    X.XXX,XX €          │
-│    Rechnungen §13b: Netto  X.XXX × 19 %    X.XXX,XX €          │
-│    ig Erwerbe:      Netto  X.XXX × 19 %    X.XXX,XX €          │
-│                                          ─────────────────      │
-│    Summe Vorsteuer lt. Rechnungen          XX.XXX,XX €          │
-│                                                                   │
-│ DIFFERENZ (A - B)                                0,00 €          │
-│ STATUS: ✓ Abgestimmt / ✗ Differenz offen                        │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 4.4 Abstimmungsschema Umsatzsteuer
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ UMSATZSTEUER-ABSTIMMUNG                  Zeitraum: MM/JJJJ      │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ A. USt lt. Buchhaltung                                           │
-│    Konto 1776/3806 (USt 19 %)              XX.XXX,XX €          │
-│    Konto 1771/3801 (USt 7 %)                X.XXX,XX €          │
-│    Konto 1787/3837 (USt §13b)                X.XXX,XX €          │
-│    Konto 1777/3807 (USt ig Lieferung)        X.XXX,XX €          │
-│    Sonstige USt-Konten                         XXX,XX €          │
-│                                          ─────────────────      │
-│    Summe Umsatzsteuer                      XX.XXX,XX €          │
-│                                                                   │
-│ B. USt lt. Ausgangsrechnungen                                    │
-│    Rechnungen 19 %: Netto XX.XXX × 19 %   XX.XXX,XX €          │
-│    Rechnungen  7 %: Netto  X.XXX ×  7 %    X.XXX,XX €          │
-│    §13b-Leistungen: Netto  X.XXX × 19 %    X.XXX,XX €          │
-│                                          ─────────────────      │
-│    Summe USt lt. Rechnungen                XX.XXX,XX €          │
-│                                                                   │
-│ DIFFERENZ (A - B)                                0,00 €          │
-│ STATUS: ✓ Abgestimmt / ✗ Differenz offen                        │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 4.5 Zahllast-Abstimmung
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ ZAHLLAST-ABSTIMMUNG                      Zeitraum: MM/JJJJ      │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ USt lt. Buchhaltung (Summe USt-Konten)     XX.XXX,XX €          │
-│ ./. Vorsteuer lt. Buchhaltung              XX.XXX,XX €          │
-│                                          ─────────────────      │
-│ = Errechnete Zahllast                       X.XXX,XX €          │
-│                                                                   │
-│ Zahllast lt. Konto 1780/3820                X.XXX,XX €          │
-│                                                                   │
-│ DIFFERENZ                                        0,00 €          │
-│                                                                   │
-│ Zahllast lt. USt-Voranmeldung               X.XXX,XX €          │
-│                                                                   │
-│ DIFFERENZ zur Voranmeldung                       0,00 €          │
-│ STATUS: ✓ Dreifach abgestimmt                                    │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 4.6 USt-Voranmeldung — Kennzahlen-Zuordnung
-
-Die USt-Abstimmung muss gegen die Kennzahlen (KZ) der
-USt-Voranmeldung abgeglichen werden:
-
-| KZ  | Bezeichnung                                           | Kontenbereich SKR03 | Kontenbereich SKR04 |
-|-----|-------------------------------------------------------|---------------------|---------------------|
-| 81  | Steuerpflichtige Umsätze 19 %                        | 8400                | 4400                |
-| 86  | Steuerpflichtige Umsätze 7 %                         | 8300                | 4300                |
-| 35  | Steuerfreie Umsätze mit VSt-Abzug (Ausfuhr §4 Nr.1a)| 8120                | 4120                |
-| 36  | Steuerfreie ig Lieferungen §4 Nr.1b                  | 8125                | 4125                |
-| 66  | Vorsteuerbeträge aus Rechnungen §15 Abs.1 Nr.1       | 1570–1579           | 1400–1409           |
-| 89  | ig Erwerbe §1a — Bemessungsgrundlage                 | 3425                | 5425                |
-
-#### Reverse Charge — §13b UStG (gemäß BMF-Vordruckmuster USt 1 A 2026)
-
-Für Leistungen, bei denen der Leistungsempfänger die Steuer schuldet — exakte Zuordnung aus dem aktuellen USt-VA-Formular:
-
-| Zeile | KZ BG | KZ Steuer | §13b-Tatbestand                                                                            |
-|-------|-------|-----------|--------------------------------------------------------------------------------------------|
-| **30** | **46** | **47**   | § 13b Abs. 1 — Sonstige Leistungen nach § 3a Abs. 2 eines im übrigen Gemeinschaftsgebiet ansässigen Unternehmers |
-| **31** | **73** | **74**   | § 13b Abs. 2 Nr. 3 — Umsätze, die unter das GrEStG fallen                                  |
-| **32** | **84** | **85**   | § 13b Abs. 2 Nr. 1, 2, 4 bis 12 — andere Leistungen (Werklieferungen Drittland, Bauleistungen Nr.4, Gebäudereinigung Nr.8, Mobilfunk/Tablets/Spielekonsolen Nr.10, Schrott, Gold, CO2-Zertifikate etc.) |
-| 34    | 60    | —         | Eigene im Inland steuerpflichtige Umsätze, für die der Leistungsempfänger die Steuer schuldet (§ 13b Abs. 5) |
-| **41** | —    | **67**    | **Vorsteuerbeträge** aus § 13b UStG (§ 15 Abs. 1 S. 1 Nr. 4 UStG)                          |
-
-> **Korrektur gegenüber älterer Plugin-Version:**
-> - KZ 73 ist **nicht** für "Bauleistungen / Schrott", sondern für **GrEStG-Umsätze** (§ 13b Abs. 2 Nr. 3).
-> - Bauleistungen, Mobilfunk, Schrott etc. (§ 13b Abs. 2 Nr. 1, 2, 4–12) gehen auf **KZ 84/85**.
-> - **§ 13b-Vorsteuer ist KZ 67** (NICHT 84 wie früher fälschlich angenommen).
-
-### 4.7 Monatliche USt-Verprobung
-
-Zusätzlich zur Kontenabstimmung ist eine rechnerische Verprobung
-durchzuführen:
-
-```
-Verprobung USt 19 %:
-    Erlöse KZ 81 (netto) × 19 % = errechnete USt
-    vs. gebuchte USt auf Konto 1776/3806
-    Toleranz: ≤ 1,00 € (Rundungsdifferenz)
-
-Verprobung USt 7 %:
-    Erlöse KZ 86 (netto) × 7 % = errechnete USt
-    vs. gebuchte USt auf Konto 1771/3801
-    Toleranz: ≤ 1,00 € (Rundungsdifferenz)
-
-Verprobung Vorsteuer 19 %:
-    Aufwand/Wareneingang × 19 % = errechnete VSt
-    vs. gebuchte VSt auf Konto 1576/1406
-    Toleranz: ≤ 1,00 € (Rundungsdifferenz)
-```
-
----
-
-## 5. Eskalationsschwellen
-
-### 5.1 Abstimmungsdifferenzen
-
-| Differenzbetrag        | Eskalationsstufe               | Frist          |
-|------------------------|--------------------------------|----------------|
-| 0,01 € – 10,00 €      | Sachbearbeiter (Eigenklärung)  | 5 Arbeitstage  |
-| 10,01 € – 100,00 €    | Teamleiter Buchhaltung         | 3 Arbeitstage  |
-| 100,01 € – 1.000,00 € | Abteilungsleiter Finanzen      | 2 Arbeitstage  |
-| 1.000,01 € – 10.000,00 €| Kaufmännische Leitung (CFO)  | 1 Arbeitstag   |
-| über 10.000,00 €       | Geschäftsführung + StB/WP      | Sofort         |
-
-### 5.2 USt-Differenzen (verschärfte Schwellen)
-
-Aufgrund der steuerlichen Relevanz gelten für USt-Differenzen
-verschärfte Eskalationsschwellen:
-
-| Differenzbetrag       | Eskalationsstufe                | Frist          |
-|-----------------------|---------------------------------|----------------|
-| 0,01 € – 1,00 €      | Sachbearbeiter (Rundungsdiff.)  | 5 Arbeitstage  |
-| 1,01 € – 50,00 €     | Teamleiter Buchhaltung          | 2 Arbeitstage  |
-| 50,01 € – 500,00 €   | Abteilungsleiter + Steuerberater| 1 Arbeitstag   |
-| über 500,00 €         | CFO + Steuerberater             | Sofort         |
-
-### 5.3 Zeitliche Eskalation
-
-| Alter der Differenz | Maßnahme                                         |
-|---------------------|--------------------------------------------------|
-| > 15 Arbeitstage    | Automatische Eskalation an nächste Stufe         |
-| > 30 Arbeitstage    | Pflicht-Meldung an Geschäftsführung              |
-| > 60 Arbeitstage    | Einschaltung Wirtschaftsprüfer/Steuerberater     |
-
----
-
-## 6. Abstimmungs-Template
-
-### 6.1 Monatliches Abstimmungsprotokoll
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│ ABSTIMMUNGSPROTOKOLL                                             │
-│ Monat: MM/JJJJ          Erstellt: TT.MM.JJJJ                   │
-│ Bearbeiter: ___________  Geprüft: ___________                   │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│ 1. BANKABSTIMMUNG                                                │
-│    □ GL-Saldo = Bankauszug                   Status: ___        │
-│    □ Schwebende Posten dokumentiert          Status: ___        │
-│    □ Differenz aufgeklärt                    Status: ___        │
-│    Differenz: __________ €  Begründung: _______________         │
-│                                                                   │
-│ 2. DEBITORENABSTIMMUNG                                           │
-│    □ Summe Debitoren = Sammelkonto            Status: ___        │
-│    □ Altersstrukturanalyse erstellt           Status: ___        │
-│    □ EWB/PWB geprüft und aktualisiert        Status: ___        │
-│    Differenz: __________ €  Begründung: _______________         │
-│                                                                   │
-│ 3. KREDITORENABSTIMMUNG                                          │
-│    □ Summe Kreditoren = Sammelkonto           Status: ___        │
-│    □ Debitorische Kreditoren geprüft         Status: ___        │
-│    Differenz: __________ €  Begründung: _______________         │
-│                                                                   │
-│ 4. USt-ABSTIMMUNG                                                │
-│    □ Vorsteuer: Buchhaltung = Eingangsrechn.  Status: ___        │
-│    □ USt: Buchhaltung = Ausgangsrechnungen   Status: ___        │
-│    □ Zahllast: Berechnet = Konto 1780/3820   Status: ___        │
-│    □ Zahllast = USt-Voranmeldung              Status: ___        │
-│    □ KZ-Verprobung 81/86/66 durchgeführt     Status: ___        │
-│    □ §13b-Vorgänge geprüft                   Status: ___        │
-│    Differenz: __________ €  Begründung: _______________         │
-│                                                                   │
-│ 5. GESAMTERGEBNIS                                                │
-│    □ Alle Abstimmungen abgeschlossen         Status: ___        │
-│    □ Offene Punkte eskaliert                 Status: ___        │
-│                                                                   │
-│ Unterschrift Bearbeiter: _____________ Datum: TT.MM.JJJJ       │
-│ Unterschrift Prüfer:     _____________ Datum: TT.MM.JJJJ       │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### 6.2 Status-Kennzeichnung
-
-| Status | Bedeutung                              |
-|--------|----------------------------------------|
-| OK     | Abgestimmt, keine Differenz            |
-| DIFF   | Differenz vorhanden, in Bearbeitung    |
-| ESK    | Eskaliert an nächste Stufe             |
-| N/A    | Nicht anwendbar für diesen Monat       |
-
----
-
-## 7. Intercompany-Abstimmung
-
-Für Unternehmen mit verbundenen Gesellschaften (Konzernverbund):
-
-### 7.1 IC-Saldenbestätigung
-
-Monatlicher Abgleich der Forderungen und Verbindlichkeiten zwischen
-verbundenen Unternehmen:
-
-```
-PRÜFUNG: Forderung Gesellschaft A an B == Verbindlichkeit Gesellschaft B an A
-TOLERANZ: 0,00 € (keine Differenz zulässig)
-```
-
-### 7.2 IC-Umsatzabstimmung
-
-```
-PRÜFUNG: Erlöse Gesellschaft A an B == Aufwand Gesellschaft B von A
-TOLERANZ: 0,00 € (keine Differenz zulässig nach Konsolidierung)
-```
-
-Differenzen sind vor dem Periodenabschluss zwingend aufzuklären.
-
----
-
-## 8. Automatisierte Abstimmungsregeln
-
-### 8.1 Toleranzgrenzen
-
-| Abstimmungsart        | Toleranz (absolut)  | Toleranz (relativ)  |
-|-----------------------|---------------------|---------------------|
-| Bankabstimmung        | 0,00 €              | 0,00 %              |
-| Debitorenabstimmung   | 0,00 €              | 0,00 %              |
-| Kreditorenabstimmung  | 0,00 €              | 0,00 %              |
-| USt-Verprobung        | 1,00 €              | 0,01 %              |
-| IC-Abstimmung         | 0,00 €              | 0,00 %              |
-
-### 8.2 Automatische Warnungen
-
-Warnungen werden generiert bei:
-
-- Saldo Bank < 0 (Überziehung ohne Kreditlinie)
-- Debitorenquote > 90 Tage überfällig > 10 % des Gesamtbestands
-- USt-Differenz > 1,00 €
-- Nicht abgeschlossene Abstimmung zum 10. Arbeitstag des Folgemonats
-- Zahllast-Differenz zur gemeldeten USt-Voranmeldung
-
----
-
-## 9. Referenzen
-
-- `config/rates-2026.json` — Aktuelle Steuersätze
-- `config/kontenrahmen.json` — Kontenrahmen SKR03 und SKR04
-- Umsatzsteuergesetz (UStG) — insb. §13b, §15, §18
-- Abgabenordnung (AO) — insb. §152, §233a, §370, §378
-- Handelsgesetzbuch (HGB) — insb. §238, §239
+- `monatsabschluss` / `jahresabschluss` — ruft `abstimmung` auf
+- `buchungssatz` — Korrektur-/EWB-/PWB-Buchungen
+- `ust-voranmeldung` — USt-Konten-Verprobung
+- `abweichungsanalyse` — Folge-Analyse bei Saldo-Anomalien

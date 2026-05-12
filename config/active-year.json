@@ -1,0 +1,7 @@
+{
+  "_purpose": "Steuert, welches Jahr standardmaessig zur Anwendung kommt. Skills referenzieren config/{active_year}/...",
+  "default_year": 2026,
+  "available_years": [2026],
+  "stubbed_years": [2025, 2027],
+  "_note": "Bei Sachverhalten, die explizit ein anderes Jahr betreffen, kann der User das im Prompt überschreiben."
+}
