@@ -264,8 +264,9 @@ Direktzusagen erfordern die Bildung einer Pensionsrückstellung:
 | Aufwand bAV für Mitunternehmer § 15 EStG | 4168 | 6148 |
 | **Pauschale Lohnsteuer auf Direktversicherungen (§ 40b EStG)** | **4167 Pauschale Steuer auf sonstige Bezüge (z.B. Direktversicherungen)** | **6147 Pauschale Steuer auf sonstige Bezüge (z.B. Direktversicherungen)** |
 | Aufwand für Unterstützung | 4169 | 6160 |
-| Pensionsrückstellung allgemein (Passivkonto) | 0951 / 0953 Rückstellungen für Direktzusagen | **3000 Rückstellungen für Pensionen und ähnliche Verpflichtungen** / **3010 Rückstellungen für Direktzusagen** |
-| Pensionsrückstellung für Gesellschafter / nahestehende Personen | 0950er (verify) | 3005 |
+| Pensionsrückstellung allgemein (Passivkonto) | **0950** Sammelkonto / **0953** Direktzusagen | **3000** Rückstellungen für Pensionen / **3010** Direktzusagen |
+| Pensionsrückstellung für Gesellschafter / nahestehende Personen | **0952** | **3005** |
+| Pensionsrückstellung zur Saldierung nach § 246 Abs. 2 HGB | **0951** | **3009** |
 | Rückstellung für Zuschussverpflichtungen Pensionskassen / Lebensversicherungen | 0954 | 3011 |
 | Pensionsrückstellung zur Saldierung mit Deckungsvermögen nach § 246 Abs. 2 HGB | 0952 | 3009 |
 | Vermögensgegenstände zur Erfüllung von Pensionsverpflichtungen | (Aktivseite) | 1380 |

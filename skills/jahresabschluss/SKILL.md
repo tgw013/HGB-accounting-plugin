@@ -495,7 +495,7 @@ passivieren:
 | **SKR03**    | **4320 Gewerbesteuer (Aufwand)**                     | **0956 Gewerbesteuerrückstellung**             |
 | **SKR03**    | **2200 Körperschaftsteuer (Aufwand)**                | **0963 Körperschaftsteuerrückstellung**        |
 | **SKR04**    | 7610 Gewerbesteuer (Aufwand)                         | 3035 Gewerbesteuerrückstellung                 |
-| **SKR04**    | 7600 Körperschaftsteuer (Aufwand)                    | (KSt-Rückstellung im 3020er-Bereich; verify exakte Sub-Nummer) |
+| **SKR04**    | 7600 Körperschaftsteuer (Aufwand)                    | **3040 Körperschaftsteuerrückstellung** |
 
 > **WICHTIG (gemäß DATEV-SKR03/SKR04 2026):**
 > - **SKR03 2200 = Körperschaftsteuer** (Aufwand, Klasse 2 "Steuern vom Einkommen"). Konto **4300 = "Nicht abziehbare Vorsteuer"**, NICHT KSt-Aufwand.
