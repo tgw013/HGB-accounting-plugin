@@ -1,4 +1,33 @@
 {
-  "_comment": "Pruned for internal deployment. The original upstream .mcp.json is preserved as .mcp.json.original. None of the upstream connectors (Slack, Box, Egnyte, Atlassian, MS365, Gmail, GCal) are necessary for HGB accounting workflows. Add your own ERP / payroll / banking MCP servers here once each one has passed its own security review.",
-  "mcpServers": {}
+  "_comment": "MCP-Server-Konfiguration. Aktuell alle in 'evaluating'-Status — Plugin funktioniert auch ohne MCP. Beim Anbinden eines Servers entsprechende Konfiguration hier ergänzen.",
+  "mcpServers": {},
+  "_planned_integrations": {
+    "datev_finrobotics": {
+      "candidate_url": "https://github.com/ppronobis/datev-mcp-server",
+      "status": "evaluated_security_safe",
+      "scope": "Phase-1: Offline EXTF-Parser, Read-only Tools",
+      "value": "Lade DATEV-EXTF-Exporte direkt; Konten-Balances, OP-Listen, Buchungsstapel-Suche",
+      "see_also": "github.com/tgw013/finrobotics-datev-mcp-internal"
+    },
+    "datev_badrix": {
+      "candidate_url": "https://github.com/BadRix90/datev-mcp",
+      "status": "evaluated_security_safe_with_sandboxing",
+      "scope": "Read+Write — kann EXTF-Dateien erzeugen für Import",
+      "value": "Vollständige DATEV-Integration inkl. Export für direkte Übernahme in DATEV-Software",
+      "caveat": "OS-level filesystem sandboxing zwingend für Produktivnutzung",
+      "see_also": "github.com/tgw013/badrix-datev-mcp-internal"
+    },
+    "bank_hbci": {
+      "candidate_url": "(future)",
+      "status": "planned",
+      "scope": "HBCI/FinTS-Bank-API",
+      "value": "Bankauszug-Ingestion und Kontoabstimmung automatisch"
+    },
+    "elster": {
+      "candidate_url": "(future)",
+      "status": "planned",
+      "scope": "ELSTER-Schnittstelle für Voranmeldungs-Datenpaket-Vorbereitung",
+      "value": "USt-VA-Daten direkt im ELSTER-XML-Format"
+    }
+  }
 }

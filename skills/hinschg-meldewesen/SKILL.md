@@ -1,13 +1,13 @@
 ---
-name: ust-voranmeldung
-description: USt-Voranmeldung Vorbereitung: BMF-Vordruckmuster USt 1 A 2026, KZ-Mapping, ELSTER-faehige Daten.
+name: hinschg-meldewesen
+description: HinSchG-Anforderungen: interne Meldestelle, Fristen, Schutz des Hinweisgebers, Bussgeldrahmen.
 ---
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
 
-# Ust Voranmeldung
+# Hinschg Meldewesen
 
-**Typ:** `workflow` (workflow / knowledge / methodology)
+**Typ:** `knowledge` (workflow / knowledge / methodology)
 **Anthropic-Pendant:** `(new — kein US-Pendant)`
 **Geltungsbereich:** GmbH, UG (siehe `config/shared/entity-types.json` für vollständige Scoping-Definition)
 **Config:** `config/{active_year}/` (Default: 2026)

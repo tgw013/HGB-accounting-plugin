@@ -1,0 +1,36 @@
+{
+  "_purpose": "Welche Rechtsformen das Plugin in v2.0 abdeckt + Out-of-Scope-Marker",
+  "in_scope": {
+    "gmbh": {
+      "name": "Gesellschaft mit beschränkter Haftung",
+      "rechtsgrundlage": "GmbHG",
+      "bilanzierungspflichtig": true,
+      "hgb_groessenklassen_anwendbar": true
+    },
+    "ug": {
+      "name": "Unternehmergesellschaft (haftungsbeschränkt)",
+      "rechtsgrundlage": "§ 5a GmbHG",
+      "bilanzierungspflichtig": true,
+      "hgb_groessenklassen_anwendbar": true,
+      "hinweis": "Mini-GmbH; gleiche Rechnungslegung wie GmbH"
+    }
+  },
+  "out_of_scope_extensible": {
+    "_comment": "Architektur erlaubt spätere Erweiterung — aktuell NICHT abgedeckt; Skills müssen Steuerberater-Konsultation anfordern, wenn diese Rechtsformen vorliegen",
+    "ag": "Aktiengesellschaft",
+    "gmbh_co_kg": "GmbH & Co. KG (sehr verbreitet im Mittelstand)",
+    "ohg": "Offene Handelsgesellschaft",
+    "kg": "Kommanditgesellschaft",
+    "gbr": "Gesellschaft bürgerlichen Rechts (klassisch)",
+    "egbr": "Eingetragene GbR (post-MoPeG) — siehe docs/OPEN_QUESTIONS.md #1",
+    "einzelunternehmer": "Einzelunternehmer / EÜR nach § 4 Abs. 3 EStG",
+    "freiberufler": "Freiberufler / EÜR",
+    "holding": "Holding-GmbH mit Beteiligungs-Bilanzierung"
+  },
+  "out_of_scope_permanent": {
+    "_comment": "Diese sind grundsätzlich außerhalb des Plugin-Fokus",
+    "konzern_konsolidierung": "Konzernrechnungslegung nach HGB / IFRS",
+    "ifrs": "IFRS-Bilanzierung",
+    "branch_specific": "Banken, Versicherungen, Krankenhäuser, Pflegeeinrichtungen, Land/Forstwirtschaft"
+  }
+}

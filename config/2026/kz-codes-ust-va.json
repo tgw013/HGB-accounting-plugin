@@ -1,0 +1,62 @@
+{
+  "_quelle": "BMF Vordruckmuster USt 1 A 2026 (BMF-Schreiben vom 29.12.2025, GZ III C 3 - S 7344/00040/008/034)",
+  "_url": "https://www.bundesfinanzministerium.de/Content/DE/Downloads/BMF_Schreiben/Steuerarten/Umsatzsteuer/2025-12-29-vordruckmuster-USt-voranmeldung-2026.pdf",
+  "_anwendung": "USt-Voranmeldung 2026 (USt 1 A)",
+  "umsaetze_steuerpflichtig": {
+    "_bereich": "Section B im Formular",
+    "normalsatz_19": {"kz_bg": 81, "kz_steuer": "automatisch", "satz": 19, "bemerkung": "Bemessungsgrundlage; Steuer wird vom System berechnet"},
+    "ermaessigt_7": {"kz_bg": 86, "kz_steuer": "automatisch", "satz": 7}
+  },
+  "ig_erwerbe": {
+    "_bereich": "Section C im Formular",
+    "normalsatz_19": {"kz_bg": 89, "kz_steuer": "automatisch", "satz": 19},
+    "ermaessigt_7": {"kz_bg": 93, "kz_steuer": "automatisch", "satz": 7},
+    "fahrzeuge_neue": {"kz_bg": 94, "kz_steuer": "automatisch"}
+  },
+  "§13b_steuerschuldnerschaft": {
+    "_bereich": "Section D im Formular — Leistungsempfänger als Steuerschuldner",
+    "_quelle": "BMF USt 1 A 2026 Zeilen 30-32",
+    "abs1_eu_sonstige_leistungen": {
+      "zeile": 30,
+      "tatbestand": "Sonstige Leistungen nach § 3a Abs. 2 UStG eines im übrigen Gemeinschaftsgebiet ansässigen Unternehmers (§ 13b Abs. 1 UStG)",
+      "kz_bg": 46,
+      "kz_steuer": 47
+    },
+    "abs2_nr3_grestg": {
+      "zeile": 31,
+      "tatbestand": "Umsätze, die unter das GrEStG fallen (§ 13b Abs. 2 Nr. 3 UStG)",
+      "kz_bg": 73,
+      "kz_steuer": 74
+    },
+    "abs2_nr1_2_4_bis_12": {
+      "zeile": 32,
+      "tatbestand": "Andere Leistungen (§ 13b Abs. 2 Nr. 1, 2, 4 bis 12 UStG) — Bauleistungen (Nr.4), Gebäudereinigung (Nr.8), Schrott, Gold (Nr.9), Mobilfunk/Tablets/Spielekonsolen (Nr.10), CO2-Zertifikate (Nr.6), etc.",
+      "kz_bg": 84,
+      "kz_steuer": 85
+    },
+    "eigene_§13b_leistungen": {
+      "zeile": 34,
+      "tatbestand": "Eigene im Inland steuerpflichtige Umsätze, für die Leistungsempfänger Steuer nach § 13b Abs. 5 schuldet",
+      "kz_bg": 60
+    }
+  },
+  "steuerfrei_mit_vorsteuerabzug": {
+    "_bereich": "Section B/E im Formular",
+    "ig_lieferungen": {"kz_bg": 41, "rechtsgrundlage": "§ 4 Nr. 1 b UStG i.V.m. § 6a UStG"},
+    "ausfuhr_drittland": {"kz_bg": 43, "rechtsgrundlage": "§ 4 Nr. 1 a UStG"},
+    "andere_stfrei_mit_vst": {"kz_bg": 44}
+  },
+  "vorsteuer": {
+    "_bereich": "Section F im Formular — Abziehbare Vorsteuerbeträge",
+    "aus_rechnungen": {"kz": 66, "rechtsgrundlage": "§ 15 Abs. 1 S. 1 Nr. 1 UStG"},
+    "aus_ig_erwerben": {"kz": 61, "rechtsgrundlage": "§ 15 Abs. 1 S. 1 Nr. 3 UStG"},
+    "aus_§13b": {"kz": 67, "zeile": 41, "rechtsgrundlage": "§ 15 Abs. 1 S. 1 Nr. 4 UStG"}
+  },
+  "dauerfristverlaengerung": {
+    "_bereich": "Section H — Sondervorauszahlung",
+    "anzurechnen_dezember": {"kz": 39, "bemerkung": "1/11 der Vorjahres-Zahllast, fällig 10.02., wird in Dezember-VA angerechnet"}
+  },
+  "ergebnis": {
+    "zahllast_erstattung": {"kz": 83, "bemerkung": "Endsaldo: positiv = Zahllast, negativ = Erstattung"}
+  }
+}
