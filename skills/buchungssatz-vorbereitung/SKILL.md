@@ -254,16 +254,30 @@ Direktzusagen erfordern die Bildung einer Pensionsrückstellung:
 
 > **Wichtig:** Die Entgeltumwandlung selbst erzeugt KEINEN zusätzlichen Aufwand — sie reduziert das SV-pflichtige und steuerliche Brutto. Buchhalterisch wird sie als Umlenkung der Bruttolohn-Verbindlichkeit gegen die Versicherung gebucht. Nur der **AG-Zuschuss von 15 %** (§ 1a Abs. 1a BetrAVG, Neuverträge seit 2019, Altverträge seit 01.01.2022) ist ein zusätzlicher Personalaufwand.
 
-**Konten gemäß DATEV-SKR03/SKR04 2026:**
+**Konten gemäß DATEV-SKR03/SKR04 2026 (Art.-Nr. 11174 / 11175):**
 
 | Vorgang | SKR03 | SKR04 |
 |---|---|---|
-| AG-Zuschuss bAV (Aufwand) | **4165 Aufwendungen für Altersversorgung** | **6140 Aufwendungen für Altersversorgung** |
-| Zuführung zur Pensionsrückstellung (Aufwand) | 4165 / spezifisches Sub-Konto Altersversorgung | 6140 / spezifisches Sub-Konto Altersversorgung |
-| Pensionsrückstellung (Passivkonto) | 0953 Rückstellungen für Direktzusagen | 3000 Rückstellungen für Pensionen und ähnliche Verpflichtungen |
-| Verbindlichkeit gegenüber Versicherung | 1750er-Bereich (oder Direktbuchung gegen Bank bei Sofortzahlung) | 3700er-Bereich (analog) |
+| **AG-Zuschuss bAV + Entgeltumwandlungs-Aufwand (Aufwand, Sammelkonto)** | **4165 Aufwendungen für Altersversorgung** | **6140 Aufwendungen für Altersversorgung** |
+| **Zuführung zur Pensionsrückstellung (Aufwand)** | 4165 (gleiches Sammelkonto — DATEV hat kein separates Zuführungs-Konto) | 6140 (analog) |
+| Aufwand bAV für Gesellschafter-Geschäftsführer | 4166 | 6149 |
+| Aufwand bAV für Mitunternehmer § 15 EStG | 4168 | 6148 |
+| **Pauschale Lohnsteuer auf Direktversicherungen (§ 40b EStG)** | **4167 Pauschale Steuer auf sonstige Bezüge (z.B. Direktversicherungen)** | **6147 Pauschale Steuer auf sonstige Bezüge (z.B. Direktversicherungen)** |
+| Aufwand für Unterstützung | 4169 | 6160 |
+| Pensionsrückstellung allgemein (Passivkonto) | 0951 / 0953 Rückstellungen für Direktzusagen | **3000 Rückstellungen für Pensionen und ähnliche Verpflichtungen** / **3010 Rückstellungen für Direktzusagen** |
+| Pensionsrückstellung für Gesellschafter / nahestehende Personen | 0950er (verify) | 3005 |
+| Rückstellung für Zuschussverpflichtungen Pensionskassen / Lebensversicherungen | 0954 | 3011 |
+| Pensionsrückstellung zur Saldierung mit Deckungsvermögen nach § 246 Abs. 2 HGB | 0952 | 3009 |
+| Vermögensgegenstände zur Erfüllung von Pensionsverpflichtungen | (Aktivseite) | 1380 |
+| Vermögensgegenstände zur Saldierung mit Pensions-RST nach § 246 Abs. 2 HGB | (Aktivseite) | 1381 |
+| Statistische Konten — Unterschiedsbetrag aus Abzinsung Altersversorgung § 253 Abs. 6 HGB | n.a. | 9285 (Haben) / 9286 (Gegenkonto) |
+| Verbindlichkeit gegenüber Versorgungsträger (Versicherung) | 1750er-Bereich Sonstige Verbindlichkeiten | 3700er-Bereich (analog) |
 
-> **WICHTIG:** Konten **4170/6170 sind NICHT bAV** — 4170 = "Vermögenswirksame Leistungen" (5. VermBG, ein anderer Tatbestand), 6170 = "Sonstige soziale Abgaben". Konten **4172/6175** existieren nicht standardmäßig in DATEV-SKR03/04. Konto **4190 = Aushilfslöhne** (NICHT Pensionsrückstellungs-Zuführung).
+> **WICHTIG (gemäß DATEV-SKR03/04 2026):**
+> - Konten **4170 / 6170 sind NICHT bAV** — 4170 = "Vermögenswirksame Leistungen" (5. VermBG, ein anderer Tatbestand), 6170 = "Sonstige soziale Abgaben"
+> - Konten **4172 / 6175 / 6190** existieren nicht standardmäßig in DATEV-SKR03/04
+> - Konto **4190 = Aushilfslöhne** (NICHT Pensionsrückstellungs-Zuführung)
+> - **DATEV hat kein separates Konto für "AG-Zuschuss bAV"** — die 15 % Pflichtzuschuss nach § 1a Abs. 1a BetrAVG werden auf das Sammelkonto **4165 (SKR03) / 6140 (SKR04)** gebucht. Differenzierung zwischen AN-Entgeltumwandlung und AG-Zuschuss erfolgt über Buchungstext oder Kostenstelle.
 
 ### 2.6 Umsatzerlöse — Realisationsprinzip (§252 Abs.1 Nr.4 HGB)
 
