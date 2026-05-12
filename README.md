@@ -1,159 +1,90 @@
-# Germany — Finance & Accounting
+# germany-accounting (HGB-Plugin für Claude)
 
-Ein Finanz- und Buchhaltungs-Plugin für Claude Code und Claude Cowork,
-speziell für den deutschen Markt. Unterstützt GmbH, GbR,
-Einzelunternehmen und Freiberufler nach HGB und EÜR.
+> ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
 
-> 🏗️ **Architektur:** Dieses Plugin basiert auf der Architektur und den
-> Konventionen des offiziellen
-> [Anthropic Finance & Accounting Plugins](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance)
-> (US-Version). Alle US-spezifischen Inhalte wurden durch geprüfte
-> deutsche Entsprechungen ersetzt — darunter HGB statt US-GAAP,
-> SKR 03/04 statt US Chart of Accounts, Sozialversicherung statt
-> FICA/FUTA, sowie vier neue Deutschland-spezifische Skills
-> (USt-Voranmeldung, eBilanz, Lohnabrechnung, GoBD-Compliance), die
-> kein US-Äquivalent haben.
+**Status:** `v2.0.0-alpha` — Skeleton-Phase. Inhalt der Skills wird in Phase 4 der v2.0-Migration befüllt. Für produktive Verwendung den Stand `v1.1.0` (Branch `main`) nutzen.
 
-> **Das Beste aus diesem Plugin herausholen?** Ob Hilfe bei der Einrichtung, Anpassung an Ihren Firmen-Workflows oder einfach ein Gespräch über die Möglichkeiten — [kontaktieren Sie AI Heroes](https://www.ai-heroes.co/contact). Wir entwickeln diese Tools so praxisnah wie möglich, und Ihr Feedback treibt das voran.
+---
+
+## Was ist das?
+
+Ein Claude-Plugin für **deutsche Finanzbuchhaltung nach HGB** mit Fokus auf:
+
+- **DATEV-Anwender** (SKR03 / SKR04, Buchungsstapel-CSV)
+- **GmbH und UG** (haftungsbeschränkt) — bewusst eng gefasst
+- **Workflow-Unterstützung**: Buchungssätze, Monats-/Jahresabschluss, USt-Voranmeldung, Lohnabrechnung, eBilanz-Vorbereitung, GoBD-Konformität, IKS-Prüfung
+- **Steuerberater-Handoff**: Strukturierte Übergabe statt Eigenversand an ELSTER/Bundesanzeiger
+
+Inspiriert von der offiziellen [Anthropic Finance Skill](https://github.com/anthropics/skills) (US-fokussiert), eigenständig auf deutsche Rechtslage portiert.
+
+## Quick Overview (English)
+
+`germany-accounting` is a Claude plugin providing German bookkeeping (HGB) workflows: SKR03/SKR04 chart of accounts, VAT pre-registrations (USt-VA), monthly/annual closings, payroll, and GoBD/IKS compliance support — scoped to GmbH and UG (limited-liability) entities. Inspired by Anthropic's official finance skill (US-focused), independently built for German law (HGB, EStG, UStG, KStG, SGB, stand 2026-05). Output is a draft — review with a `Steuerberater` (tax advisor) before productive use.
+
+---
 
 ## Installation
 
-### Option 1: Claude Desktop — Drag & Drop (empfohlen)
-
-1. Die neueste `.zip`-Datei von der
-   [Releases-Seite](https://github.com/mlobo2012/Germany-SMB-Finance-Accounting-Plugin/releases)
-   herunterladen
-2. In der Claude Desktop App auf **Plugins** → **Upload plugin** gehen
-3. Die Zip-Datei per Drag & Drop einfügen — das Plugin wird automatisch installiert
-
-> **Hinweis:** Die Zip-Datei ist ein Snapshot. Bei Updates die neue
-> Version von der Releases-Seite herunterladen und erneut installieren.
-
-### Option 2: Claude Code CLI
-
 ```bash
-# Vorherigen Cache leeren (bei Problemen)
-rm -rf ~/.claude/plugins/marketplaces/*Germany*
-rm -rf ~/.claude/plugins/cache/*Germany*
-
-# Schritt 1: Repository als Plugin-Marketplace hinzufügen
-claude plugins marketplace add mlobo2012/Germany-SMB-Finance-Accounting-Plugin
-
-# Schritt 2: Plugin installieren
-claude plugins install germany-finance@Germany-SMB-Finance-Accounting-Plugin
+# Plugin in Claude Code lokal registrieren (Repo-Pfad anpassen)
+claude plugin add ./path/to/HGB-accounting-plugin-internal
 ```
 
-> **Fehlerbehebung:** Bei „not found"-Fehlern die Cache-Verzeichnisse
-> oben leeren und erneut versuchen. Der Marketplace-Name im
-> Install-Befehl ist `Germany-SMB-Finance-Accounting-Plugin` (nicht
-> der GitHub-Pfad).
+`plugin.json` deklariert Name `germany-accounting`. Skills werden automatisch geladen, Slash-Commands stehen unter `/<command-name>` zur Verfügung.
 
-> **Empfohlenes Modell:** Für beste Ergebnisse wird die Verwendung des
-> neuesten **Claude Opus**-Modells dringend empfohlen. Die umfangreichen
-> deutschen Rechtsvorschriften, Steuerberechnungen und
-> Buchhaltungsstandards in diesem Plugin profitieren erheblich von der
-> höheren Reasoning-Kapazität von Opus — insbesondere bei komplexen
-> Workflows wie Lohnabrechnung, USt-Voranmeldung und Jahresabschluss.
+## Verfügbare Skills (v2.0-alpha)
 
-> **Wichtig:** Dieses Plugin unterstützt bei Finanz- und
-> Buchhaltungs-Workflows, ersetzt jedoch keine professionelle Steuer-,
-> Rechts- oder Wirtschaftsprüfungsberatung. Alle Ergebnisse sollten von
-> qualifizierten Fachleuten geprüft werden.
+| Skill | Typ | Zweck |
+|---|---|---|
+| `buchung-grundlagen` | knowledge | Doppik-Grundlagen, GoBD, SKR-Auswahl |
+| `buchungssatz` | workflow | Beleg → Buchungsvorschlag |
+| `monatsabschluss` | workflow | Monatliche Abschluss-Checkliste |
+| `ust-voranmeldung` | workflow | USt-VA-Vorbereitung (BMF USt 1 A 2026) |
+| `lohnabrechnung` | workflow | Lohnabrechnung GmbH-Geschäftsführer + Mitarbeiter |
+| `jahresabschluss` | workflow | HGB-Jahresabschluss (Aufstellung) |
+| `ebilanz` | workflow | eBilanz-Datenpaket-Vorbereitung |
+| `abstimmung` | workflow | Konten-Abstimmung (Bank, OP, EWB/PWB) |
+| `abweichungsanalyse` | workflow | Plan-Ist-Vergleich, Forecast |
+| `gobd-konformitaet` | knowledge | GoBD-Anforderungen, Verfahrensdokumentation |
+| `iks-pruefung` | methodology | IKS nach IDW PS 261 (5 COSO-Komponenten) |
+| `hinschg-meldewesen` | knowledge | HinSchG-Anforderungen ab 50 MA |
+| `datev-export` | workflow | DATEV-Buchungsstapel-CSV erzeugen |
+| `steuerberater-handoff` | workflow | Übergabepaket für StB / WP |
 
-## Befehle (Commands)
+## Geltungsbereich
 
-| Befehl | Beschreibung |
-|---|---|
-| `/buchungssatz` | Buchungssätze erstellen — Abgrenzungen, Anlagevermögen, ARAP, Lohn, Umsatzerlöse mit Soll/Haben und Belegen |
-| `/abstimmung` | Kontenabstimmung — Saldenliste vs. Nebenbuch, Bank oder USt-Konto |
-| `/jahresabschluss` | Bilanz (§266 HGB), GuV (§275 HGB) oder EÜR generieren |
-| `/abweichungsanalyse` | Plan-Ist-Vergleich mit Abweichungszerlegung und Kommentar |
-| `/monatsabschluss` | Monatsabschluss-Checkliste mit Steuerkalender und ELSTER-Fristen |
-| `/iks-pruefung` | Internes Kontrollsystem prüfen (IDW PS 261, HGB §289) |
-| `/compliance` | GoBD-, HinSchG-, DCGK-Compliance und Aufbewahrungsfristen prüfen |
-| `/ust-voranmeldung` | USt-Voranmeldung vorbereiten (monatlich/vierteljährlich) |
-| `/ebilanz` | eBilanz-Daten für XBRL/ERiC-Übermittlung aufbereiten |
-| `/lohnabrechnung` | Lohnabrechnung prüfen — SV-Beiträge, LSt, bAV, Umlagen |
+- **In Scope:** GmbH, UG (haftungsbeschränkt)
+- **Out of Scope (architektonisch erweiterbar):** AG, KGaA, GmbH & Co. KG, OHG, KG, eGbR/GbR, Einzelunternehmen, Vereine, Stiftungen
 
-## Skills (automatisch aktiviert)
+Details: [`config/shared/entity-types.json`](config/shared/entity-types.json) und [`docs/SCOPE.md`](docs/SCOPE.md).
 
-| Skill | Beschreibung |
-|---|---|
-| buchungssatz-vorbereitung | Best Practices für Buchungssätze nach HGB/GoB |
-| buchungssatz | Buchungssatz-Workflow mit SKR 03/04 Kontenreferenz |
-| abstimmung | Abstimmungsmethodik inkl. USt-Abstimmung |
-| jahresabschluss | Bilanz/GuV nach HGB §266/§275, EÜR nach §4(3) EStG |
-| abweichungsanalyse | Abweichungszerlegung mit Wesentlichkeit nach IDW PS 250 |
-| monatsabschluss | Monatsabschluss-Prozess mit Steuerkalender |
-| iks-pruefung | IKS-Bewertung nach IDW PS 261 und HGB §289 Abs.4 |
-| compliance | GoBD, HinSchG, DCGK, Aufbewahrungsfristen |
-| ust-voranmeldung | USt-Workflow: Vorsteuerabzug, Zahllast, ELSTER-Filing |
-| ebilanz | eBilanz: HGB-Taxonomie, Mussfelder, ERiC-Übermittlung |
-| lohnabrechnung | Lohnabrechnung: 5 SV-Zweige, ELStAM, bAV, Umlagen |
+## Mehrjahres-Config
 
-## Konfiguration
+`config/{year}/` enthält jahres-spezifische Werte (Sätze, Kontenrahmen, Fristen, KZ-Codes).
+Aktuell verifiziert: **2026**. Pointer in `config/active-year.json`.
 
-### Kontenrahmen umschalten
+## Output-Formate
 
-In `config/kontenrahmen.json` den Wert `default` auf `"SKR03"` oder
-`"SKR04"` setzen. Skills referenzieren automatisch die richtigen Konten.
+- **Markdown** (Buchungsvorschläge, Begründungen, Quellen-Verweise)
+- **DATEV-Buchungsstapel-CSV** (importfähig in DATEV-Software)
+- **Excel-Tabellen** (Abstimmungs- und Analyse-Output)
+- **Steuerberater-Handoff-Brief** (strukturierte Übergabe)
 
-### Jährliche Aktualisierung
+**Nicht enthalten:** Direkte ELSTER-Übermittlung, XBRL/eBilanz-Direktversand. Diese Verantwortung bleibt beim Anwender / StB.
 
-Zum Jahreswechsel `config/rates-2026.json` durch die neue Version
-(z.B. `rates-2027.json`) ersetzen und in `plugin.json` den Verweis
-anpassen. Alle Skills lesen Werte aus dieser Datei.
+## Quellen
 
-## MCP-Integration
-
-Dieses Plugin funktioniert am besten mit MCP-Servern für Ihre
-Finanzdaten. Fügen Sie die relevanten Server in `.mcp.json` hinzu:
-
-- **ERP** (z.B. DATEV, Lexware, sevDesk) — Saldenlisten, Buchungen
-- **Lohn** (z.B. DATEV Lohn und Gehalt, Personio) — Brutto/Netto, SV
-- **Data Warehouse** (z.B. Snowflake, BigQuery) — Analysen
-- **Tabellenkalkulation** (z.B. Excel, Google Sheets) — Arbeitspapiere
-
-Ohne MCP-Server können Sie Daten manuell einfügen oder Dateien hochladen.
-
-## Beispiel-Workflows
-
-### Monatsabschluss März 2026
-
-```
-/monatsabschluss 2026-03
-```
-
-Claude führt die Abschluss-Checkliste durch: Bankabstimmung →
-Debitorenabstimmung → Abgrenzungsbuchungen → USt-Voranmeldung →
-GuV/Bilanz-Entwurf → Freigabe.
-
-### USt-Voranmeldung Februar 2026
-
-```
-/ust-voranmeldung 2026-02
-```
-
-Claude berechnet Umsatzsteuer, Vorsteuer, Zahllast/Erstattung und
-bereitet die ELSTER-Formulardaten vor.
-
-### Jahresabschluss 2025
-
-```
-/jahresabschluss 2025 –format bilanz+guv –methode gesamtkostenverfahren
-```
-
-Claude generiert Bilanz nach §266 HGB und GuV nach §275 Abs.2 HGB
-(Gesamtkostenverfahren) mit Vorjahresvergleich.
-
-
-
-## Autor
-
-Erstellt von [AI Heroes](https://www.ai-heroes.co).
+Vollständige Liste verifizierter Primärquellen: [`docs/SOURCES.md`](docs/SOURCES.md).
 
 ## Lizenz
 
-[Apache 2.0 + Commons Clause](LICENSE) — kostenlos für private und
-interne geschäftliche Nutzung. Kommerzieller Weiterverkauf ist nicht
-gestattet.
+Apache License 2.0 — siehe [`LICENSE`](LICENSE).
+
+## Beiträge
+
+Siehe [`CONTRIBUTING.md`](CONTRIBUTING.md). Beiträge willkommen — insbesondere Verifikation gegen aktuelle Rechtslage, Erweiterungen für weitere Rechtsformen.
+
+## Verwandte Projekte
+
+- [Anthropic Finance Skill](https://github.com/anthropics/skills) — US-Pendant, Inspiration für v2.0-Struktur
+- DATEV-MCP-Server (geplant): `datev_finrobotics` (Read-only EXTF), `datev_badrix` (Read+Write)
