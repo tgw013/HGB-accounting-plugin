@@ -171,7 +171,12 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
 END OF TERMS AND CONDITIONS
 
-Copyright 2026 Marco Lobo / AI Heroes (www.ai-heroes.co)
+Copyright 2026 tgw013 (https://github.com/tgw013)
+
+Lineage: This work originated as a fork of an upstream German-accounting
+plugin attributed to Marco Lobo / AI Heroes (www.ai-heroes.co). The v2.0
+rewrite is a substantial reorganization with new structure, scope, and
+verified content; see docs/PROVENANCE.md for the full history.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
