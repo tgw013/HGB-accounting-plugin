@@ -2,7 +2,16 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
-## [Unreleased] — v2.0.0-alpha (Branch `v2-redesign`)
+## [2.0.0] — 2026-05-12
+
+Merged from `v2-redesign` branch. Drops `-alpha` suffix; promoted to `main`
+without further structural change (alpha-tag was conservative naming for the
+in-development branch).
+
+Plus: LICENSE copyright updated to current author (tgw013); upstream lineage
+acknowledgment moved to `docs/PROVENANCE.md` per Apache-2.0 attribution guidance.
+
+## [2.0.0-alpha] — 2026-05-12 (Branch `v2-redesign`, superseded by 2.0.0)
 
 ### Added
 - **Multi-Jahres-Config-Struktur**: `config/{2025,2026,2027}/` mit `active-year.json`-Pointer

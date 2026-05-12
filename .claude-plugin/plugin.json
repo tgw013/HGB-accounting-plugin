@@ -1,6 +1,6 @@
 {
   "name": "germany-accounting",
-  "version": "2.0.0-alpha",
+  "version": "2.0.0",
   "description": "Deutsche FiBu-Workflows mit Claude — DATEV-treu, GmbH/UG-fokussiert, HGB-konform. Inspiriert von der offiziellen Anthropic Finance Skill, vollständig gegen DATEV-Kontenrahmen 2026 (Art.-Nr. 11174/11175), HGB/EStG/UStG/KStG/SGB Stand 2026-05 und BMF-Vordruckmuster verifiziert.",
   "author": {
     "name": "tgw013",
