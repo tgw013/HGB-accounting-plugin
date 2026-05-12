@@ -1,10 +1,12 @@
 ---
-description: IKS-Bewertung nach IDW PS 261 (n.F.): 5 Framework-Komponenten + operative Audit-Schwerpunkte.
+description: IKS-Bewertung nach IDW PS 261 — 5 COSO-Komponenten, operative Audit-Schwerpunkte, Reife-Score, Maßnahmen-Backlog.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `iks-pruefung`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

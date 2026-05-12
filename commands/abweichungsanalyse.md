@@ -1,10 +1,12 @@
 ---
-description: Plan-Ist-Vergleich nach IDW PS 250 mit Waterfall-Decomposition (Preis/Mengen/Mix/Waehrung/Struktur/Einmaleffekte).
+description: Plan-Ist-Vergleich + Forecast — Erlös-/Kosten-Abweichungs-Zerlegung (Preis/Menge/Mix), BWA-Kommentierung, Forecast-Aktualisierung.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `abweichungsanalyse`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

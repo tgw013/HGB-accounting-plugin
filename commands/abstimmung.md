@@ -1,10 +1,12 @@
 ---
-description: Kontenabstimmung: Bank, Debitoren, Kreditoren, USt-Verprobung, Intercompany. Mit Eskalationsschwellen.
+description: Konten-Abstimmung Bank/Kasse/OP-Debitoren/OP-Kreditoren/USt/Intercompany — Differenz-Analyse, Klärungsvorschläge, EWB/PWB-Prüfung.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `abstimmung`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

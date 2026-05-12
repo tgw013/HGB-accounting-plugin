@@ -1,10 +1,12 @@
 ---
-description: Strukturiertes Uebergabe-Format an Steuerberater: Sachverhalt + Vorschlag + §-Grundlagen + Belege.
+description: Strukturierte Übergabe an Steuerberater/WP — Sachverhalt, eigener Vorschlag, §-Grundlagen, Belege, offene Fragen. Spart StB-Stunden.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `steuerberater-handoff`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

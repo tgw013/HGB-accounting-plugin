@@ -1,10 +1,12 @@
 ---
-description: Generiert DATEV-Buchungsstapel-CSV (EXTF-Format) fuer direkten Import in DATEV/Lexware.
+description: Buchungsvorschläge als DATEV-Buchungsstapel-CSV (EXTF-Format) exportieren — importfähig in DATEV-Anwendungen.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `datev-export`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

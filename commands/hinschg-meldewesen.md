@@ -1,10 +1,12 @@
 ---
-description: HinSchG-Anforderungen: interne Meldestelle, Fristen, Schutz des Hinweisgebers, Bussgeldrahmen.
+description: HinSchG-Pflichten (ab 50 MA) — interne Meldestelle, Fristen, Hinweisgeber-Schutz, Bußgeldrahmen, IKS-Verzahnung.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `hinschg-meldewesen`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

@@ -1,10 +1,12 @@
 ---
-description: USt-Voranmeldung Vorbereitung: BMF-Vordruckmuster USt 1 A 2026, KZ-Mapping, ELSTER-faehige Daten.
+description: USt-Voranmeldung vorbereiten — BMF Vordruckmuster USt 1 A 2026, KZ-Mapping, Dauerfristverlängerung, ELSTER-fähige Datenaufstellung.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `ust-voranmeldung`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.

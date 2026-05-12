@@ -1,10 +1,12 @@
 ---
-description: Monatsabschluss-Workflow mit 5-Tage-Closing-Kalender und ELSTER-Fristen.
+description: Monatsabschluss-Checkliste — Konten-Abstimmung, Abgrenzungen, USt-VA-Vorbereitung, Lohnverbuchung, Bank-Reconciliation, BWA.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
 Aktiviere die `monatsabschluss`-Skill und arbeite den Sachverhalt durch.
 
-Falls der User keinen konkreten Sachverhalt mitgegeben hat, frage nach den noetigen Eingaben (siehe Section 2 des Skills).
+**Geltungsbereich:** GmbH, UG. Bei anderen Rechtsformen Hinweis geben und Steuerberater-Konsultation empfehlen.
 
-Bei Unsicherheit: Steuerberater-Hinweis aktivieren (siehe Disclaimer im Skill-Header).
+Falls kein konkreter Sachverhalt mitgegeben wurde, erfrage die Eingaben (siehe Section 2 des Skills).
+
+Bei Unsicherheit: Disclaimer aus dem Skill-Header zitieren und Steuerberater empfehlen.
