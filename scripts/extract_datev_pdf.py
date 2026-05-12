@@ -1,125 +1,221 @@
 """
-Column-aware DATEV-Kontenrahmen PDF extractor.
+DATEV-Kontenrahmen PDF extractor — structure-aware (v4).
 
-The DATEV PDFs (SKR03 Art.-Nr. 11174, SKR04 Art.-Nr. 11175) use a two-column
-page layout. Naive `pdftotext -layout` extraction places the columns side-by-side
-on the same line, which makes grepping for konto labels unreliable. Worse, many
-labels span multiple lines and follow-on accounts inherit a label prefix via a
-leading dash (e.g. "1248 Pauschalwertberichtigung auf Forderungen – Restlaufzeit
-bis 1 Jahr" / "1249 – Restlaufzeit größer 1 Jahr").
+Models the DATEV-PDF layout:
 
-This script:
-  1) Splits each page horizontally at the column gap (computed from word x-coords).
-  2) Concatenates wrapped label lines into single logical entries per konto.
-  3) Resolves leading-dash continuation labels against the most-recent full label.
+  Per page: 2 main halves (LHS, RHS), independent konto ranges.
+  Per half: 3 sub-columns
+    (1) Bilanzposten        — grouping label, drawn as a box spanning multiple konten
+    (2) Programmverbindung  — prefix code (F, S, KU, AM, …) with range or single id;
+                              may include lone range-markers like "-69" on a row
+    (3) Konto + Bezeichnung — 4-digit konto number, BOLD for main konten, regular
+                              for sub-konten; bezeichnungen wrap over 2-4 lines
 
-Output: a clean TSV "konto<TAB>label" file, sorted by konto.
+  Some BOLD entries in sub-column (3) are HEADINGS only (no konto number), e.g.
+  "Finanzanlagen". These are NOT konten.
 
-Usage:
-  python extract_datev_pdf.py <input.pdf> <output.tsv>
+  Konto labels may use DASH-CONTINUATION: a follow-on konto with "– …" inherits
+  the prefix of the most-recent full label.
+
+Implementation notes:
+  - PyMuPDF returns text as spans. A line may be split across several spans when
+    fonts change (e.g. "0810" alone + " " bold + "Ausleihungen an" regular).
+  - We treat a konto anchor as ANY span whose stripped text begins with `\\d{4}`,
+    optionally followed by a space + rest. Bezeichnung-spans on the same y-line
+    as a digit-only anchor are merged in.
+  - Bold spans WITHOUT a leading konto, sitting at konto-column-x and visually
+    separating konto blocks, are HEADINGS — they break the wrap-continuation
+    chain but do not become konten.
+  - Pure range-markers (`^-\\d{1,3}$`) are skipped.
+  - Footer band (last ~25pt of page height) is excluded.
+
+Output TSV columns: konto<TAB>bold<TAB>bezeichnung
 """
 import re
 import sys
-import pdfplumber
-
-KONTO_RE = re.compile(r"^\s*(?:[A-Z]{1,3}\s+)?(\d{4})\s+(.*)$")
-CONT_RE  = re.compile(r"^\s*[–-]\s*(.+)$")
+import fitz
 
 
-def extract_column_lines(page):
-    words = page.extract_words(use_text_flow=False, keep_blank_chars=False)
-    if not words:
+KONTO_ANY  = re.compile(r"^(?:[A-Z]{1,3}\s+)?(\d{4})(?:\s+(.*))?$")
+RANGE_MARK = re.compile(r"^-\d{1,3}$")
+DASH_CONT  = re.compile(r"^\s*[–-]\s*(.+)$")
+
+KEEP_HYPHEN_BEFORE = {
+    "und", "oder", "auf", "im", "in", "der", "die", "des", "vom", "von",
+    "zu", "an", "bei", "mit", "aus", "für", "fuer", "über", "ueber",
+}
+
+HYPHEN_WRAP = re.compile(r"(\w)-\s+(\w[\wäöüÄÖÜß]*)", re.UNICODE)
+
+
+def join_hyphenated(text):
+    def repl(m):
+        prev, nxt = m.group(1), m.group(2)
+        if nxt.lower() in KEEP_HYPHEN_BEFORE:
+            return f"{prev}- {nxt}"
+        return f"{prev}{nxt}"
+    return HYPHEN_WRAP.sub(repl, text)
+
+LINE_TOL    = 1.0
+FOOTER_PT   = 25.0
+
+
+def collect_spans(page):
+    spans = []
+    for block in page.get_text("dict")["blocks"]:
+        for line in block.get("lines", []):
+            for s in line.get("spans", []):
+                text = s["text"].strip()
+                if not text:
+                    continue
+                x0, top, x1, bottom = s["bbox"]
+                spans.append({
+                    "text": text,
+                    "x0": x0, "x1": x1,
+                    "top": top, "bottom": bottom,
+                    "font": s.get("font", ""),
+                    "bold": "Bold" in s.get("font", ""),
+                })
+    return spans
+
+
+def detect_konto_x_bands(spans, page_width):
+    """LHS and RHS konto-column x0 from spans whose text begins with 4 digits."""
+    anchors = [s for s in spans if KONTO_ANY.match(s["text"])]
+    if not anchors:
+        return None, None
+    mid = page_width / 2
+    lhs = [s["x0"] for s in anchors if s["x0"] < mid]
+    rhs = [s["x0"] for s in anchors if s["x0"] >= mid]
+    return (min(lhs) if lhs else None,
+            min(rhs) if rhs else None)
+
+
+def extract_half(spans, konto_x, half_right_edge, page_bottom, tol=2.5, gap_pt=4.5):
+    """Extract konten from one half (LHS or RHS).
+
+    A 'konto-column span' has x0 in [konto_x − tol, half_right_edge).
+    Heading-break heuristics that close the current entry:
+      a) Bold span at konto-x (no konto-digit prefix) — section heading
+      b) ANY bold span whose top is > gap_pt below the previous wrap's bottom
+         (catches "Finanzanlagen" et al. that sit at wrap-x but with a vertical gap)
+    """
+    if konto_x is None:
         return []
 
-    xs = sorted(w["x0"] for w in words)
-    midpoint = (xs[0] + xs[-1]) / 2
-    left_words  = [w for w in words if w["x0"] <  midpoint]
-    right_words = [w for w in words if w["x0"] >= midpoint]
+    cutoff = page_bottom - FOOTER_PT
+    col = [s for s in spans
+           if s["x0"] >= (konto_x - tol)
+           and s["x0"] < half_right_edge
+           and s["top"] < cutoff
+           and not RANGE_MARK.match(s["text"])]
+    col.sort(key=lambda s: (s["top"], s["x0"]))
 
-    def group_by_line(ws, y_tol=3):
-        ws = sorted(ws, key=lambda w: (round(w["top"] / y_tol), w["x0"]))
-        lines, cur, cur_top = [], [], None
-        for w in ws:
-            if cur_top is None or abs(w["top"] - cur_top) <= y_tol:
-                cur.append(w)
-                cur_top = w["top"] if cur_top is None else cur_top
-            else:
-                lines.append(" ".join(x["text"] for x in cur))
-                cur, cur_top = [w], w["top"]
-        if cur:
-            lines.append(" ".join(x["text"] for x in cur))
-        return lines
+    entries = []
+    current = None
+    in_heading_break = False
+    last_bottom = None
 
-    return group_by_line(left_words) + group_by_line(right_words)
+    def flush(c):
+        if c is None:
+            return
+        joined = " ".join(p for p in c["parts"] if p)
+        joined = re.sub(r"\s+", " ", joined).strip()
+        joined = join_hyphenated(joined)
+        c["bezeichnung"] = joined
+        entries.append(c)
 
-
-def parse_konten(lines):
-    """
-    Walk lines, group into (konto, label) tuples.
-    A new konto starts on a line beginning with an optional prefix-letter group
-    plus 4 digits. Subsequent lines without a konto number are wrap-continuations
-    of the most-recent konto label. A label beginning with "– " is a sub-variant
-    that inherits the most-recent FULL label prefix (up to but excluding any
-    existing dash-suffix).
-    """
-    konten = {}
-    last_konto = None
-    last_full_label = None
-    base_label = None
-
-    for raw in lines:
-        line = raw.strip()
-        if not line:
+    for s in col:
+        m = KONTO_ANY.match(s["text"])
+        if m:
+            flush(current)
+            in_heading_break = False
+            current = {
+                "konto": m.group(1),
+                "bold":  s["bold"],
+                "parts": [],
+                "top":   s["top"],
+            }
+            rest = (m.group(2) or "").strip()
+            if rest:
+                current["parts"].append(rest)
+            last_bottom = s["bottom"]
             continue
 
-        m = KONTO_RE.match(line)
-        if m:
-            konto = m.group(1)
-            rest  = m.group(2).strip()
+        if s["bold"] and (
+            abs(s["x0"] - konto_x) < tol
+            or (last_bottom is not None and (s["top"] - last_bottom) > gap_pt)
+        ):
+            in_heading_break = True
+            continue
 
-            if CONT_RE.match(rest):
-                suffix = CONT_RE.match(rest).group(1).strip()
-                label = (base_label + " – " + suffix) if base_label else rest
-                last_full_label = label
-            else:
-                label = rest
-                base_label = rest.split(" – ")[0] if " – " in rest else rest
-                last_full_label = label
+        if current is None or in_heading_break:
+            continue
 
-            if konto in konten:
-                konten[konto] += " " + label
-            else:
-                konten[konto] = label
-            last_konto = konto
+        current["parts"].append(s["text"])
+        last_bottom = max(last_bottom or 0, s["bottom"])
+
+    flush(current)
+    return entries
+
+
+PREFIX_SPLIT = re.compile(r"\s+[-–]\s+")
+
+
+def resolve_dash_continuations(entries):
+    last_prefix = None
+    for e in entries:
+        b = e["bezeichnung"]
+        m = DASH_CONT.match(b)
+        if m and last_prefix:
+            e["bezeichnung"] = f"{last_prefix} – {m.group(1).strip()}"
         else:
-            if last_konto and last_full_label is not None:
-                konten[last_konto] = (konten[last_konto] + " " + line).strip()
-                if base_label and " – " not in konten[last_konto]:
-                    base_label = konten[last_konto]
-                last_full_label = konten[last_konto]
+            last_prefix = PREFIX_SPLIT.split(b, maxsplit=1)[0]
+    return entries
 
-    cleaned = {}
-    for k, v in konten.items():
-        v = re.sub(r"\s+", " ", v).strip()
-        cleaned[k] = v
-    return cleaned
+
+def extract_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    ordered = []
+    for page in doc:
+        page_width  = page.rect.width
+        page_height = page.rect.height
+        spans = collect_spans(page)
+        lhs_x, rhs_x = detect_konto_x_bands(spans, page_width)
+
+        if lhs_x is not None and rhs_x is not None:
+            lhs_right = (lhs_x + rhs_x) / 2
+            rhs_right = page_width
+        elif lhs_x is not None:
+            lhs_right = page_width / 2
+            rhs_right = page_width
+        else:
+            lhs_right = page_width / 2
+            rhs_right = page_width
+
+        lhs = extract_half(spans, lhs_x, lhs_right, page_height)
+        rhs = extract_half(spans, rhs_x, rhs_right, page_height)
+        ordered.extend(lhs)
+        ordered.extend(rhs)
+
+    ordered = resolve_dash_continuations(ordered)
+
+    by_konto = {}
+    for e in ordered:
+        k = e["konto"]
+        if k not in by_konto:
+            by_konto[k] = e
+    return by_konto
 
 
 def main(in_pdf, out_tsv):
-    all_konten = {}
-    with pdfplumber.open(in_pdf) as pdf:
-        for page in pdf.pages:
-            lines = extract_column_lines(page)
-            page_konten = parse_konten(lines)
-            for k, v in page_konten.items():
-                if k not in all_konten:
-                    all_konten[k] = v
-
+    konten = extract_pdf(in_pdf)
     with open(out_tsv, "w", encoding="utf-8", newline="\n") as f:
-        for k in sorted(all_konten):
-            f.write(f"{k}\t{all_konten[k]}\n")
-
-    print(f"wrote {len(all_konten)} konten to {out_tsv}")
+        f.write("konto\tbold\tbezeichnung\n")
+        for k in sorted(konten):
+            e = konten[k]
+            f.write(f"{e['konto']}\t{'B' if e['bold'] else ''}\t{e['bezeichnung']}\n")
+    print(f"wrote {len(konten)} konten to {out_tsv}")
 
 
 if __name__ == "__main__":
