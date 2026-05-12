@@ -26,3 +26,5 @@ test-outputs-docx/
 .skr03-clean.tsv
 .skr04-clean.tsv
 konten-verification.tsv
+.skr03-2025-clean.tsv
+.skr04-2025-clean.tsv

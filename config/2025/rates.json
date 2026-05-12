@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "version": "2025",
+    "effective_from": "2025-01-01",
+    "effective_until": "2025-12-31",
+    "last_updated": "2026-05-12",
+    "purpose": "Korrektur-Buchungen für VZ 2025 und Abschluss-Arbeiten",
+    "sources": [
+      "Sozialversicherungs-Rechengrößenverordnung 2025 (BGBl. 2024 I Nr. 1158)",
+      "Sozialversicherungsentgeltverordnung (SvEV) 2025",
+      "BMF Vordruckmuster USt 1 A 2025 (BMF-Schreiben Dez. 2024)",
+      "Steuerfortentwicklungsgesetz (für Solz-Freigrenze 2025)",
+      "Mindestlohnanpassungsverordnung 2025",
+      "Wachstumschancengesetz (Kleinunternehmer-Grenzen ab 2025, Bürokratieentlastungsgesetz IV)"
+    ],
+    "_verify_required_note": "Felder mit _verify_required = true sind plausibel, aber nicht stichprobenartig gegen Primärquelle gegenchecked. Vor produktiver Nutzung verifizieren oder durch StB freigeben lassen."
+  },
+  "sozialversicherung": {
+    "krankenversicherung": {
+      "allgemeiner_beitragssatz": 14.6,
+      "durchschnittlicher_zusatzbeitrag": 2.5,
+      "_zusatzbeitrag_verify_required": true,
+      "_zusatzbeitrag_quelle": "BMG-Bekanntmachung vom 27.11.2024 (durchschn. Zusatzbeitrag 2025 = 2,5 % — vs. 2024: 1,7 %)",
+      "gesamt": 17.1,
+      "arbeitgeber_anteil": 8.55,
+      "arbeitnehmer_anteil": 8.55
+    },
+    "rentenversicherung": {
+      "beitragssatz": 18.6,
+      "arbeitgeber_anteil": 9.3,
+      "arbeitnehmer_anteil": 9.3
+    },
+    "arbeitslosenversicherung": {
+      "beitragssatz": 2.6,
+      "arbeitgeber_anteil": 1.3,
+      "arbeitnehmer_anteil": 1.3
+    },
+    "pflegeversicherung": {
+      "beitragssatz_mit_kind": 3.6,
+      "beitragssatz_kinderlos": 4.2,
+      "kinderlosenzuschlag": 0.6,
+      "arbeitgeber_anteil": 1.8,
+      "arbeitgeber_anteil_sachsen": 1.3,
+      "abschlag_2_kinder": 0.25,
+      "abschlag_3_kinder": 0.50,
+      "abschlag_4_kinder": 0.75,
+      "abschlag_5_plus_kinder": 1.00
+    }
+  },
+  "beitragsbemessungsgrenzen": {
+    "_hinweis": "Ab 2025 einheitlich Ost/West (SV-Rechengrößenverordnung 2025)",
+    "kv_pv_jaehrlich": 66150,
+    "kv_pv_monatlich": 5512.50,
+    "rv_av_jaehrlich": 96600,
+    "rv_av_monatlich": 8050,
+    "versicherungspflichtgrenze_jaehrlich": 73800,
+    "geringfuegigkeitsgrenze_monatlich": 556,
+    "_geringfuegigkeitsgrenze_quelle": "§ 8 SGB IV — gekoppelt an Mindestlohn × 130 / 3 → 12,82 × 130 / 3 = 555,53 → 556",
+    "uebergangsbereich_bis": 2000
+  },
+  "umlagen": {
+    "u1_typisch_min": 1.0,
+    "u1_typisch_max": 3.5,
+    "u1_beschraenkt_auf_mitarbeiter": 30,
+    "u2_typisch": 0.24,
+    "_u2_verify_required": true,
+    "_u2_hinweis": "U2-Satz 2025 kassenabhängig; 0,24 % war 2024 typisch — 2025 verifizieren oder beim aktuellen KV-Träger erfragen",
+    "insolvenzgeldumlage_u3": 0.15
+  },
+  "betriebliche_altersvorsorge": {
+    "_quelle": "§ 3 Nr. 63 EStG (steuerfrei bis 8% BBG RV-West/einheitlich) + § 1 SvEV (SV-frei bis 4%)",
+    "entgeltumwandlung_max_sv_frei_prozent_bbg_rv": 4,
+    "entgeltumwandlung_max_sv_frei_2025": 3864,
+    "steuerfreier_hoechstbetrag_prozent_bbg_rv": 8,
+    "steuerfreier_hoechstbetrag_2025": 7728,
+    "arbeitgeber_zuschuss_pflicht_prozent": 15
+  },
+  "mindestlohn": {
+    "_quelle": "Vierte Mindestlohnanpassungsverordnung vom 24.11.2023 (BGBl. 2023 I Nr. 332)",
+    "stundensatz_2025": 12.82,
+    "stundensatz_ab_2026": 13.90,
+    "vollzeit_40h_brutto_monatlich_exakt": 2222.13,
+    "vollzeit_40h_brutto_monatlich_gerundet": 2225,
+    "berechnung": "Stundensatz x 40 Std. x 52 Wochen / 12 Monate"
+  },
+  "umsatzsteuer": {
+    "_hinweis_kleinunternehmer": "Neue Grenzen 25.000 € Vorjahr / 100.000 € laufendes Jahr gelten AB 01.01.2025 (Wachstumschancengesetz)",
+    "normalsatz": 19,
+    "ermaessigter_satz": 7,
+    "voranmeldung_schwelle_monatlich": 9000,
+    "voranmeldung_schwelle_vierteljaehrlich_min": 2001,
+    "befreiung_schwelle": 2000,
+    "kleinunternehmer_grenze_vorjahr": 25000,
+    "kleinunternehmer_grenze_laufend": 100000,
+    "oss_schwelle": 10000,
+    "zm_schwelle_vierteljaehrlich": 50000
+  },
+  "koerperschaftsteuer": {
+    "_hinweis": "KSt-Satz 15 % bleibt 2025 unverändert. Wachstumschancengesetz-Senkung greift ab 2028.",
+    "steuersatz": 15,
+    "solidaritaetszuschlag_prozent": 5.5,
+    "solidaritaetszuschlag_effektiv": 0.825,
+    "vorauszahlung_termine": ["10.03", "10.06", "10.09", "10.12"]
+  },
+  "gewerbesteuer": {
+    "steuermesszahl": 3.5,
+    "mindest_hebesatz": 200,
+    "hebesaetze_referenz": {
+      "_hinweis": "Beispielwerte 2025 — kommunale Hebesätze sind jährlich beim FA / Gemeinde zu prüfen",
+      "berlin": 410,
+      "muenchen": 490,
+      "hamburg": 470,
+      "frankfurt": 460,
+      "durchschnitt_gewichtet": 435,
+      "_durchschnitt_verify_required": true
+    },
+    "vorauszahlung_termine": ["15.02", "15.05", "15.08", "15.11"],
+    "freibetrag_personengesellschaften": 24500
+  },
+  "urlaub": {
+    "minimum_werktage_6_tage_woche": 24,
+    "minimum_arbeitstage_5_tage_woche": 20,
+    "ueblich_arbeitstage": "25-30"
+  },
+  "hgb_groessenklassen": {
+    "_hinweis": "Seit 17.04.2024 gültig (BGBl. 2024 I Nr. 120) — gilt für GJ ab 2023 (wahlweise), Pflicht ab GJ 2024. Werte identisch zu 2026.",
+    "kleinst": {
+      "bilanzsumme_max": 450000,
+      "umsatz_max": 900000,
+      "arbeitnehmer_max": 10
+    },
+    "klein": {
+      "bilanzsumme_max": 7500000,
+      "umsatz_max": 15000000,
+      "arbeitnehmer_max": 50
+    },
+    "mittelgross": {
+      "bilanzsumme_max": 25000000,
+      "umsatz_max": 50000000,
+      "arbeitnehmer_max": 250
+    }
+  },
+  "aufbewahrungsfristen": {
+    "_hinweis": "Verkuerzung 10 → 8 Jahre fuer Buchungsbelege durch das Vierte Buerokratieentlastungsgesetz (BEG IV) — gilt fuer ab 01.01.2025 entstandene Buchungsbelege",
+    "jahresabschluesse_bilanzen_inventare_lageberichte": 10,
+    "buchungsbelege_bis_31_12_2024": 10,
+    "buchungsbelege_ab_01_01_2025": 8,
+    "rechnungen_ab_01_01_2025_§14b_UStG": 8,
+    "handelsbriefe": 6,
+    "lohnunterlagen_§41_EStG": 6,
+    "verfahrensdokumentation_gobd": 10
+  },
+  "solidaritaetszuschlag_freigrenze_2025": {
+    "_quelle": "Steuerfortentwicklungsgesetz / Inflationsausgleichsgesetz — VZ 2025",
+    "einzelveranlagung_jaehrlich_eur": 19950,
+    "zusammenveranlagung_jaehrlich_eur": 39900,
+    "milderungszone_max_anteil_prozent": 11.9
+  },
+  "sachbezugswerte_2025": {
+    "_quelle": "Sozialversicherungsentgeltverordnung (SvEV) 2025, Bundesrat-Beschluss 13.12.2024",
+    "fruehstueck_eur": 2.30,
+    "mittag_abend_eur": 4.40,
+    "mahlzeit_monat_eur": 132,
+    "_mahlzeit_monat_verify_required": true,
+    "verpflegung_monat_gesamt_eur": 333
+  },
+  "gwg_und_afa_grenzen": {
+    "_quelle": "§ 6 Abs. 2 + Abs. 2a EStG",
+    "sofortabschreibung_grenze_netto_eur": 250,
+    "gwg_grenze_netto_eur": 800,
+    "sammelposten_pool_min_eur": 250.01,
+    "sammelposten_pool_max_eur": 1000,
+    "sammelposten_abschreibung_jahre": 5,
+    "degressive_afa_2025": "Zulaessig fuer bewegliche WG mit Anschaffung/Herstellung im Zeitraum 01.04.2024-31.12.2024 (max. 20 % p.a., 2x lineare AfA) — Wachstumschancengesetz; FUER ANSCHAFFUNGEN 2025 GENERELL NICHT ZULAESSIG",
+    "_degressive_afa_verify_required": true,
+    "sonder_afa_7g_max_prozent": 40,
+    "sonder_afa_7g_zeitraum": "verteilt auf Anschaffungsjahr und 4 Folgejahre (insgesamt max. 40 %)"
+  }
+}
