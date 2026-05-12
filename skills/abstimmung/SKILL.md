@@ -1,5 +1,5 @@
 ---
-skill: abstimmung
+name: abstimmung
 type: command
 language: de
 version: "2026"
@@ -19,6 +19,9 @@ tags:
   - debitoren
   - kreditoren
 ---
+
+> ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
+
 
 # Abstimmung
 

@@ -1,9 +1,9 @@
 {
   "name": "germany-accounting",
-  "version": "1.0.3",
-  "description": "Germany — Finance & Accounting: Deutsche Finanzbuchhaltung, Steuererklärung, Lohnabrechnung und Compliance-Workflows für GmbH, GbR, Einzelunternehmen und Freiberufler.",
+  "version": "1.1.0",
+  "description": "Germany — Finance & Accounting: Deutsche Finanzbuchhaltung, Steuererklärung, Lohnabrechnung und Compliance-Workflows für GmbH, GbR, Einzelunternehmen und Freiberufler. v1.1.0: Fork mit DATEV-2026-Re-Sync und Praxis-Readiness-Anpassungen (siehe CHANGES_APPLIED.md + ACCOUNTING_REVIEW_FIRST_PASS.md).",
   "author": {
-    "name": "AI Heroes",
+    "name": "AI Heroes (upstream) / tgw013 (fork mit Korrekturen 2026-05)",
     "url": "https://www.ai-heroes.co"
   }
 }

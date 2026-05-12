@@ -12,6 +12,9 @@ number_format: "1.234,56 €"
 date_format: "TT.MM.JJJJ"
 ---
 
+> ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
+
+
 # Lohnabrechnung — Vollständige Gehaltsabrechnung Deutschland
 
 ## Überblick

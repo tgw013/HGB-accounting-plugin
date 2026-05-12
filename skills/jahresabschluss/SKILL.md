@@ -1,5 +1,5 @@
 ---
-skill: jahresabschluss
+name: jahresabschluss
 type: command
 language: de
 version: "2026"
@@ -19,6 +19,9 @@ tags:
   - hgb
   - steuer
 ---
+
+> ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
+
 
 # Jahresabschluss
 
@@ -607,9 +610,20 @@ und abzüglich eines Verlustvortrags den Betrag übersteigen.
 Seit dem MoPeG (Gesetz zur Modernisierung des Personengesellschaftsrechts,
 01.01.2024) gelten für die GbR folgende Besonderheiten:
 
+> 🚨 **OFFENE RECHTSFRAGE — § 264a HGB & eGbR (Stand 2026-05)**
+>
+> Die Anwendbarkeit von § 264a HGB auf die **eingetragene GbR (eGbR)**, deren Gesellschafter ausschließlich Kapitalgesellschaften sind (z. B. "GmbH & Co. eGbR"), ist seit Inkrafttreten des MoPeG (01.01.2024) in der Literatur **umstritten**:
+> - **Pro Analogie:** Der Schutzzweck des § 264a HGB (Schutz vor Bilanzlücken bei reiner Kapitalgesellschafts-Struktur) gilt gleichermaßen für die eGbR
+> - **Contra Wortlaut:** § 264a HGB nennt explizit nur OHG und KG. Das MoPeG hat keine entsprechende Anpassung gebracht — eine planwidrige Regelungslücke ist umstritten
+>
+> Eine eindeutige BGH-Rechtsprechung oder BMF-Verwaltungsauffassung liegt **zum Stand 2026-05 nicht vor**. Das IDW hat sich (bisher) nicht abschließend positioniert.
+>
+> **🛑 Wenn der vorliegende Sachverhalt eine eGbR oder GmbH & Co. eGbR betrifft, deren Gesellschafter ausschließlich Kapitalgesellschaften sind: ZWINGEND Steuerberater oder Wirtschaftsprüfer konsultieren — diese Skill kann hierzu KEINE verlässliche Empfehlung geben.**
+>
+> Die folgenden Hinweise sind nur Orientierung, nicht Festlegung.
+
 ### Buchführungspflicht
-- Eingetragene GbR (eGbR) im Gesellschaftsregister: §264a HGB kann greifen,
-  wenn Vollhafter keine natürliche Person ist
+- Eingetragene GbR (eGbR) im Gesellschaftsregister: **§ 264a HGB könnte greifen** (siehe Hinweis oben — offene Rechtsfrage), wenn alle Vollhafter keine natürlichen Personen sind
 - Nicht-eingetragene GbR: In der Regel keine Buchführungspflicht nach HGB,
   EÜR nach §4 Abs.3 EStG zulässig (sofern Schwellenwerte §141 AO nicht überschritten)
 - Schwellenwerte für Buchführungspflicht: Umsatz > 800.000 € ODER Gewinn > 80.000 €
