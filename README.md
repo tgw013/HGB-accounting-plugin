@@ -25,12 +25,22 @@ Inspiriert von der offiziellen [Anthropic Finance Skill](https://github.com/anth
 
 ## Installation
 
-```bash
-# Plugin in Claude Code lokal registrieren (Repo-Pfad anpassen)
-claude plugin add ./path/to/HGB-accounting-plugin-internal
+**In Claude Code** — innerhalb einer aktiven Session zwei Slash-Commands:
+
+```
+/plugin marketplace add tgw013/HGB-accounting-plugin-internal
+/plugin install germany-accounting@hgb-accounting
 ```
 
-`plugin.json` deklariert Name `germany-accounting`. Skills werden automatisch geladen, Slash-Commands stehen unter `/<command-name>` zur Verfügung.
+Das war's. Skills + Commands stehen sofort zur Verfügung; `germany-accounting` ist in `/plugin` als installiert sichtbar.
+
+**Voraussetzungen:** Claude Code installiert (`npm install -g @anthropic-ai/claude-code`, Node 18+). Bei privatem Repo zusätzlich `gh auth login` für GitHub-Zugriff.
+
+**In Claude Cowork** (Desktop-Variante): Plugin-Marketplace ist offiziell ein Claude-Code-Feature. Ob Cowork die in Claude Code installierten Plugins automatisch übernimmt, ist offiziell **nicht dokumentiert**. Bei Bedarf testen und Rückmeldung über `/feedback` in Cowork erbitten.
+
+**Lokale Entwicklung / Test ohne Marketplace:** `claude --plugin-dir ./HGB-accounting-plugin-internal` aus dem Eltern-Ordner des Klons startet Claude Code mit dem Plugin direkt geladen.
+
+Quelle Plugin-Mechanik: [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins.md), [Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces.md).
 
 ## Verfügbare Skills (v2.0-alpha)
 

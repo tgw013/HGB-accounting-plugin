@@ -1,0 +1,15 @@
+{
+  "name": "hgb-accounting",
+  "owner": {
+    "name": "tgw013",
+    "url": "https://github.com/tgw013"
+  },
+  "plugins": [
+    {
+      "name": "germany-accounting",
+      "source": ".",
+      "version": "2.0.0",
+      "description": "Deutsche FiBu-Workflows: HGB, DATEV SKR03/04, USt-VA, Lohnabrechnung, eBilanz, GoBD/IKS, Steuerberater-Handoff. GmbH+UG-fokussiert."
+    }
+  ]
+}
