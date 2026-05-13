@@ -2,7 +2,7 @@
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
 
-**Status:** `v2.0.0-alpha` — Skeleton-Phase. Inhalt der Skills wird in Phase 4 der v2.0-Migration befüllt. Für produktive Verwendung den Stand `v1.1.0` (Branch `main`) nutzen.
+**Status:** `v2.0.0` — produktive Linie auf `main`. 14 Skills + 14 Commands befüllt, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert. Output bleibt **Vorschlag** — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen. Vorherige Stände bleiben als Tags erreichbar (`v1.1.0`, `v2.0.0-alpha`).
 
 ---
 
