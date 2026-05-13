@@ -15,7 +15,7 @@ Ein Claude-Plugin für **deutsche Finanzbuchhaltung nach HGB** mit Fokus auf:
 - **Workflow-Unterstützung**: Buchungssätze, Monats-/Jahresabschluss, USt-Voranmeldung, Lohnabrechnung, eBilanz-Vorbereitung, GoBD-Konformität, IKS-Prüfung
 - **Steuerberater-Handoff**: Strukturierte Übergabe statt Eigenversand an ELSTER/Bundesanzeiger
 
-Inspiriert von der offiziellen [Anthropic Finance Skill](https://github.com/anthropics/skills) (US-fokussiert), eigenständig auf deutsche Rechtslage portiert.
+Inspiriert vom offiziellen [Anthropic Finance Plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance) (US-fokussiert: Journal-Entry-Prep, Reconciliation, Close-Management, Variance-Analysis, SOX-Testing) — eigenständig auf deutsche Rechtslage portiert (HGB, DATEV-SKR03/04, BMF-Vordruckmuster, IDW PS 261 statt SOX).
 
 ## Quick Overview (English)
 
@@ -96,5 +96,5 @@ Siehe [`CONTRIBUTING.md`](CONTRIBUTING.md). Beiträge willkommen — insbesonder
 
 ## Verwandte Projekte
 
-- [Anthropic Finance Skill](https://github.com/anthropics/skills) — US-Pendant, Inspiration für v2.0-Struktur
+- [Anthropic Finance Plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance) — US-Pendant (Journal-Entry-Prep, Reconciliation, Close-Management, Variance-Analysis, SOX-Testing, Audit-Support, Financial-Statements)
 - DATEV-MCP-Server (geplant): `datev_finrobotics` (Read-only EXTF), `datev_badrix` (Read+Write)

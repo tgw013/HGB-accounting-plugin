@@ -8,8 +8,8 @@ description: Beleg in Buchungsvorschlag umwandeln (SKR03/SKR04, USt-Behandlung, 
 # Buchungssatz
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** `journal-entry-prep` (Workflow-Anteil)
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `journal-entry-prep` + `journal-entry` (Workflow-Anteile) (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/`
 **Knowledge-Base:** `buchung-grundlagen`
 

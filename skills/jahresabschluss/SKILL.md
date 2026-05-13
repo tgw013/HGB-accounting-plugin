@@ -8,8 +8,8 @@ description: HGB-Jahresabschluss-Aufstellung GmbH/UG — Bilanz §266, GuV §275
 # Jahresabschluss
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** `annual-close` (sinngemäß)
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `close-management` + `financial-statements` (sinngemäß; HGB-Aufstellung statt US-GAAP) (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/`
 **Knowledge-Base:** `buchung-grundlagen`
 

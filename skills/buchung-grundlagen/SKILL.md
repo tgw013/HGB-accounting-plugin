@@ -8,8 +8,8 @@ description: Doppik-Grundlagen, GoB/GoBD, Belegpflicht, Aufbewahrungsfristen, SK
 # Buchung Grundlagen
 
 **Typ:** `knowledge`
-**Anthropic-Pendant:** `journal-entry-prep` (Knowledge-Anteil)
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `journal-entry-prep` (Knowledge-Anteil) (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/`
 
 ---

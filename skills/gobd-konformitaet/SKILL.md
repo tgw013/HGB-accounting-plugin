@@ -8,7 +8,6 @@ description: GoBD-Anforderungen (BMF 28.11.2019) — Verfahrensdokumentation, Fe
 # GoBD-Konformität
 
 **Typ:** `knowledge`
-**Anthropic-Pendant:** (kein direktes Pendant)
 **Geltungsbereich:** GmbH, UG (gilt für alle Buchführungspflichtigen)
 **Config:** `config/{active_year}/rates.json` (Aufbewahrungsfristen)
 **Knowledge-Base:** `buchung-grundlagen`

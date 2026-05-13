@@ -8,7 +8,6 @@ description: USt-Voranmeldung vorbereiten — BMF Vordruckmuster USt 1 A 2026, K
 # USt-Voranmeldung
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** (neu — kein direktes US-Pendant)
 **Geltungsbereich:** GmbH, UG
 **Config:** `config/{active_year}/kz-codes-ust-va.json`, `rates.json`, `fristen.json`
 **Knowledge-Base:** `buchung-grundlagen`

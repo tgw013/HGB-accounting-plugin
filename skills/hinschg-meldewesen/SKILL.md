@@ -8,7 +8,6 @@ description: HinSchG-Pflichten (ab 50 MA) — interne Meldestelle, Fristen, Hinw
 # HinSchG-Meldewesen
 
 **Typ:** `knowledge`
-**Anthropic-Pendant:** (kein direktes Pendant)
 **Geltungsbereich:** GmbH, UG **ab 50 MA** (Schwellwert HinSchG)
 **Config:** —
 **Knowledge-Base:** —

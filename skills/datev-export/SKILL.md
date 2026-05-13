@@ -8,7 +8,6 @@ description: Buchungsvorschläge als DATEV-Buchungsstapel-CSV (EXTF-Format) expo
 # DATEV-Export
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** (neu — DACH-spezifisch)
 **Geltungsbereich:** GmbH, UG
 **Config:** `config/{active_year}/kontenrahmen.json`, `config/shared/formats.json`
 **Knowledge-Base:** `buchung-grundlagen`

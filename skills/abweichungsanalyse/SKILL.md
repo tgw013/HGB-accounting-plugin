@@ -8,8 +8,8 @@ description: Plan-Ist-Vergleich + Forecast — Erlös-/Kosten-Abweichungs-Zerleg
 # Abweichungsanalyse
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** `variance-analysis`
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `variance-analysis` (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/kontenrahmen.json`
 **Knowledge-Base:** `buchung-grundlagen`
 

@@ -8,7 +8,6 @@ description: Strukturierte Übergabe an Steuerberater/WP — Sachverhalt, eigene
 # Steuerberater-Handoff
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** (kein direktes Pendant)
 **Geltungsbereich:** GmbH, UG
 **Config:** —
 **Knowledge-Base:** alle anderen Skills (referenziert situationsabhängig)

@@ -8,8 +8,8 @@ description: Konten-Abstimmung Bank/Kasse/OP-Debitoren/OP-Kreditoren/USt/Interco
 # Abstimmung
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** `reconciliation` (sinngemäß)
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `reconciliation` (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/kontenrahmen.json`
 **Knowledge-Base:** `buchung-grundlagen`
 

@@ -8,8 +8,8 @@ description: Monatsabschluss-Checkliste — Konten-Abstimmung, Abgrenzungen, USt
 # Monatsabschluss
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** `monthly-close`
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `close-management` (Monats-Closing-Aspekte) (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/`
 **Knowledge-Base:** `buchung-grundlagen`, `gobd-konformitaet`
 

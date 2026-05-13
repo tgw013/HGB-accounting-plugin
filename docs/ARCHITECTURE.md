@@ -2,7 +2,7 @@
 
 ## Designprinzipien
 
-1. **Knowledge ≠ Workflow.** Inspiriert von Anthropic's Original-Finance-Skill: Hintergrundwissen ist eine eigene Skill-Klasse, Workflows greifen darauf zu — keine Vermischung.
+1. **Knowledge ≠ Workflow.** Inspiriert vom [Anthropic Finance Plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance): Hintergrundwissen ist eine eigene Skill-Klasse, Workflows greifen darauf zu — keine Vermischung.
 2. **Quellen-Treue.** Jeder Konto-Vorschlag, jeder KZ-Code, jede Frist hat einen Verweis auf eine Primärquelle. Sekundärliteratur ist Hilfsmaterial, keine Belegquelle.
 3. **Mehrjahres-Kompatibilität.** Alles Jahres-abhängige liegt in `config/{jahr}/`. Skills referenzieren `{active_year}`, nie hardcoded 2026.
 4. **Disclaimer als Diktat.** Kein produktiver Output ohne `⚠ Hinweis`-Block. Plugin ist Hilfsmittel, nicht StB-Ersatz.

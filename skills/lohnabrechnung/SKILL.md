@@ -8,7 +8,6 @@ description: Lohn-/Gehaltsabrechnung GmbH/UG — Brutto-Netto, SV-Beiträge, LSt
 # Lohnabrechnung
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** (kein direktes US-Pendant; US-Payroll-Logik fundamentally other)
 **Geltungsbereich:** GmbH, UG
 **Config:** `config/{active_year}/rates.json`, `kontenrahmen.json`, `fristen.json`
 **Knowledge-Base:** `buchung-grundlagen`

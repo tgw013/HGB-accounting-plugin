@@ -8,8 +8,8 @@ description: eBilanz-Datenpaket vorbereiten — Taxonomie-Mapping HGB 6.9, Mussf
 # eBilanz
 
 **Typ:** `workflow`
-**Anthropic-Pendant:** (kein direktes Pendant)
-**Geltungsbereich:** GmbH, UG
+**Anthropic-Pendant:** `financial-statements` (sinngemäß; eBilanz statt US-Filings) (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG
 **Config:** `config/{active_year}/kontenrahmen.json`, `fristen.json`
 **Knowledge-Base:** `buchung-grundlagen`, `jahresabschluss`
 

@@ -8,8 +8,8 @@ description: IKS-Bewertung nach IDW PS 261 — 5 COSO-Komponenten, operative Aud
 # IKS-Prüfung
 
 **Typ:** `methodology`
-**Anthropic-Pendant:** SOX-404-Skill (US-Pendant, in DE durch IDW PS 261 ersetzt)
-**Geltungsbereich:** GmbH, UG (besondere Relevanz für prüfungspflichtige Gesellschaften)
+**Anthropic-Pendant:** `sox-testing` + `audit-support` (US-Pendants; in DE durch IDW PS 261 ersetzt) (siehe [anthropics/knowledge-work-plugins/finance](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance))
+ GmbH, UG (besondere Relevanz für prüfungspflichtige Gesellschaften)
 **Config:** —
 **Knowledge-Base:** `buchung-grundlagen`, `gobd-konformitaet`
 
