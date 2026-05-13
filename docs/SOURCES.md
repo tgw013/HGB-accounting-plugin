@@ -69,7 +69,7 @@ Anwender müssen die PDFs separat beschaffen (Urheberrecht). Plugin enthält nur
 
 Siehe `docs/CONNECTORS.md` für Security-Evaluierung.
 
-## Verifikations-Diskipplin
+## Verifikations-Disziplin
 
 - Jede §-Angabe muss auf eine der oben genannten URLs zurückführbar sein
 - DATEV-Konto-Nummern müssen Seitenverweis auf das jeweilige Jahres-PDF haben (in PR-Diskussionen, nicht im Code)

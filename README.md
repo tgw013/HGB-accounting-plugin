@@ -1,100 +1,235 @@
-# germany-accounting (HGB-Plugin für Claude)
+# germany-accounting
 
-> ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2026 Art.-Nr. 11174/11175, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Schreiben). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung Konten und §-Verweise stichprobenartig prüfen, bei rechtlicher Unsicherheit Steuerberater/Wirtschaftsprüfer konsultieren.
+Ein Finanz- und Buchhaltungs-Plugin für **Cowork** (Anthropic's agentische Desktop-App) — funktioniert auch in **Claude Code**. Auf deutsche Rechtslage portiert: HGB, DATEV-SKR03/04, USt-Voranmeldung, Lohn, GoBD/IKS, eBilanz-Vorbereitung. Geltungsbereich GmbH + UG.
 
-**Status:** `v2.0.0` — produktive Linie auf `main`. 14 Skills + 14 Commands befüllt, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert. Output bleibt **Vorschlag** — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen. Vorherige Stände bleiben als Tags erreichbar (`v1.1.0`, `v2.0.0-alpha`).
+> ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2025+2026, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Vordruckmuster). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen.
+
+**Status:** `v2.0.0` auf `main`. 14 Skills + 14 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert. Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`.
 
 ---
 
-## Was ist das?
-
-Ein Claude-Plugin für **deutsche Finanzbuchhaltung nach HGB** mit Fokus auf:
-
-- **DATEV-Anwender** (SKR03 / SKR04, Buchungsstapel-CSV)
-- **GmbH und UG** (haftungsbeschränkt) — bewusst eng gefasst
-- **Workflow-Unterstützung**: Buchungssätze, Monats-/Jahresabschluss, USt-Voranmeldung, Lohnabrechnung, eBilanz-Vorbereitung, GoBD-Konformität, IKS-Prüfung
-- **Steuerberater-Handoff**: Strukturierte Übergabe statt Eigenversand an ELSTER/Bundesanzeiger
-
-Inspiriert vom offiziellen [Anthropic Finance Plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance) (US-fokussiert: Journal-Entry-Prep, Reconciliation, Close-Management, Variance-Analysis, SOX-Testing) — eigenständig auf deutsche Rechtslage portiert (HGB, DATEV-SKR03/04, BMF-Vordruckmuster, IDW PS 261 statt SOX).
-
 ## Quick Overview (English)
 
-`germany-accounting` is a Claude plugin providing German bookkeeping (HGB) workflows: SKR03/SKR04 chart of accounts, VAT pre-registrations (USt-VA), monthly/annual closings, payroll, and GoBD/IKS compliance support — scoped to GmbH and UG (limited-liability) entities. Inspired by Anthropic's official finance skill (US-focused), independently built for German law (HGB, EStG, UStG, KStG, SGB, stand 2026-05). Output is a draft — review with a `Steuerberater` (tax advisor) before productive use.
+A finance and accounting plugin for German GmbH/UG entities — HGB-compliant journal entries with SKR03/SKR04, VAT pre-registration, payroll, monthly/annual close, and GoBD/IKS compliance. Primarily designed for Cowork; also works in Claude Code. Inspired by Anthropic's [finance plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance) (US-focused), independently ported to German law. Output is a draft — review with a `Steuerberater` (German tax advisor) before productive use.
 
 ---
 
 ## Installation
 
-**In Claude Code** — innerhalb einer aktiven Session zwei Slash-Commands:
+**1. Try the one-line shell shortcut first** (as used in Anthropic's own finance-plugin README):
+
+```bash
+claude plugins add tgw013/HGB-accounting-plugin-internal
+```
+
+**2. If that fails, use the documented two-step slash-command path inside an active Claude Code session:**
 
 ```
 /plugin marketplace add tgw013/HGB-accounting-plugin-internal
 /plugin install germany-accounting@hgb-accounting
 ```
 
-Das war's. Skills + Commands stehen sofort zur Verfügung; `germany-accounting` ist in `/plugin` als installiert sichtbar.
-
 **Voraussetzungen:** Claude Code installiert (`npm install -g @anthropic-ai/claude-code`, Node 18+). Bei privatem Repo zusätzlich `gh auth login` für GitHub-Zugriff.
 
-**In Claude Cowork** (Desktop-Variante): Plugin-Marketplace ist offiziell ein Claude-Code-Feature. Ob Cowork die in Claude Code installierten Plugins automatisch übernimmt, ist offiziell **nicht dokumentiert**. Bei Bedarf testen und Rückmeldung über `/feedback` in Cowork erbitten.
+**In Cowork:** Anthropic's offizielle Finance-Skill ist explizit "primarily designed for Cowork." Das hier ist die DE-Variante mit gleicher Architektur — installiert via Claude Code auf demselben Rechner, sollte Cowork die Skills bei nächster Session sehen. Falls nicht: `/feedback` in Cowork.
 
-**Lokale Entwicklung / Test ohne Marketplace:** `claude --plugin-dir ./HGB-accounting-plugin-internal` aus dem Eltern-Ordner des Klons startet Claude Code mit dem Plugin direkt geladen.
+**Lokale Entwicklung:** `claude --plugin-dir ./HGB-accounting-plugin-internal` lädt das Plugin direkt aus einem Klon ohne Marketplace.
 
-Quelle Plugin-Mechanik: [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins.md), [Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces.md).
+Doku-Quellen: [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins.md), [Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces.md).
 
-## Verfügbare Skills (v2.0-alpha)
+---
 
-| Skill | Typ | Zweck |
+## Skills (14)
+
+Skills stellen Hintergrundwissen und Workflow-Logik bereit. Claude wählt sie automatisch passend zur Aufgabe; Zugriff erfolgt über die Slash-Commands oder über natürliche Aufforderungen ("Erstelle Buchungssatz für …").
+
+| Skill | Typ | Anthropic-Pendant | Zweck |
+|---|---|---|---|
+| `buchung-grundlagen` | knowledge | `journal-entry-prep` (Knowledge) | Doppik, GoBD, SKR-Auswahl, Aufbewahrungsfristen, §-Verweis-Disziplin |
+| `buchungssatz` | workflow | `journal-entry-prep` + `journal-entry` | Beleg → Buchungsvorschlag (SKR03/04, USt-Tatbestand, §-Begründung) |
+| `monatsabschluss` | workflow | `close-management` | Monats-Closing-Checkliste, Abgrenzungen, USt-VA-Vorbereitung |
+| `ust-voranmeldung` | workflow | — (DE-spezifisch) | KZ-Mapping nach BMF-Vordruckmuster USt 1 A, ELSTER-fähige Aufstellung |
+| `lohnabrechnung` | workflow | — (DE-spezifisch) | Brutto-Netto, SV, LSt, bAV §3 Nr.63, Minijob/Midijob, Verbuchung |
+| `jahresabschluss` | workflow | `close-management` + `financial-statements` | HGB-Aufstellung (Bilanz §266, GuV §275, Anhang §284-288) |
+| `ebilanz` | workflow | `financial-statements` (sinngemäß) | Datenpaket-Vorbereitung für ERiC/DATEV (kein Direktversand) |
+| `abstimmung` | workflow | `reconciliation` | Bank, Kasse, OP-Debitoren/-Kreditoren, USt, Intercompany, EWB/PWB |
+| `abweichungsanalyse` | workflow | `variance-analysis` | Plan-Ist-Decomposition (Preis/Menge/Mix), BWA-Kommentierung, Forecast |
+| `gobd-konformitaet` | knowledge | — (DE-spezifisch) | BMF-GoBD 28.11.2019: Festschreibung, Z1/Z2/Z3, Verfahrensdokumentation |
+| `iks-pruefung` | methodology | `sox-testing` + `audit-support` | IKS nach IDW PS 261 / 5 COSO-Komponenten (ersetzt SOX in DE) |
+| `hinschg-meldewesen` | knowledge | — (DE-spezifisch) | HinSchG-Pflichten ab 50 MA, Meldestelle, Fristen, Bußgeldrahmen |
+| `datev-export` | workflow | — (DACH-spezifisch) | DATEV-Buchungsstapel-CSV (EXTF-Format) für direkten Import |
+| `steuerberater-handoff` | workflow | — (DACH-spezifisch) | Strukturiertes Übergabe-Paket (Sachverhalt + Vorschlag + § + Belege) |
+
+## Slash-Commands (14)
+
+Jeder Skill hat einen gleichnamigen Slash-Command zum direkten Aufruf:
+
+`/buchung-grundlagen` · `/buchungssatz` · `/monatsabschluss` · `/ust-voranmeldung` · `/lohnabrechnung` · `/jahresabschluss` · `/ebilanz` · `/abstimmung` · `/abweichungsanalyse` · `/gobd-konformitaet` · `/iks-pruefung` · `/hinschg-meldewesen` · `/datev-export` · `/steuerberater-handoff`
+
+---
+
+## Beispiel-Workflows
+
+### Monatsabschluss April
+
+```
+/monatsabschluss
+  → Saldenliste 04/2026 hochladen
+  → Bank-Auszüge aller Konten (PDF/CSV)
+  → OP-Listen Debitoren + Kreditoren
+
+Plugin liefert:
+  - Closing-Checkliste (was ist OK, was ist offen)
+  - Vorgeschlagene Nachbuchungen (Abgrenzungen, RST-Anpassungen)
+  - BWA-Kommentar
+
+Anschluss:
+/ust-voranmeldung 04/2026   → KZ-Aufstellung + Zahllast/Erstattung
+/datev-export               → Buchungsstapel-CSV der Vorschläge
+/steuerberater-handoff      → Übergabe-Brief an StB
+```
+
+### Einzel-Buchungssatz mit § 13b
+
+```
+/buchungssatz
+  → "Rechnung Acme Cloud Ltd. (IE), 1.500 € netto, SaaS Mai 2026"
+
+Plugin erkennt § 13b Abs. 1 UStG, baut Buchung mit
+SKR04 6840/3837/1407/3300, schlägt KZ 46/47/67 in USt-VA vor,
+begründet mit §-Verweis.
+```
+
+### Jahresabschluss-Vorbereitung
+
+```
+/jahresabschluss
+  → Saldenliste GJ vor Umbuchungen
+  → Inventur-Liste
+  → Anlagengitter
+  → AfA-Lauf-Ergebnis
+
+Plugin liefert:
+  - Größenklasse-Bestimmung (§ 267 HGB)
+  - Bilanz § 266 + GuV § 275 (Markdown + Excel)
+  - Anhang-Gerüst (§§ 284-288)
+  - Steuerrückstellungs-Berechnung (KSt + GewSt + Solz)
+
+/ebilanz   → Datenpaket-Vorbereitung
+/steuerberater-handoff   → Übergabe an StB für ELSTER/Bundesanzeiger
+```
+
+### IKS-Selbstbewertung vor Prüfung
+
+```
+/iks-pruefung
+  → Prozess-Beschreibungen, Berechtigungskonzept, bestehende Kontrollen
+
+Plugin liefert:
+  - Reife-Score je COSO-Komponente
+  - Lücken-Liste mit Priorität
+  - Maßnahmen-Backlog mit Frist + Verantwortlichem
+```
+
+---
+
+## Wo kommen die Daten her?
+
+Anthropic's Pendant verbindet sich via MCP an ERP / Data-Warehouse / BI-Tools. **Bei uns sind MCP-Integrationen Stand v2.0.0 noch geplant** (siehe `.mcp.json`). Bis dahin liefert der Anwender die Daten manuell — Claude kann sie aus mehreren Formaten lesen:
+
+| Daten-Typ | Quelle | Format | Wie übergeben |
+|---|---|---|---|
+| **Belege** | Eingangs-/Ausgangs-Rechnungen | PDF, Foto (JPG/PNG), oder Text-Paste | Direkt in die Konversation hochladen oder einfügen |
+| **Saldenliste** | DATEV Unternehmen online / DATEV Rechnungswesen / Lexware | Excel-Export (XLSX), CSV, PDF | Hochladen |
+| **Bankauszüge** | Online-Banking | PDF, CSV, MT940 | Hochladen |
+| **OP-Listen** | DATEV-OPOS-Auswertung / Lexware | Excel, CSV, PDF | Hochladen |
+| **Lohnjournal** | DATEV LODAS / DATEV Lohn und Gehalt / Lexware Lohn / Personio | Excel, CSV, PDF | Hochladen |
+| **Anlagengitter** | DATEV Anlagenverwaltung | Excel, PDF | Hochladen |
+| **Plan/Budget** | Excel-Planung intern | Excel, CSV, Text-Tabelle | Hochladen oder einfügen |
+| **MA-Stammdaten** | HR-System | CSV / strukturierte Liste | Einfügen oder Skill-Frage beantworten |
+| **Vertragsdaten** | Verträge (Miete, Versicherung, bAV, GF-Anstellungsvertrag) | PDF, Text | Hochladen + kurze Zusammenfassung des Sachverhalts |
+
+**Praxis-Tipp:** Daten **lokal** halten — Cowork läuft auf deinem Rechner. Keine Cloud-Synchronisation der Belege ohne ausdrückliche Freigabe; DSGVO-Pflichten bleiben beim Anwender.
+
+**Geplante MCP-Integrationen** (in `.mcp.json` als `evaluating`):
+- `datev_finrobotics` (Read-only EXTF-Import aus DATEV-Exporten)
+- `datev_badrix` (Read + Write inkl. EXTF-Export für DATEV-Import)
+- `bank_hbci` (HBCI/FinTS Bank-API)
+- `elster` (XML-Vorbereitung — kein Direktversand)
+
+---
+
+## Vergleich: germany-accounting (DE/HGB) vs. Anthropic Finance Plugin (US/GAAP)
+
+**Architektur**: identisch — Knowledge/Workflow-Trennung, source-fidelity-Disziplin, Markdown + CSV + Excel als Output.
+**Inhalt**: portiert auf DE-Rechtslage. Wo US-spezifisch (z.B. SOX), durch das deutsche Äquivalent (IDW PS 261) ersetzt. Plus DACH-spezifische Skills (USt-VA, Lohn, GoBD, DATEV-Export, StB-Handoff).
+
+### Skills
+
+| Anthropic Finance (US-GAAP) | germany-accounting (HGB) | Status |
 |---|---|---|
-| `buchung-grundlagen` | knowledge | Doppik-Grundlagen, GoBD, SKR-Auswahl |
-| `buchungssatz` | workflow | Beleg → Buchungsvorschlag |
-| `monatsabschluss` | workflow | Monatliche Abschluss-Checkliste |
-| `ust-voranmeldung` | workflow | USt-VA-Vorbereitung (BMF USt 1 A 2026) |
-| `lohnabrechnung` | workflow | Lohnabrechnung GmbH-Geschäftsführer + Mitarbeiter |
-| `jahresabschluss` | workflow | HGB-Jahresabschluss (Aufstellung) |
-| `ebilanz` | workflow | eBilanz-Datenpaket-Vorbereitung |
-| `abstimmung` | workflow | Konten-Abstimmung (Bank, OP, EWB/PWB) |
-| `abweichungsanalyse` | workflow | Plan-Ist-Vergleich, Forecast |
-| `gobd-konformitaet` | knowledge | GoBD-Anforderungen, Verfahrensdokumentation |
-| `iks-pruefung` | methodology | IKS nach IDW PS 261 (5 COSO-Komponenten) |
-| `hinschg-meldewesen` | knowledge | HinSchG-Anforderungen ab 50 MA |
-| `datev-export` | workflow | DATEV-Buchungsstapel-CSV erzeugen |
-| `steuerberater-handoff` | workflow | Übergabepaket für StB / WP |
+| `journal-entry-prep` | `buchung-grundlagen` (Knowledge) | übernommen |
+| `journal-entry` | `buchungssatz` (Workflow) | übernommen + DE-USt-Tatbestände + SKR03/04 |
+| `reconciliation` | `abstimmung` | übernommen + EWB/PWB-Logik nach HGB |
+| `financial-statements` | `jahresabschluss` + `ebilanz` | aufgeteilt: HGB-Aufstellung + eBilanz-Datenpaket |
+| `variance-analysis` | `abweichungsanalyse` | übernommen, gleiche Methodik |
+| `close-management` | `monatsabschluss` + `jahresabschluss` | aufgeteilt nach Periode |
+| `sox-testing` | `iks-pruefung` | SOX 404 ersetzt durch IDW PS 261 / COSO |
+| `audit-support` | teilweise in `iks-pruefung`, `gobd-konformitaet` | aufgeteilt |
+| — | `ust-voranmeldung` | **DE-neu** — keine US-Entsprechung (Bund-Sales-Tax dezentral) |
+| — | `lohnabrechnung` | **DE-neu** — US-Payroll grundsätzlich anders |
+| — | `gobd-konformitaet` | **DE-neu** — BMF-spezifisches Verwaltungsrecht |
+| — | `hinschg-meldewesen` | **DE-neu** — EU-Whistleblower-Richtlinie + HinSchG |
+| — | `datev-export` | **DACH-neu** — DATEV-EXTF-Standard |
+| — | `steuerberater-handoff` | **DACH-neu** — StB-System hat keine US-Entsprechung |
+
+### Slash-Commands
+
+| Anthropic | germany-accounting | Hinweis |
+|---|---|---|
+| `/journal-entry` | `/buchungssatz` | Output formatär identisch (Soll/Haben + §) |
+| `/reconciliation` | `/abstimmung` | Output formatär identisch |
+| `/income-statement` | (im `/jahresabschluss`-Output enthalten) | GuV ist Teil der Bilanz/GuV-Aufstellung |
+| `/variance-analysis` | `/abweichungsanalyse` | Identische Decomposition-Logik |
+| `/sox-testing` | `/iks-pruefung` | IDW-PS-261-Framework statt SOX-Walkthroughs |
+| — | 9 weitere DE-Commands | siehe Skills-Tabelle oben |
+
+---
 
 ## Geltungsbereich
 
 - **In Scope:** GmbH, UG (haftungsbeschränkt)
 - **Out of Scope (architektonisch erweiterbar):** AG, KGaA, GmbH & Co. KG, OHG, KG, eGbR/GbR, Einzelunternehmen, Vereine, Stiftungen
 
-Details: [`config/shared/entity-types.json`](config/shared/entity-types.json) und [`docs/SCOPE.md`](docs/SCOPE.md).
+Details: [`config/shared/entity-types.json`](config/shared/entity-types.json), [`docs/SCOPE.md`](docs/SCOPE.md).
 
 ## Mehrjahres-Config
 
-`config/{year}/` enthält jahres-spezifische Werte (Sätze, Kontenrahmen, Fristen, KZ-Codes).
-Aktuell verifiziert: **2026**. Pointer in `config/active-year.json`.
+`config/{year}/` enthält jahres-spezifische Werte (Sätze, BBG, Mindestlohn, Kontenrahmen-Wording, Fristen, USt-VA-KZ-Codes). Aktuell verifiziert: **2025 + 2026**. Stub: 2027. Pointer in `config/active-year.json`.
 
 ## Output-Formate
 
-- **Markdown** (Buchungsvorschläge, Begründungen, Quellen-Verweise)
-- **DATEV-Buchungsstapel-CSV** (importfähig in DATEV-Software)
-- **Excel-Tabellen** (Abstimmungs- und Analyse-Output)
-- **Steuerberater-Handoff-Brief** (strukturierte Übergabe)
+- **Markdown** — Buchungsvorschläge, Begründungen, Quellen-Verweise (Default)
+- **DATEV-Buchungsstapel-CSV** (EXTF) — importfähig in DATEV-Software
+- **Excel-Tabellen** — Abstimmungen, Analysen, Bilanz/GuV
+- **Steuerberater-Handoff-Brief** — strukturiert für StB-Übergabe
 
-**Nicht enthalten:** Direkte ELSTER-Übermittlung, XBRL/eBilanz-Direktversand. Diese Verantwortung bleibt beim Anwender / StB.
+**Nicht enthalten:** direkter ELSTER-Versand, Bundesanzeiger-Offenlegung, eBilanz-XBRL-Übermittlung — bleibt bei Anwender / StB.
 
 ## Quellen
 
-Vollständige Liste verifizierter Primärquellen: [`docs/SOURCES.md`](docs/SOURCES.md).
+[`docs/SOURCES.md`](docs/SOURCES.md) — alle Primärquellen (HGB/EStG/UStG/etc. auf gesetze-im-internet.de, DATEV-PDFs, BMF-Schreiben, SGB, IDW).
 
 ## Lizenz
 
-Apache License 2.0 — siehe [`LICENSE`](LICENSE).
+Apache License 2.0 — siehe [`LICENSE`](LICENSE). Lineage-Hinweis im LICENSE-Footer, vollständige Provenienz in [`docs/PROVENANCE.md`](docs/PROVENANCE.md).
 
 ## Beiträge
 
-Siehe [`CONTRIBUTING.md`](CONTRIBUTING.md). Beiträge willkommen — insbesondere Verifikation gegen aktuelle Rechtslage, Erweiterungen für weitere Rechtsformen.
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Insbesondere willkommen: Verifikation gegen aktuelle Rechtslage, Erweiterungen für weitere Rechtsformen, MCP-Server-Anbindung an DATEV.
 
 ## Verwandte Projekte
 
-- [Anthropic Finance Plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance) — US-Pendant (Journal-Entry-Prep, Reconciliation, Close-Management, Variance-Analysis, SOX-Testing, Audit-Support, Financial-Statements)
-- DATEV-MCP-Server (geplant): `datev_finrobotics` (Read-only EXTF), `datev_badrix` (Read+Write)
+- [Anthropic Finance Plugin](https://github.com/anthropics/knowledge-work-plugins/tree/main/finance) — US-Pendant
+- [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) — Anthropic's Meta-Marketplace (enthält Finance, Sales, weitere)
+- DATEV-MCP-Server (geplant, in `.mcp.json` als `evaluating`): `datev_finrobotics`, `datev_badrix`
