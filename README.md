@@ -16,22 +16,34 @@ A finance and accounting plugin for German GmbH/UG entities — HGB-compliant jo
 
 ## Installation
 
-**1. Try the one-line shell shortcut first** (as used in Anthropic's own finance-plugin README):
+### Cowork (empfohlen für Nicht-Entwickler)
 
-```bash
-claude plugins add tgw013/HGB-accounting-plugin-internal
-```
+Cowork installiert Plugins über **ZIP-Upload** (kein Slash-Command-Marketplace wie Claude Code).
 
-**2. If that fails, use the documented two-step slash-command path inside an active Claude Code session:**
+1. **Lade die fertige ZIP** von der [Releases-Seite](https://github.com/tgw013/HGB-accounting-plugin-internal/releases) herunter — `germany-accounting-vX.Y.Z.zip` (Asset der jeweiligen Release).
+2. In Cowork: Plugin-Bereich öffnen → neues Plugin hinzufügen → ZIP hochladen.
+3. Skills + Commands stehen sofort zur Verfügung.
+
+> ⚠ **Nicht** GitHub's grünen "Code → Download ZIP" Button benutzen — dort liegt alles in einem Wrapper-Ordner `HGB-accounting-plugin-internal-main/`, was Cowork nicht versteht. Immer die Release-ZIP nutzen.
+>
+> **Falls eine Release-ZIP fehlt** (zwischen Releases): GitHub-ZIP entpacken, in den entpackten Ordner gehen, dort `.claude-plugin`, `commands`, `skills`, `config`, `.mcp.json` etc. markieren und neu zippen (Windows: Rechtsklick → "In ZIP-Datei komprimieren"). Diese neue ZIP in Cowork hochladen.
+
+### Claude Code (für Entwickler)
+
+Innerhalb einer aktiven Claude-Code-Session:
 
 ```
 /plugin marketplace add tgw013/HGB-accounting-plugin-internal
 /plugin install germany-accounting@hgb-accounting
 ```
 
-**Voraussetzungen:** Claude Code installiert (`npm install -g @anthropic-ai/claude-code`, Node 18+). Bei privatem Repo zusätzlich `gh auth login` für GitHub-Zugriff.
+Oder als Shell-Shortcut (analog zu Anthropic's Finance-Plugin-README):
 
-**In Cowork:** Anthropic's offizielle Finance-Skill ist explizit "primarily designed for Cowork." Das hier ist die DE-Variante mit gleicher Architektur — installiert via Claude Code auf demselben Rechner, sollte Cowork die Skills bei nächster Session sehen. Falls nicht: `/feedback` in Cowork.
+```bash
+claude plugins add tgw013/HGB-accounting-plugin-internal
+```
+
+**Voraussetzungen:** Claude Code (`npm install -g @anthropic-ai/claude-code`, Node 18+). Bei privatem Repo zusätzlich `gh auth login`.
 
 **Lokale Entwicklung:** `claude --plugin-dir ./HGB-accounting-plugin-internal` lädt das Plugin direkt aus einem Klon ohne Marketplace.
 
