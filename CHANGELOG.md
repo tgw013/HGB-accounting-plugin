@@ -2,6 +2,35 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.0.1] — 2026-05-17 — Public-launch readiness
+
+Pre-public-release audit. No functional skill/command changes — purely repo hygiene.
+
+### Removed
+- `docs/INTERNAL_README.md` (explicitly internal framing)
+- `docs/ISSUES_LOG.md` (empty template)
+- `.mcp.json` `see_also` references to private `-internal` MCP repos
+
+### Moved
+- 5 v1.x historical artifacts → `docs/archive/` (with archive README explaining context)
+
+### Changed
+- `docs/SECURITY_REVIEW.md`: historical-reference banner; clarifies v2.0 rewrite was not re-audited at the file level
+- `docs/PROVENANCE.md`: added "v2.0 rewrite audit" section with diff stats (-3,289 net lines vs upstream) + Commons Clause / Apache 2.0 reasoning
+- `skills/steuerberater-handoff/SKILL.md`: example name placeholder genericised
+- All repo URL refs updated `HGB-accounting-plugin-internal` → `HGB-accounting-plugin` (repo renamed)
+- Git history scrubbed: personal/work emails replaced with GitHub noreply across all 35 commits
+
+### Added
+- `SECURITY.md` (vulnerability disclosure via GitHub Security Advisory)
+- `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1)
+- `.github/ISSUE_TEMPLATE/bug-report.md` + `accounting-correction.md`
+- `.github/PULL_REQUEST_TEMPLATE.md` with verification-diff requirement
+
+### Verified
+- gitleaks: clean (35 commits, ~733 KB)
+- trufflehog: clean (0 verified, 0 unverified secrets)
+
 ## [2.0.0] — 2026-05-12
 
 Merged from `v2-redesign` branch. Drops `-alpha` suffix; promoted to `main`

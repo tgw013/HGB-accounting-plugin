@@ -4,7 +4,7 @@ Ein Finanz- und Buchhaltungs-Plugin für **Cowork** (Anthropic's agentische Desk
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2025+2026, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Vordruckmuster). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen.
 
-**Status:** `v2.0.0` auf `main`. 14 Skills + 14 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert. Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`.
+**Status:** `v2.0.1` auf `main`. 14 Skills + 14 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert. Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`.
 
 ---
 
