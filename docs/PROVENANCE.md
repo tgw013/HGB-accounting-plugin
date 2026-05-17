@@ -68,3 +68,37 @@ The two files that diverge from upstream by design are:
 The trust signals are weak from a community-review standpoint but **not
 suspicious**. The plugin is what it claims to be (see SECURITY_REVIEW.md).
 The remaining gap is content-correctness, not authenticity.
+
+---
+
+## v2.0 rewrite audit (added 2026-05-17, for public-launch readiness)
+
+### What changed between upstream `787d81c` and v2.0 HEAD
+
+Substantial rewrite. Diff summary from `git diff 787d81c..HEAD -- skills/ commands/ config/`:
+
+```
+44 files changed, 2347 insertions(+), 5636 deletions(-)
+```
+
+- **Net negative line count** (-3,289 lines): every upstream skill was significantly trimmed and restructured under the new Knowledge/Workflow separation pattern.
+- **Deleted entirely:** `skills/buchungssatz-vorbereitung/`, `skills/compliance/` (upstream-only, replaced by new architecture).
+- **Added from scratch (zero upstream lineage):** `skills/buchung-grundlagen/`, `skills/datev-export/`, `skills/gobd-konformitaet/`, `skills/hinschg-meldewesen/`, `skills/steuerberater-handoff/`.
+- **Substantively rewritten:** every other skill file (lohnabrechnung, jahresabschluss, monatsabschluss, ust-voranmeldung, abstimmung, ebilanz, iks-pruefung, abweichungsanalyse, buchungssatz) — most lost 50–80% of upstream content and was replaced with HGB-2026-verified content backed by primary-source citations.
+- **Config layer rebuilt:** original single `config/kontenrahmen.json` replaced by `config/{2025,2026}/` multi-year structure with 128 konten verified against DATEV PDFs Art.-Nr. 11174/11175 via structure-aware extractor (`scripts/extract_datev_pdf.py`).
+
+### Apache 2.0 + Commons Clause inheritance
+
+Upstream was licensed under Apache 2.0 with an appended Commons Clause restricting commercial sale. v2 LICENSE drops the Commons Clause and is pure Apache 2.0.
+
+**Reasoning for the drop:**
+
+1. The substantive content in v2 is overwhelmingly new work: 5 wholly new skills, full rebuild of the config layer, and net-negative line counts in surviving skills indicate the rewrite is not a thin derivative.
+2. The factual content most likely to have survived from upstream (HGB §-references, DATEV konto numbers, KZ-codes from BMF Vordruckmuster) is not copyrightable — these are statutory and administrative facts, not creative expression.
+3. Any residual prose patterns from upstream that may survive are de minimis relative to v2's volume and have been re-cast in service of the new Knowledge/Workflow architecture.
+
+**Honest caveat:** Commons Clause is a non-standard rider and its enforceability against substantial rewrites is contested. If you are planning a commercial product based on this repo and want absolute clarity, contact upstream (`mlobo2012` / AI Heroes) for a written waiver, or re-add the Commons Clause to your own distribution. The Apache 2.0 license terms are otherwise straightforward.
+
+### Upstream attribution
+
+LICENSE file's footer retains the lineage acknowledgment to AI Heroes / Marco Lobo. README and CHANGELOG also document the inspiration. This satisfies Apache 2.0 §4(c) attribution.

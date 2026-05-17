@@ -31,7 +31,7 @@ Alle Konto-Nummern und Rate-Werte sind gegen die DATEV-Standardkontenrahmen 2026
 ```bash
 # In deinem Projekt-Repo:
 cd <projekt>
-git clone https://github.com/tgw013/HGB-accounting-plugin-internal.git .claude/plugins/germany-accounting
+git clone https://github.com/tgw013/HGB-accounting-plugin.git .claude/plugins/germany-accounting
 
 # Oder via Claude Code's Plugin-Marketplace (wenn dort gelistet)
 claude plugin install germany-accounting

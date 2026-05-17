@@ -6,16 +6,14 @@
       "candidate_url": "https://github.com/ppronobis/datev-mcp-server",
       "status": "evaluated_security_safe",
       "scope": "Phase-1: Offline EXTF-Parser, Read-only Tools",
-      "value": "Lade DATEV-EXTF-Exporte direkt; Konten-Balances, OP-Listen, Buchungsstapel-Suche",
-      "see_also": "github.com/tgw013/finrobotics-datev-mcp-internal"
+      "value": "Lade DATEV-EXTF-Exporte direkt; Konten-Balances, OP-Listen, Buchungsstapel-Suche"
     },
     "datev_badrix": {
       "candidate_url": "https://github.com/BadRix90/datev-mcp",
       "status": "evaluated_security_safe_with_sandboxing",
       "scope": "Read+Write — kann EXTF-Dateien erzeugen für Import",
       "value": "Vollständige DATEV-Integration inkl. Export für direkte Übernahme in DATEV-Software",
-      "caveat": "OS-level filesystem sandboxing zwingend für Produktivnutzung",
-      "see_also": "github.com/tgw013/badrix-datev-mcp-internal"
+      "caveat": "OS-level filesystem sandboxing zwingend für Produktivnutzung"
     },
     "bank_hbci": {
       "candidate_url": "(future)",

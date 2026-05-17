@@ -1,16 +1,22 @@
-# IT Security Review
+# IT Security Review (Historical, v1.x)
 
-**Subject:** Germany-SMB-Finance-Accounting-Plugin
-**Pinned commit:** `787d81cbb78f227767a415cb64c911b1ad8acbb0` (2026-03-28)
+> ⚠ **For historical reference.** This security review was conducted on the **upstream** `mlobo2012/Germany-SMB-Finance-Accounting-Plugin` at commit `787d81cb…` (2026-03-28) as part of the original private vendoring decision. The **v2.0 rewrite (May 2026) was not re-audited at the file level** — substantial portions were rewritten, new skills were added (`datev-export`, `steuerberater-handoff`, `gobd-konformitaet`, `hinschg-meldewesen`), and the multi-year config structure replaced the original single-config layout.
+>
+> **For production use:** anyone running v2.0 in a sensitive environment should perform their own current-state security review. The findings below apply to upstream v1.x artifacts that may no longer be present in v2.
+
+---
+
+**Subject:** `mlobo2012/Germany-SMB-Finance-Accounting-Plugin` (upstream)
+**Pinned commit at time of review:** `787d81cbb78f227767a415cb64c911b1ad8acbb0` (2026-03-28)
 **Review date:** 2026-05-08
-**Verdict:** ✅ **Cleared on technical security.** ⚠️ Operational hardening required (see RECOMMENDATIONS.md).
-**Scope of this review:** IT-security review only. **Content / accounting correctness is NOT in scope and must be reviewed separately by a qualified professional before production use.**
+**Verdict at time of review:** ✅ Cleared on technical security. ⚠️ Operational hardening required (originally tracked in `docs/RECOMMENDATIONS.md`, now in `docs/archive/RECOMMENDATIONS.md`).
+**Scope of this review:** IT-security only. **Accounting correctness was NOT in scope** and must be reviewed separately by a qualified professional before production use.
 
 ---
 
 ## Threat model
 
-The plugin will be deployed in a real company environment with potential access
+The plugin will be deployed in environments with potential access
 to sensitive client data, DATEV credentials (once an MCP server is added),
 and production accounting systems. The threat model considers:
 

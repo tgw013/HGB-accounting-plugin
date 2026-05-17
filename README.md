@@ -20,11 +20,11 @@ A finance and accounting plugin for German GmbH/UG entities — HGB-compliant jo
 
 Cowork installiert Plugins über **ZIP-Upload** (kein Slash-Command-Marketplace wie Claude Code).
 
-1. **Lade die fertige ZIP** von der [Releases-Seite](https://github.com/tgw013/HGB-accounting-plugin-internal/releases) herunter — `germany-accounting-vX.Y.Z.zip` (Asset der jeweiligen Release).
+1. **Lade die fertige ZIP** von der [Releases-Seite](https://github.com/tgw013/HGB-accounting-plugin/releases) herunter — `germany-accounting-vX.Y.Z.zip` (Asset der jeweiligen Release).
 2. In Cowork: Plugin-Bereich öffnen → neues Plugin hinzufügen → ZIP hochladen.
 3. Skills + Commands stehen sofort zur Verfügung.
 
-> ⚠ **Nicht** GitHub's grünen "Code → Download ZIP" Button benutzen — dort liegt alles in einem Wrapper-Ordner `HGB-accounting-plugin-internal-main/`, was Cowork nicht versteht. Immer die Release-ZIP nutzen.
+> ⚠ **Nicht** GitHub's grünen "Code → Download ZIP" Button benutzen — dort liegt alles in einem Wrapper-Ordner `HGB-accounting-plugin-main/`, was Cowork nicht versteht. Immer die Release-ZIP nutzen.
 >
 > **Falls eine Release-ZIP fehlt** (zwischen Releases): GitHub-ZIP entpacken, in den entpackten Ordner gehen, dort `.claude-plugin`, `commands`, `skills`, `config`, `.mcp.json` etc. markieren und neu zippen (Windows: Rechtsklick → "In ZIP-Datei komprimieren"). Diese neue ZIP in Cowork hochladen.
 
@@ -33,19 +33,19 @@ Cowork installiert Plugins über **ZIP-Upload** (kein Slash-Command-Marketplace 
 Innerhalb einer aktiven Claude-Code-Session:
 
 ```
-/plugin marketplace add tgw013/HGB-accounting-plugin-internal
+/plugin marketplace add tgw013/HGB-accounting-plugin
 /plugin install germany-accounting@hgb-accounting
 ```
 
 Oder als Shell-Shortcut (analog zu Anthropic's Finance-Plugin-README):
 
 ```bash
-claude plugins add tgw013/HGB-accounting-plugin-internal
+claude plugins add tgw013/HGB-accounting-plugin
 ```
 
 **Voraussetzungen:** Claude Code (`npm install -g @anthropic-ai/claude-code`, Node 18+). Bei privatem Repo zusätzlich `gh auth login`.
 
-**Lokale Entwicklung:** `claude --plugin-dir ./HGB-accounting-plugin-internal` lädt das Plugin direkt aus einem Klon ohne Marketplace.
+**Lokale Entwicklung:** `claude --plugin-dir ./HGB-accounting-plugin` lädt das Plugin direkt aus einem Klon ohne Marketplace.
 
 Doku-Quellen: [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins.md), [Plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces.md).
 

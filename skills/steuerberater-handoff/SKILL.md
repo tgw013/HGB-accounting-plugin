@@ -79,7 +79,7 @@ Pro Sachverhalt:
 
 ```
 **STB-HANDOFF · GmbH XYZ · Monatsabschluss 04/2026**
-Stand: 2026-05-10 · Version 1.0 · Ansprechp.: T. Weidemüller · Frist Rückmeldung: 2026-05-15
+Stand: 2026-05-10 · Version 1.0 · Ansprechp.: [Name CFO/Buchhaltung] · Frist Rückmeldung: 2026-05-15
 
 EXECUTIVE SUMMARY
 - Closing 04/2026 abgeschlossen, USt-VA-Entwurf anbei
