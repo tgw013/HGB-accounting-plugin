@@ -137,6 +137,7 @@ Das Feld-Inventar (31 Header-Felder + 125 Datenspalten mit Regex + Beschreibung 
 - `monatsabschluss` — produziert Sammel-Buchungen
 - `ust-voranmeldung` — kann als CSV exportieren
 - `steuerberater-handoff` — Buchungsstapel ist Anlage zur StB-Übergabe
+- `wiederkehrende-buchungen` — für **wiederholende** Buchungen (Monats-Beitragsübertrag etc.) statt einzelner Buchungen: DATEV-Format Kategorie 65, Version 4 (v2.5+)
 
 ## 11.1 Automatikkonten-Schutz (v2.3)
 
