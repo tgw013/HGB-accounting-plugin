@@ -202,12 +202,19 @@ def _format_konto(value: Any, sachkonten_laenge: int, field_label: str = "Konto"
 
 
 def _format_bu_schluessel(value: Any) -> str:
-    """Field #9 BU-Schlüssel: 4-digit zero-padded, quoted. Empty allowed (Automatikkonto)."""
+    """
+    Field #9 BU-Schlüssel: 4-digit zero-padded, quoted. Empty = Automatikkonto.
+
+    Per PRD §6 + Prüfprogramm Meldung 110: empty text fields must emit as
+    quoted-empty "" (not bare). The portal regex ^([\"]\\d{4}[\"])$ doesn't
+    explicitly cover empty, but the Prüfprogramm treats bare-empty as a
+    Textkennzeichen-warning. So empty → "".
+    """
     if value is None or value == "":
-        return ""
+        return '""'
     s = str(value).strip()
     if not s:
-        return ""
+        return '""'
     if not re.fullmatch(r"\d{1,4}", s):
         raise FieldValidationError(f"BU-Schlüssel '{s}' muss 1-4 Ziffern sein")
     padded = s.zfill(4)
@@ -231,9 +238,9 @@ def _format_belegdatum(value: Any) -> str:
 
 
 def _format_belegfeld(value: Any, field_label: str = "Belegfeld") -> str:
-    """Fields #11/#12 Belegfeld 1/2: word chars + $&%*+-/, max 36, quoted."""
+    """Fields #11/#12 Belegfeld 1/2: word chars + $&%*+-/, max 36, quoted. Empty → \"\"."""
     if value is None or value == "":
-        return ""
+        return '""'
     s = str(value)
     if len(s) > 36:
         raise FieldValidationError(
@@ -275,14 +282,14 @@ def _format_kost_menge(value: Any) -> str:
 
 def _format_generalumkehr(value: Any) -> str:
     """
-    Field #118 Generalumkehr — portal inconsistency.
+    Field #118 Generalumkehr — portal inconsistency, TEXT field.
 
     Portal regex accepts only quoted (0|1); description says 'G or 1'.
     Serializer accepts input "G", "1", or boolean true → emits "1".
-    Input "0" or boolean false → empty (no Generalumkehr).
+    Input "0" or boolean false / empty → quoted-empty "" (text field, PRD §6).
     """
     if value is None or value == "" or value is False or value == "0":
-        return ""
+        return '""'
     if value is True or str(value).strip().upper() in ("G", "1", "TRUE"):
         return '"1"'
     raise FieldValidationError(
@@ -519,19 +526,26 @@ def build_column_header_row(inventory: dict) -> list[str]:
 # appropriate empty representation (text → "", numeric → bare).
 
 def _make_field_handlers(sachkontenlaenge: int):
-    """Build the 125-element list of (input_key, formatter) tuples for data rows."""
-    text_empty = lambda v: _format_quoted_empty_or_text(v) if v not in (None, "") else ""
-    text_max20 = lambda v: _format_quoted_empty_or_text(v, max_len=20) if v not in (None, "") else ""
-    text_max30 = lambda v: _format_quoted_empty_or_text(v, max_len=30) if v not in (None, "") else ""
-    text_max35 = lambda v: _format_quoted_empty_or_text(v, max_len=35) if v not in (None, "") else ""
-    text_max36 = lambda v: _format_quoted_empty_or_text(v, max_len=36) if v not in (None, "") else ""
-    text_max50 = lambda v: _format_quoted_empty_or_text(v, max_len=50) if v not in (None, "") else ""
-    text_max76 = lambda v: _format_quoted_empty_or_text(v, max_len=76) if v not in (None, "") else ""
-    text_max210 = lambda v: _format_quoted_empty_or_text(v, max_len=210) if v not in (None, "") else ""
+    """
+    Build the 125-element list of (input_key, formatter) tuples for data rows.
 
-    def kost(v):  # Field #37/#38: word + space, max 36, quoted
+    PRD §6 + Prüfprogramm Meldung 110: text fields emit quoted-empty "" when
+    empty; numeric/structured fields emit bare. The lambdas below preserve
+    this distinction — text_* wrappers always go through _format_quoted_empty_or_text
+    (which returns "" for empty); opt_* numeric/structured wrappers return bare "".
+    """
+    text_empty = lambda v: _format_quoted_empty_or_text(v)
+    text_max20 = lambda v: _format_quoted_empty_or_text(v, max_len=20)
+    text_max30 = lambda v: _format_quoted_empty_or_text(v, max_len=30)
+    text_max35 = lambda v: _format_quoted_empty_or_text(v, max_len=35)
+    text_max36 = lambda v: _format_quoted_empty_or_text(v, max_len=36)
+    text_max50 = lambda v: _format_quoted_empty_or_text(v, max_len=50)
+    text_max76 = lambda v: _format_quoted_empty_or_text(v, max_len=76)
+    text_max210 = lambda v: _format_quoted_empty_or_text(v, max_len=210)
+
+    def kost(v):  # Field #37/#38: word + space, max 36, quoted; empty → ""
         if v in (None, ""):
-            return ""
+            return '""'
         s = str(v)
         if len(s) > 36 or not re.fullmatch(r"[\w ]{0,36}", s):
             raise FieldValidationError(
@@ -540,17 +554,19 @@ def _make_field_handlers(sachkontenlaenge: int):
         return f'"{s}"'
 
     def opt_numeric(v):
+        # Numeric field: bare empty per PRD §6
         return _format_numeric_optional(v)
 
-    def opt_two_letter_quoted(v):  # e.g. EU-Mitgliedstaat #98 / #120: 2 uppercase letters or empty
+    def opt_two_letter_quoted(v):  # Text field: empty → ""
         if v in (None, ""):
-            return ""
+            return '""'
         s = str(v).upper()
         if not re.fullmatch(r"[A-Z]{2}", s):
             raise FieldValidationError(f"2-Letter-Code '{v}' muss 2 Großbuchstaben sein")
         return f'"{s}"'
 
     def opt_decimal(v, pat):
+        # Numeric field: bare empty per PRD §6
         if v in (None, ""):
             return ""
         s = str(v)
@@ -559,6 +575,7 @@ def _make_field_handlers(sachkontenlaenge: int):
         return s
 
     def opt_date_ttmmjjjj(v):
+        # Numeric (TTMMJJJJ) field: bare empty per PRD §6
         if v in (None, ""):
             return ""
         s = str(v)
@@ -573,16 +590,16 @@ def _make_field_handlers(sachkontenlaenge: int):
         ("umsatz", _format_umsatz),
         # 2 Soll/Haben-Kennzeichen
         ("soll_haben_kennzeichen", _format_soll_haben),
-        # 3 WKZ Umsatz
-        ("wkz_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else ""),
+        # 3 WKZ Umsatz (TEXT — empty → "")
+        ("wkz_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else '""'),
         # 4 Kurs
         ("kurs", lambda v: opt_decimal(v, r"[1-9]\d{0,3}\,\d{2,6}")),
         # 5 Basis-Umsatz
         ("basis_umsatz",
             lambda v: ("" if v in (None, "")
                        else (_format_umsatz(v)))),
-        # 6 WKZ Basis-Umsatz
-        ("wkz_basis_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else ""),
+        # 6 WKZ Basis-Umsatz (TEXT — empty → "")
+        ("wkz_basis_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else '""'),
         # 7 Konto
         ("konto", lambda v: _format_konto(v, sachkontenlaenge, "Konto")),
         # 8 Gegenkonto
@@ -601,9 +618,9 @@ def _make_field_handlers(sachkontenlaenge: int):
         ("buchungstext", _format_buchungstext),
         # 15 Postensperre
         ("postensperre", lambda v: _validate_choice(v, "Postensperre", {0, 1}) if v not in (None, "") else ""),
-        # 16 Diverse Adressnummer
+        # 16 Diverse Adressnummer (TEXT — empty → "")
         ("diverse_adressnummer",
-            lambda v: ("" if v in (None, "")
+            lambda v: ('""' if v in (None, "")
                        else (f'"{str(v)}"' if re.fullmatch(r"\w{0,9}", str(v))
                              else (_ for _ in ()).throw(
                                  FieldValidationError(f"Diverse Adressnummer '{v}' max 9 word chars"))))),
@@ -639,12 +656,12 @@ def _make_field_handlers(sachkontenlaenge: int):
         # 39 KOST-Menge
         ("kost_menge", _format_kost_menge),
         # 40 EU-Land u. UStID (Bestimmung)
-        ("eu_land_ustid_bestimmung", lambda v: _format_quoted_empty_or_text(v, max_len=15) if v not in (None, "") else ""),
+        ("eu_land_ustid_bestimmung", lambda v: _format_quoted_empty_or_text(v, max_len=15)),
         # 41 EU-Steuersatz (Bestimmung)
         ("eu_steuersatz_bestimmung", lambda v: opt_decimal(v, r"\d{2}\,\d{2}")),
-        # 42 Abw. Versteuerungsart
+        # 42 Abw. Versteuerungsart (TEXT — empty → "")
         ("abw_versteuerungsart",
-            lambda v: ("" if v in (None, "")
+            lambda v: ('""' if v in (None, "")
                        else (f'"{str(v).upper()}"' if str(v).upper() in {"I", "K", "P", "S"}
                              else (_ for _ in ()).throw(
                                  FieldValidationError(f"Abw. Versteuerungsart '{v}' muss I/K/P/S sein"))))),
@@ -684,9 +701,9 @@ def _make_field_handlers(sachkontenlaenge: int):
     handlers.append(("gewicht", lambda v: opt_decimal(v, r"\d{1,8}\,\d{2}")))
     # 90 Zahlweise
     handlers.append(("zahlweise", lambda v: opt_numeric(v)))
-    # 91 Forderungsart
+    # 91 Forderungsart (TEXT — empty → "")
     handlers.append(("forderungsart",
-        lambda v: ("" if v in (None, "")
+        lambda v: ('""' if v in (None, "")
                    else (f'"{str(v)}"' if re.fullmatch(r"\w{0,10}", str(v))
                          else (_ for _ in ()).throw(
                              FieldValidationError(f"Forderungsart '{v}' max 10 word chars"))))))
@@ -702,9 +719,9 @@ def _make_field_handlers(sachkontenlaenge: int):
     handlers.append(("skontotyp", lambda v: opt_numeric(v)))
     # 95 Auftragsnummer
     handlers.append(("auftragsnummer", text_max30))
-    # 96 Buchungstyp (data row)
+    # 96 Buchungstyp (TEXT — empty → "")
     handlers.append(("buchungstyp_data",
-        lambda v: ("" if v in (None, "")
+        lambda v: ('""' if v in (None, "")
                    else (f'"{str(v).upper()}"' if re.fullmatch(r"[A-Z]{2}", str(v).upper())
                          else (_ for _ in ()).throw(
                              FieldValidationError(f"Buchungstyp data '{v}' muss 2 Großbuchstaben sein"))))))
@@ -737,7 +754,7 @@ def _make_field_handlers(sachkontenlaenge: int):
                          else (_ for _ in ()).throw(
                              FieldValidationError(f"Beteiligtennummer '{v}' muss 4 Ziffern sein"))))))
     # 109 Identifikationsnummer
-    handlers.append(("identifikationsnummer", lambda v: _format_quoted_empty_or_text(v, max_len=11) if v not in (None, "") else ""))
+    handlers.append(("identifikationsnummer", lambda v: _format_quoted_empty_or_text(v, max_len=11)))
     # 110 Zeichnernummer
     handlers.append(("zeichnernummer", text_max20))
     # 111 Postensperre bis
@@ -766,7 +783,7 @@ def _make_field_handlers(sachkontenlaenge: int):
     # 122 BVV-Position — portal inconsistency
     handlers.append(("bvv_position", _format_bvv_position))
     # 123 EU-Land u. UStID (Ursprung)
-    handlers.append(("eu_land_ustid_ursprung", lambda v: _format_quoted_empty_or_text(v, max_len=15) if v not in (None, "") else ""))
+    handlers.append(("eu_land_ustid_ursprung", lambda v: _format_quoted_empty_or_text(v, max_len=15)))
     # 124 EU-Steuersatz (Ursprung)
     handlers.append(("eu_steuersatz_ursprung", lambda v: opt_decimal(v, r"\d{2}\,\d{2}")))
     # 125 Abw. Skontokonto

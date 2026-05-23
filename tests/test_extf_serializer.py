@@ -188,10 +188,14 @@ class TestDataRow:
         data_line = csv_path.read_bytes().decode("cp1252").split("\r\n")[2]
         assert data_line.split(";")[8] == '"0040"'
 
-    def test_bu_schluessel_empty_stays_empty(self, tmp_path):
+    def test_bu_schluessel_empty_emits_quoted_empty(self, tmp_path):
+        """BU-Schlüssel is a text field; empty (Automatikkonto) emits as "" not bare.
+
+        Per PRD §6 + Prüfprogramm Meldung 110.
+        """
         csv_path, _ = _run(tmp_path)
         data_line = csv_path.read_bytes().decode("cp1252").split("\r\n")[2]
-        assert data_line.split(";")[8] == ""  # bare empty for unset BU
+        assert data_line.split(";")[8] == '""'  # quoted-empty for text field
 
     def test_belegfeld_1_character_whitelist(self, tmp_path):
         # Allowed
@@ -239,10 +243,10 @@ class TestDataRow:
         csv_path, _ = _run(tmp_path, buchungen=_balanced_pair(generalumkehr=True))
         data_line = csv_path.read_bytes().decode("cp1252").split("\r\n")[2]
         assert data_line.split(";")[117] == '"1"'
-        # false → empty
+        # false → quoted-empty (text field per PRD §6)
         csv_path, _ = _run(tmp_path, buchungen=_balanced_pair(generalumkehr=False))
         data_line = csv_path.read_bytes().decode("cp1252").split("\r\n")[2]
-        assert data_line.split(";")[117] == ""
+        assert data_line.split(";")[117] == '""'
 
     def test_kost_menge_strict_format(self, tmp_path):
         _run(tmp_path, buchungen=_balanced_pair(kost_menge="000000000001,2345"))
@@ -593,3 +597,77 @@ class TestCLI:
         assert rc == 1
         captured = capsys.readouterr()
         assert "FEHLER" in captured.err
+
+
+class TestPruefprogrammMeldung110:
+    """
+    Regression tests for Prüfprogramm Meldung 110:
+    "Das Textfeld 'X' ist nicht mit dem Textkennzeichen umgeben."
+
+    Per PRD §6: text fields emit quoted-empty "" when empty;
+    numeric/structured fields emit bare. Sample of text fields that previously
+    leaked bare-empty due to handler-lambda short-circuits.
+    """
+
+    def _data_line(self, tmp_path):
+        csv_path, _ = _run(tmp_path)
+        return csv_path.read_bytes().decode("cp1252").split("\r\n")[2].split(";")
+
+    def test_text_fields_empty_emit_quoted(self, tmp_path):
+        fields = self._data_line(tmp_path)
+        # Index = field_number - 1
+        # Text fields known to be empty in the default minimal_buchung:
+        text_empties = {
+            3: "WKZ Umsatz",
+            6: "WKZ Basis-Umsatz",
+            9: "BU-Schlüssel",
+            12: "Belegfeld 2",
+            16: "Diverse Adressnummer",
+            20: "Beleglink",
+            21: "Beleginfo - Art 1",
+            22: "Beleginfo - Inhalt 1",
+            37: "KOST1",
+            38: "KOST2",
+            40: "EU-Land u. UStID (Bestimmung)",
+            42: "Abw. Versteuerungsart",
+            48: "Zusatzinformation - Art 1",
+            91: "Forderungsart",
+            95: "Auftragsnummer",
+            96: "Buchungstyp",
+            98: "EU-Mitgliedstaat (Anzahlungen)",
+            102: "Herkunft-Kz",
+            105: "SEPA-Mandatsreferenz",
+            107: "Gesellschaftername",
+            109: "Identifikationsnummer",
+            110: "Zeichnernummer",
+            118: "Generalumkehr",
+            120: "Land",
+            121: "Abrechnungsreferenz",
+            123: "EU-Land u. UStID (Ursprung)",
+        }
+        for n, name in text_empties.items():
+            assert fields[n - 1] == '""', (
+                f"Field #{n} ({name}) emitted as {fields[n-1]!r}, expected '\"\"' "
+                f"(text field empty per PRD §6)"
+            )
+
+    def test_numeric_fields_empty_emit_bare(self, tmp_path):
+        fields = self._data_line(tmp_path)
+        # Numeric/structured fields known to be empty in default minimal_buchung
+        numeric_empties = {
+            4: "Kurs",
+            5: "Basis-Umsatz",
+            15: "Postensperre",
+            17: "Geschäftspartnerbank",
+            41: "EU-Steuersatz",
+            106: "Skontosperre",
+            119: "Steuersatz",
+            122: "BVV-Position",
+            124: "EU-Steuersatz Ursprung",
+            125: "Abw. Skontokonto",
+        }
+        for n, name in numeric_empties.items():
+            assert fields[n - 1] == "", (
+                f"Field #{n} ({name}) emitted as {fields[n-1]!r}, expected bare empty "
+                f"(numeric field per PRD §6)"
+            )
