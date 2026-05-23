@@ -138,6 +138,22 @@ Das Feld-Inventar (31 Header-Felder + 125 Datenspalten mit Regex + Beschreibung 
 - `ust-voranmeldung` — kann als CSV exportieren
 - `steuerberater-handoff` — Buchungsstapel ist Anlage zur StB-Übergabe
 
+## 11.1 Automatikkonten-Schutz (v2.3)
+
+Das Plugin lehnt Buchungssätze ab, in denen ein Automatikkonto (AM- oder AV-Prefix der DATEV-Programmverbindung) mit einem nicht-leeren BU-Schlüssel verwendet wird — außer BU-Schlüssel `"0040"` (Aufhebung der Automatik).
+
+**Hintergrund:** Automatikkonten haben USt-Automatik eingebaut. Wenn man trotzdem einen BU-Schlüssel setzt, weist DATEV den Import mit Fehler **REW00305** zurück ("Funktion 0 unzulässig, da Konto bereits einen automatischen Steuerschlüssel enthält"). Das Plugin fängt das vor dem Export ab.
+
+**Konfiguration:** `config/shared/datev-automatik-konten.json` listet die Konten je SKR. Generiert mit `scripts/generate_automatik_konten.py` aus den DATEV-PDF-Extraktoren. Re-generieren bei jedem Jahres-Update (siehe `UPDATE_CHECKLIST.md` §3).
+
+**Beispiel-Fehler:**
+```
+Buchung #1: REW00305-Verletzung — Konto 4400 ist Automatikkonto (Programmverbindung 'AM') +
+BU-Schlüssel '9' ist gesetzt. Lösung: entweder BU-Schlüssel entfernen (Konto handhabt USt
+automatisch), oder ein nicht-Automatikkonto wählen, oder BU-Schlüssel '0040' (Aufhebung
+der Automatik) setzen wenn die Automatik explizit deaktiviert werden soll.
+```
+
 ## 12. Determinism guarantee
 
 Das Script `scripts/generate_extf.py` ist **byte-deterministisch**: identische Eingabe erzeugt identische CSV-Ausgabe (verifizierbar über SHA-256). Dies ist GoBD-relevant für die Verfahrensdokumentation: dieselbe Buchungssatz-Eingabe produziert reproduzierbar dieselbe Exportdatei, sodass jede Prüfung (Steuerberater-Review, Betriebsprüfung) dieselbe Datei zur Inspektion vorfindet.

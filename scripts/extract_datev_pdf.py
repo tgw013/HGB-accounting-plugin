@@ -1,5 +1,12 @@
 """
-DATEV-Kontenrahmen PDF extractor — structure-aware (v4).
+DATEV-Kontenrahmen PDF extractor — structure-aware (v5).
+
+v5 change: capture the Programmverbindungs-Prefix (F/S/R/KU/AM/U/...) per konto
+so callers can identify Automatikkonten (prefix "AM" or "AM-derived" — used by
+DATEV to mark accounts with built-in USt-Automatik). Output TSV gains a fourth
+column `pv_prefix` (the literal letter prefix, empty if none). Downstream of
+this: scripts/generate_extf.py rejects bookings on Automatikkonten with a
+non-empty BU-Schlüssel (REW00305 error class).
 
 Models the DATEV-PDF layout:
 
@@ -8,6 +15,7 @@ Models the DATEV-PDF layout:
     (1) Bilanzposten        — grouping label, drawn as a box spanning multiple konten
     (2) Programmverbindung  — prefix code (F, S, KU, AM, …) with range or single id;
                               may include lone range-markers like "-69" on a row
+                              IMPORTANT: prefix "AM" = Automatikkonto (USt-Automatik built in)
     (3) Konto + Bezeichnung — 4-digit konto number, BOLD for main konten, regular
                               for sub-konten; bezeichnungen wrap over 2-4 lines
 
@@ -28,15 +36,17 @@ Implementation notes:
     chain but do not become konten.
   - Pure range-markers (`^-\\d{1,3}$`) are skipped.
   - Footer band (last ~25pt of page height) is excluded.
+  - Programmverbindungs-Prefix is captured from the konto-anchor regex's optional
+    group; "AM" prefix → Automatikkonto.
 
-Output TSV columns: konto<TAB>bold<TAB>bezeichnung
+Output TSV columns: konto<TAB>bold<TAB>pv_prefix<TAB>bezeichnung
 """
 import re
 import sys
 import fitz
 
 
-KONTO_ANY  = re.compile(r"^(?:[A-Z]{1,3}\s+)?(\d{4})(?:\s+(.*))?$")
+KONTO_ANY  = re.compile(r"^(?:([A-Z]{1,3})\s+)?(\d{4})(?:\s+(.*))?$")
 RANGE_MARK = re.compile(r"^-\d{1,3}$")
 DASH_CONT  = re.compile(r"^\s*[–-]\s*(.+)$")
 
@@ -131,12 +141,13 @@ def extract_half(spans, konto_x, half_right_edge, page_bottom, tol=2.5, gap_pt=4
             flush(current)
             in_heading_break = False
             current = {
-                "konto": m.group(1),
-                "bold":  s["bold"],
-                "parts": [],
-                "top":   s["top"],
+                "konto":     m.group(2),
+                "pv_prefix": (m.group(1) or ""),
+                "bold":      s["bold"],
+                "parts":     [],
+                "top":       s["top"],
             }
-            rest = (m.group(2) or "").strip()
+            rest = (m.group(3) or "").strip()
             if rest:
                 current["parts"].append(rest)
             last_bottom = s["bottom"]
@@ -211,11 +222,15 @@ def extract_pdf(pdf_path):
 def main(in_pdf, out_tsv):
     konten = extract_pdf(in_pdf)
     with open(out_tsv, "w", encoding="utf-8", newline="\n") as f:
-        f.write("konto\tbold\tbezeichnung\n")
+        f.write("konto\tbold\tpv_prefix\tbezeichnung\n")
         for k in sorted(konten):
             e = konten[k]
-            f.write(f"{e['konto']}\t{'B' if e['bold'] else ''}\t{e['bezeichnung']}\n")
-    print(f"wrote {len(konten)} konten to {out_tsv}")
+            f.write(
+                f"{e['konto']}\t{'B' if e['bold'] else ''}\t"
+                f"{e.get('pv_prefix', '')}\t{e['bezeichnung']}\n"
+            )
+    am_count = sum(1 for e in konten.values() if e.get("pv_prefix") == "AM")
+    print(f"wrote {len(konten)} konten to {out_tsv} ({am_count} Automatikkonten flagged via AM-prefix)")
 
 
 if __name__ == "__main__":

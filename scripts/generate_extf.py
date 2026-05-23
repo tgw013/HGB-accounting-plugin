@@ -46,10 +46,19 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FIELDS_JSON = REPO_ROOT / "config" / "shared" / "datev-extf-fields.json"
+AUTOMATIK_JSON = REPO_ROOT / "config" / "shared" / "datev-automatik-konten.json"
 
 DEFAULT_FORMAT_VERSION = 13
 DEFAULT_ENCODING = "cp1252"
 SUPPORTED_ENCODINGS = {"cp1252", "utf-8-sig"}
+
+# Formatkategorien — v2.3 introduces multi-category routing seam.
+# Only category 21 (Buchungsstapel) has handlers in v2.3; 65 (Wiederkehrend) +
+# 16 (Debitoren/Kreditoren) coming in v2.5 + v2.7 respectively.
+SUPPORTED_FORMATKATEGORIEN = {21}
+
+# BU-Schlüssel "0040" = Aufhebung der Automatik (allowed even on Automatikkonten)
+BU_AUFHEBUNG_DER_AUTOMATIK = "0040"
 
 # DATEV CSV conventions
 FIELD_SEPARATOR = ";"
@@ -109,6 +118,49 @@ def load_field_inventory(format_version: int) -> dict:
             f"Available: {sorted(inventory['buchungsstapel'].keys())}"
         )
     return inventory["buchungsstapel"][fv_key]
+
+
+# ---------------------------------------------------------------------------
+# Automatikkonten loader (v2.3) — for REW00305 prevention
+# ---------------------------------------------------------------------------
+
+def load_automatik_konten(skr: str) -> dict[str, str]:
+    """
+    Load the Automatikkonten map {konto_nr: prefix} for the given SKR.
+
+    Used by the validate_no_bu_on_automatik check to prevent DATEV import
+    error REW00305 ("Funktion 0 unzulässig, da Konto bereits einen
+    automatischen Steuerschlüssel enthält").
+
+    Returns empty dict if AUTOMATIK_JSON missing — soft-degrade so the
+    serializer still works if the optional config wasn't regenerated yet.
+    """
+    if not AUTOMATIK_JSON.exists():
+        return {}
+    with AUTOMATIK_JSON.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("automatikkonten", {}).get(skr, {})
+
+
+# ---------------------------------------------------------------------------
+# Formatkategorie routing seam (v2.3) — only 21 (Buchungsstapel) supported now
+# ---------------------------------------------------------------------------
+
+def validate_formatkategorie(formatkategorie: int) -> None:
+    """v2.3: only Formatkategorie 21 (Buchungsstapel) supported.
+
+    v2.5 will add 65 (Wiederkehrende Buchungen), v2.7 will add 16
+    (Debitoren/Kreditoren). This validator is the routing seam — extend
+    SUPPORTED_FORMATKATEGORIEN + dispatch the right handler list when those
+    releases land.
+    """
+    if formatkategorie not in SUPPORTED_FORMATKATEGORIEN:
+        raise InputValidationError(
+            f"Formatkategorie {formatkategorie} nicht unterstützt in v2.3. "
+            f"Unterstützt: {sorted(SUPPORTED_FORMATKATEGORIEN)}. "
+            f"Wiederkehrende Buchungen (65) kommt in v2.5; "
+            f"Debitoren/Kreditoren (16) kommt in v2.7."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -810,6 +862,65 @@ def build_data_row(buchung: dict, sachkontenlaenge: int) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Automatikkonten validation (v2.3) — REW00305 prevention
+# ---------------------------------------------------------------------------
+
+def validate_no_bu_on_automatik(buchungen: list[dict], automatik_konten: dict[str, str]) -> list[str]:
+    """
+    Reject bookings where konto OR gegenkonto is an Automatikkonto AND
+    bu_schluessel is non-empty (except BU "0040" Aufhebung der Automatik).
+
+    Prevents DATEV import error REW00305:
+        "Funktion 0 unzulässig, da Konto bereits einen automatischen
+        Steuerschlüssel enthält"
+
+    Returns a list of human-readable interpretation-rule strings that fired
+    (for inclusion in the sidecar .report.md). Raises FieldValidationError on
+    any clash with a clear remediation suggestion.
+
+    Soft-degrades if automatik_konten is empty (e.g. when AUTOMATIK_JSON is
+    missing) — no false-positives if the config was never generated.
+    """
+    if not automatik_konten:
+        return []
+
+    notes = []
+    flagged_konten = set()
+
+    for i, b in enumerate(buchungen, 1):
+        bu = (b.get("bu_schluessel") or "").strip()
+        # Normalize BU to its 4-digit form for comparison
+        bu_norm = bu.zfill(4) if bu and bu.isdigit() else bu
+        if not bu or bu_norm == BU_AUFHEBUNG_DER_AUTOMATIK:
+            continue
+        for slot in ("konto", "gegenkonto"):
+            k = str(b.get(slot) or "")
+            if k in automatik_konten:
+                prefix = automatik_konten[k]
+                raise FieldValidationError(
+                    f"Buchung #{i}: REW00305-Verletzung — Konto {k} ist "
+                    f"Automatikkonto (Programmverbindung '{prefix}') + "
+                    f"BU-Schlüssel '{bu}' ist gesetzt. "
+                    f"Lösung: entweder BU-Schlüssel entfernen (Konto handhabt "
+                    f"USt automatisch), oder ein nicht-Automatikkonto wählen, "
+                    f"oder BU-Schlüssel '0040' (Aufhebung der Automatik) "
+                    f"setzen wenn die Automatik explizit deaktiviert werden soll."
+                )
+
+    # If we get here, no clash. But report whether the check fired at all.
+    konten_in_use = {str(b.get("konto") or "") for b in buchungen} | \
+                    {str(b.get("gegenkonto") or "") for b in buchungen}
+    flagged_konten = konten_in_use & set(automatik_konten.keys())
+    if flagged_konten:
+        notes.append(
+            f"v2.3 Automatikkonten-Check: {len(flagged_konten)} Automatikkonten "
+            f"verwendet ({', '.join(sorted(flagged_konten))}), alle ohne "
+            f"problematischen BU-Schlüssel — REW00305-Verletzung nicht erkannt."
+        )
+    return notes
+
+
+# ---------------------------------------------------------------------------
 # Saldo validation
 # ---------------------------------------------------------------------------
 
@@ -983,11 +1094,22 @@ def generate(
         header_input = dict(header_input)
         header_input["sachkontenrahmen"] = data["skr"]
 
+    # v2.3: Formatkategorie routing seam — only 21 (Buchungsstapel) for now
+    formatkategorie = int(header_input.get("formatkategorie", 21))
+    validate_formatkategorie(formatkategorie)
+
     inventory = load_field_inventory(format_version)
     sachkontenlaenge = int(header_input.get("sachkonten_laenge", 4))
 
     # 1. Saldo check (fast-fail before formatting)
     sum_soll, sum_haben = validate_saldo(buchungen)
+
+    # 1b. v2.3: Automatikkonten check (REW00305 prevention) — fast-fail
+    skr = data.get("skr") or header_input.get("sachkontenrahmen", "")
+    # Normalize SKR03 / "03" → SKR03 for the automatik-konten lookup
+    skr_lookup = skr if skr.startswith("SKR") else {"03": "SKR03", "04": "SKR04"}.get(skr, "")
+    automatik_konten = load_automatik_konten(skr_lookup) if skr_lookup else {}
+    automatik_notes = validate_no_bu_on_automatik(buchungen, automatik_konten)
 
     # 2. Build rows
     header_row = build_header_row(header_input, inventory)
@@ -1006,7 +1128,7 @@ def generate(
     write_csv(rows, output_path, encoding)
 
     # 4. Determine which interpretation rules fired (by scanning the inventory + actual usage)
-    interpretations_applied = _collect_interpretations(buchungen, inventory)
+    interpretations_applied = _collect_interpretations(buchungen, inventory) + automatik_notes
 
     # 5. Write report
     report_path = output_path.with_suffix(output_path.suffix + ".report.md")

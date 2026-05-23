@@ -671,3 +671,59 @@ class TestPruefprogrammMeldung110:
                 f"Field #{n} ({name}) emitted as {fields[n-1]!r}, expected bare empty "
                 f"(numeric field per PRD §6)"
             )
+
+
+# ---------------------------------------------------------------------------
+# v2.3: Automatikkonten-aware validation (REW00305 prevention)
+# ---------------------------------------------------------------------------
+
+class TestAutomatikkonten:
+    """
+    PRD §14.2. The validate_no_bu_on_automatik check prevents DATEV import
+    error REW00305 by rejecting BU-Schlüssel on Automatikkonten (AM/AV
+    Programmverbindungs-Prefix). BU "0040" (Aufhebung der Automatik) is the
+    documented exception and is allowed.
+
+    Automatikkonten data: config/shared/datev-automatik-konten.json
+    """
+
+    def _balanced_pair_automatik(self, **overrides):
+        """Pair using SKR04 Erlöse 19% (4400, AM-prefix Automatik) on S side."""
+        s = _minimal_buchung(konto="4400", **overrides)
+        h = _minimal_buchung(soll_haben_kennzeichen="H", konto="3300", gegenkonto="4400")
+        h.update({k: v for k, v in overrides.items() if k != "konto"})
+        h["soll_haben_kennzeichen"] = "H"
+        return [s, h]
+
+    def test_automatik_konto_with_empty_bu_succeeds(self, tmp_path):
+        """Erlöse 4400 (AM-Automatik) + leerer BU-Schlüssel → OK."""
+        _run(tmp_path, buchungen=self._balanced_pair_automatik(bu_schluessel=""))
+
+    def test_automatik_konto_with_bu_9_rejected_rew00305(self, tmp_path):
+        """Erlöse 4400 + BU '9' → FieldValidationError, message names REW00305."""
+        with pytest.raises(G.FieldValidationError, match="REW00305"):
+            _run(tmp_path, buchungen=self._balanced_pair_automatik(bu_schluessel="9"))
+
+    def test_automatik_konto_with_bu_0040_aufhebung_succeeds(self, tmp_path):
+        """Erlöse 4400 + BU '0040' (Aufhebung der Automatik) → OK (documented exception)."""
+        _run(tmp_path, buchungen=self._balanced_pair_automatik(bu_schluessel="0040"))
+
+    def test_non_automatik_konto_with_bu_9_succeeds(self, tmp_path):
+        """Büromaterial 6815 (no Automatik prefix) + BU '9' → OK (existing behavior unchanged)."""
+        _run(tmp_path, buchungen=_balanced_pair(bu_schluessel="9"))
+
+    def test_automatik_check_logged_in_report_when_konto_used(self, tmp_path):
+        """If an Automatikkonto is used (even without clash), report mentions it."""
+        _, report = _run(tmp_path, buchungen=self._balanced_pair_automatik(bu_schluessel=""))
+        md = report.read_text(encoding="utf-8")
+        assert "Automatikkonten-Check" in md
+        assert "4400" in md
+
+    def test_unsupported_formatkategorie_rejected(self, tmp_path):
+        """Formatkategorie 65 (Wiederkehrend) rejected in v2.3 — coming in v2.5."""
+        with pytest.raises(G.InputValidationError, match="Formatkategorie 65"):
+            _run(tmp_path, header_overrides={"formatkategorie": 65})
+
+    def test_supported_formatkategorie_21_succeeds(self, tmp_path):
+        """Formatkategorie 21 (Buchungsstapel) — default — still works."""
+        _run(tmp_path, header_overrides={"formatkategorie": 21})
