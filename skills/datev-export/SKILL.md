@@ -77,18 +77,35 @@ Vollständige Feldliste siehe DATEV-Format-Beschreibung "DATEV-Format" (DATEV-On
 
 1. Eingangs-Buchungen normalisieren (Datum, Beträge, Konten validieren gegen `kontenrahmen.json`)
 2. Header-Zeile aufbauen (Berater-, Mandanten-Nr., WJ, Sachkontenlänge, Bezeichnung)
-3. Spalten-Header gemäß Format-Version (700 oder 810 — 810 ist aktueller, mehr Felder)
-4. Pro Buchung Zeile generieren
-5. Encoding-Konvertierung UTF-8 → CP1252
-6. Datei speichern (`.csv`) mit DATEV-Namens-Konvention: `EXTF_buchungsstapel_YYYYMMDD_HHMM.csv`
+3. Strukturierten Input für den Serializer als JSON-Datei schreiben (siehe `tests/fixtures/` für Beispiele)
+4. Serializer aufrufen (siehe §6.5) — Script schreibt CSV (31 Header-Felder + 125 Datenspalten-Header + N Buchungszeilen) + Begleit-Bericht
+
+### 6.5 Implementation
+
+**Implementation:** Die Generierung der CSV-Datei erfolgt deterministisch über das Hilfsscript `scripts/generate_extf.py`. Nach Erstellung des strukturierten Buchungssatz-JSON ruft dieser Skill das Script auf:
+
+```bash
+python scripts/generate_extf.py \
+  --input /tmp/buchungen_2026-04.json \
+  --output /tmp/EXTF_buchungsstapel_20260520_1430.csv \
+  --format-version 13 \
+  --encoding cp1252
+```
+
+Das Script validiert Eingaben (Saldengleichheit, Konto-Existenz, Belegfeld-Whitelist, Datums-Format), schreibt CSV mit korrekter Codierung (CP1252 default) und CRLF-Zeilenenden, und erzeugt einen `.report.md`-Begleitbericht mit SHA-256, Σ Soll / Σ Haben, verwendeten Konten + BU-Schlüsseln, und ausgelösten Portal-Inkonsistenz-Interpretationsregeln. Bei Validierungsfehlern bricht das Script mit klarer Fehlermeldung ab (Exit-Code 1).
+
+Das Feld-Inventar (31 Header-Felder + 125 Datenspalten mit Regex + Beschreibung pro Formatversion) liegt deklarativ in `config/shared/datev-extf-fields.json` und ist PORTAL-verifiziert gegen developer.datev.de.
 
 ## 7. Output
 
-- CSV-Datei mit Header + Buchungen
-- Begleit-Markdown mit:
+- **CSV-Datei** (CP1252 / CRLF) mit Header-Zeile (31 Felder) + Spalten-Header-Zeile (125 Felder) + N Buchungs-Zeilen (je 125 Felder)
+- **Begleit-`.report.md`-Datei** mit:
   - Anzahl Buchungssätze
-  - Summe Soll / Summe Haben (muss übereinstimmen)
-  - Validierungs-Status (alle Konten existieren? alle Pflicht-Felder?)
+  - Σ Soll / Σ Haben / Differenz (muss 0,00 sein)
+  - Liste der verwendeten Konten + BU-Schlüssel
+  - **SHA-256-Hash** der CSV-Datei (für GoBD-Verfahrensdokumentation)
+  - Generierungs-Zeitstempel (ISO-8601 UTC)
+  - Liste der ausgelösten Portal-Inkonsistenz-Interpretationsregeln
   - Import-Hinweis: "In DATEV als **Vorabbuchungsstapel** importieren, prüfen, dann erst freigeben"
 
 ## 8. Validierung
@@ -120,3 +137,15 @@ Vollständige Feldliste siehe DATEV-Format-Beschreibung "DATEV-Format" (DATEV-On
 - `monatsabschluss` — produziert Sammel-Buchungen
 - `ust-voranmeldung` — kann als CSV exportieren
 - `steuerberater-handoff` — Buchungsstapel ist Anlage zur StB-Übergabe
+
+## 12. Determinism guarantee
+
+Das Script `scripts/generate_extf.py` ist **byte-deterministisch**: identische Eingabe erzeugt identische CSV-Ausgabe (verifizierbar über SHA-256). Dies ist GoBD-relevant für die Verfahrensdokumentation: dieselbe Buchungssatz-Eingabe produziert reproduzierbar dieselbe Exportdatei, sodass jede Prüfung (Steuerberater-Review, Betriebsprüfung) dieselbe Datei zur Inspektion vorfindet.
+
+Der Determinismus wird durchgesetzt durch (siehe `tests/test_extf_serializer.py::TestFormat::test_determinism_5_runs`):
+- Keine Reihenfolgen-Manipulation (Input-Reihenfolge = Output-Reihenfolge; kein `sorted()`)
+- Keine Zeitstempel innerhalb der CSV (nur im Begleit-`.report.md`)
+- Keine locale-abhängige Zahlenformatierung (explizit `,` als Dezimaltrennzeichen)
+- Explizites CRLF + CP1252-Encoding am Schreib-Boundary
+
+Plus: vier dokumentierte Portal-Inkonsistenz-Interpretationsregeln (Header-Feld #5 Formatversion, Daten-Felder #106 Skontosperre, #118 Generalumkehr, #122 BVV-Position) werden im Begleit-Bericht ausgewiesen, wann immer sie ausgelöst wurden — Audit-Trail über jegliche Abweichung von der Portal-Literal-Regex.
