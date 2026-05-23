@@ -19,7 +19,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVe
 
 ### Notes
 - Formatversionen 10/11/12 backward-compatibility is planned for v2.4.0, only if a Sealogy-specific Steuerberater requires it
-- DATEV-Format-Prüfprogramm CI integration is planned for v2.2.0
+- DATEV-Format-Prüfprogramm CI integration (PRD §14.1 / v2.2.0) **deferred indefinitely**. Three unresolvable design blockers: (a) DATEV-Lizenz makes EXE redistribution legally fuzzy, (b) GitHub-Actions secrets capped at 64 KB vs. 314 KB EXE, (c) GUI-subsystem EXE has no parseable exit code. For a solo-maintainer project, manual run via `scripts/run_pruefprogramm.ps1` as a release-gate (see `UPDATE_CHECKLIST.md` §9) provides the same protection at zero infrastructure cost. Re-evaluation trigger: first external contributor PR that touches `scripts/generate_extf.py`.
 - No new pip dependencies; Python 3.10+ stdlib only
 - Anlagenverwaltung-internal logic and DATEV LODAS are explicitly NOT addressable via this serializer (they are not part of DATEV-Format)
 
