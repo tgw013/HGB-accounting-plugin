@@ -2,6 +2,26 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.6.0] - 2026-05-23
+
+### Added
+- **KOST-Splitt** (PRD §14.5) — eine Buchung kann jetzt über mehrere Kostenstellen verteilt werden via `kost_allocations`-Array im Input-JSON. Der Serializer expandiert eine Quell-Buchung in N flache Buchungen mit proportionalem Umsatz, gemeinsamen `konto`/`gegenkonto`/`belegfeld_1`/`buchungstext` und je eigener `kost1`/`kost2`/`kost_menge`. Use-Case: 1000 € Miete aufgeteilt 40 % Vertrieb / 30 % Verwaltung / 30 % F&E in einer Eingabe statt drei copy-paste-Buchungen.
+- `scripts/generate_extf.py`:
+  - `expand_kost_allocations(buchungen) → (expanded, audit)` — Expansion vor Saldo- und Automatik-Check, validiert `Σ anteil_prozent == 100,00` exakt, rechnet jede Allocation via `Decimal` + `ROUND_HALF_EVEN`, verteilt Rundungs-Residual auf die letzte Allocation für cent-exakte Summe.
+  - `_format_splitt_audit_block()` — neue Sidecar-Report-Sektion `## KOST-Splittbuchungen (v2.6)` mit Quell-Buchung + Allocations-Breakdown (Anteil %, Cent-Betrag pro Kostenstelle).
+  - Backwards-kompatibel: Buchungen ohne `kost_allocations` (flache `kost1`/`kost2`/`kost_menge`-Felder) bleiben unverändert.
+- `tests/fixtures/kost_splitt_miete/input.json` — Miete 04/2026 1000 € auf VERTRIEB/VERWALTUNG/FundE (40/30/30) gesplittet plus balancing H-Buchung gegen Kreditor.
+- `tests/test_extf_serializer.py` `TestKostSplitt` — 6 neue Tests: 2-way 50/50, 3-way 33,33/33,33/33,34 mit Residual-auf-Letzter, anteil-Sum ≠ 100 wird abgelehnt, Saldo-Check stimmt nach Expansion gegen die H-Seite, Flat-KOST-Backwards-Compat, synthetische Fixture round-trip.
+
+### Changed
+- `skills/datev-export/SKILL.md` — neue §6.7 "KOST-Splitt mit `kost_allocations`" mit Input-Schema-Beispiel + Rundungs-Semantik.
+- Test-Suite: 81 → 87 Tests (+6). Coverage stabil ≥ 90 %.
+
+### Notes
+- v2.6 ist explizit `[REASONED]` (Input-Schema-Design-Entscheidung), nicht `[PORTAL]` — DATEV publiziert kein Multi-Allocation-Pattern. Die Output-CSV bleibt 100 % Buchungsstapel-konform (jede expandierte Allocation ist eine ordentliche Buchungsstapel-Zeile mit KOST1/KOST2/Umsatz).
+- Saldo-Check läuft NACH Expansion: die N expandierten S-Zeilen summieren cent-exakt zur Original-Umsatz und balancieren weiterhin gegen die H-Seite.
+- Nächste geplante Release per PRD §14: v2.7.0 (Debitoren/Kreditoren — recommended deferred bis konkreter Use-Case bestätigt).
+
 ## [2.5.0] - 2026-05-23
 
 ### Added

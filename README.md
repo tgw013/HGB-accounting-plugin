@@ -4,7 +4,7 @@ Ein Finanz- und Buchhaltungs-Plugin für **Cowork** (Anthropic's agentische Desk
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2025+2026, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Vordruckmuster). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen.
 
-**Status:** `v2.5.0` (in PR review, basiert auf v2.3.0). 15 Skills + 15 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert, **DATEV-EXTF-Export deterministisch** (Python-Serializer mit PORTAL-verifizierter Feld-Inventar; identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) + **Automatikkonten-Schutz** (verhindert REW00305) + **Wiederkehrende Buchungen** (Formatkategorie 65 v4 für monatliche/quartalsweise Serien). Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`, `v2.0.1`, `v2.1.0`. v2.3.0 in PR-Stack vor diesem.
+**Status:** `v2.6.0` (in PR review, basiert auf v2.5.0). 15 Skills + 15 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert, **DATEV-EXTF-Export deterministisch** (Python-Serializer mit PORTAL-verifizierter Feld-Inventar; identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) + **Automatikkonten-Schutz** (verhindert REW00305) + **Wiederkehrende Buchungen** (Formatkategorie 65 v4 für monatliche/quartalsweise Serien) + **KOST-Splitt** (eine Buchung über mehrere Kostenstellen verteilen via `kost_allocations`). Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`, `v2.0.1`, `v2.1.0`. v2.3.0 + v2.5.0 in PR-Stack vor diesem.
 
 ---
 
@@ -69,7 +69,7 @@ Skills stellen Hintergrundwissen und Workflow-Logik bereit. Claude wählt sie au
 | `gobd-konformitaet` | knowledge | — (DE-spezifisch) | BMF-GoBD 28.11.2019: Festschreibung, Z1/Z2/Z3, Verfahrensdokumentation |
 | `iks-pruefung` | methodology | `sox-testing` + `audit-support` | IKS nach IDW PS 261 / 5 COSO-Komponenten (ersetzt SOX in DE) |
 | `hinschg-meldewesen` | knowledge | — (DE-spezifisch) | HinSchG-Pflichten ab 50 MA, Meldestelle, Fristen, Bußgeldrahmen |
-| `datev-export` | workflow | — (DACH-spezifisch) | DATEV-Buchungsstapel-CSV (EXTF-Format) für direkten Import |
+| `datev-export` | workflow | — (DACH-spezifisch) | DATEV-Buchungsstapel-CSV (EXTF-Format) — **deterministisch** (SHA-256, GoBD), DATEV-Prüfprogramm-validiert, mit Automatikkonten-Schutz + Wiederkehrende Buchungen + KOST-Splitt |
 | `steuerberater-handoff` | workflow | — (DACH-spezifisch) | Strukturiertes Übergabe-Paket (Sachverhalt + Vorschlag + § + Belege) |
 
 ## Slash-Commands (14)
