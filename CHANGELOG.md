@@ -2,6 +2,27 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.1.0] - 2026-05-22
+
+### Added
+- `scripts/generate_extf.py`: deterministic Python serializer for DATEV-EXTF-Buchungsstapel Formatversion 13
+- `config/shared/datev-extf-fields.json`: declarative 31-header + 125-data field inventory per Formatversion, source-tagged to developer.datev.de
+- `tests/test_extf_serializer.py`: round-trip, determinism, validation, portal-inconsistency, and synthetic-fixture tests (60 tests, 92% line coverage on the serializer)
+- Sidecar `.report.md` output alongside every generated CSV (SHA-256, saldo check, account validation, portal-inconsistency deviations applied, Formatversion targeted)
+- Support for Generalumkehr (field #118) via optional `generalumkehr: true` in input JSON Buchungen
+- Documented interpretation rules for four [PORTAL-INCONSISTENT] cases (Skontosperre, BVV-Position, Generalumkehr, Header Formatversion)
+
+### Changed
+- `skills/datev-export/SKILL.md`: new §6.5 "Implementation" section documenting Bash invocation pattern; new §12 "Determinism guarantee"
+- EXTF generation is now deterministic: previously Claude generated CSV inline, now `datev-export` skill delegates to `scripts/generate_extf.py`
+- Buchungsstapel default target version is now Formatversion 13 (introduced by DATEV February 2024 per portal Changelog)
+
+### Notes
+- Formatversionen 10/11/12 backward-compatibility is planned for v2.4.0, only if a Sealogy-specific Steuerberater requires it
+- DATEV-Format-Prüfprogramm CI integration (PRD §14.1 / v2.2.0) **deferred indefinitely**. Three unresolvable design blockers: (a) DATEV-Lizenz makes EXE redistribution legally fuzzy, (b) GitHub-Actions secrets capped at 64 KB vs. 314 KB EXE, (c) GUI-subsystem EXE has no parseable exit code. For a solo-maintainer project, manual run via `scripts/run_pruefprogramm.ps1` as a release-gate (see `UPDATE_CHECKLIST.md` §9) provides the same protection at zero infrastructure cost. Re-evaluation trigger: first external contributor PR that touches `scripts/generate_extf.py`.
+- No new pip dependencies; Python 3.10+ stdlib only
+- Anlagenverwaltung-internal logic and DATEV LODAS are explicitly NOT addressable via this serializer (they are not part of DATEV-Format)
+
 ## [2.0.1] — 2026-05-17 — Public-launch readiness
 
 Pre-public-release audit. No functional skill/command changes — purely repo hygiene.

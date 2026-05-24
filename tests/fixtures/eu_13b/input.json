@@ -1,0 +1,72 @@
+{
+  "header": {
+    "kennzeichen": "EXTF",
+    "versionsnummer": 700,
+    "formatkategorie": 21,
+    "formatname": "Buchungsstapel",
+    "formatversion": 13,
+    "erzeugt_am": "20260522143000000",
+    "herkunft": "RE",
+    "exportiert_von": "tgw013",
+    "importiert_von": "",
+    "berater_nr": 12345,
+    "mandanten_nr": 1,
+    "wj_beginn": "20260101",
+    "sachkonten_laenge": 4,
+    "datum_von": "20260501",
+    "datum_bis": "20260531",
+    "bezeichnung": "Pruefprogramm-Test 05/2026",
+    "diktatkuerzel": "TG",
+    "buchungstyp": 1,
+    "rechnungslegungszweck": 0,
+    "festschreibung": 0,
+    "wkz": "EUR",
+    "anwendungsinformation": "05/2026"
+  },
+  "skr": "SKR04",
+  "buchungen": [
+    {
+      "umsatz": "1500,00",
+      "soll_haben_kennzeichen": "S",
+      "konto": "6840",
+      "gegenkonto": "3300",
+      "bu_schluessel": "",
+      "belegdatum": "0305",
+      "belegfeld_1": "CLOUD-MAI-26",
+      "buchungstext": "SaaS-Abo Acme Cloud Mai 2026"
+    },
+    {
+      "umsatz": "285,00",
+      "soll_haben_kennzeichen": "S",
+      "konto": "1407",
+      "gegenkonto": "3837",
+      "bu_schluessel": "",
+      "belegdatum": "0305",
+      "belegfeld_1": "CLOUD-MAI-26",
+      "buchungstext": "VSt 13b 19% EU-Sonstige",
+      "eu_land_ustid_bestimmung": "IE9999999X",
+      "sachverhalt_l_l": "1"
+    },
+    {
+      "umsatz": "285,00",
+      "soll_haben_kennzeichen": "H",
+      "konto": "3837",
+      "gegenkonto": "1407",
+      "bu_schluessel": "",
+      "belegdatum": "0305",
+      "belegfeld_1": "CLOUD-MAI-26",
+      "buchungstext": "USt 13b 19% EU-Sonstige"
+    },
+    {
+      "umsatz": "1500,00",
+      "soll_haben_kennzeichen": "H",
+      "konto": "3300",
+      "gegenkonto": "6840",
+      "bu_schluessel": "",
+      "belegdatum": "1005",
+      "belegfeld_1": "CLOUD-MAI-26",
+      "buchungstext": "Kreditor Acme Cloud Ltd"
+    }
+  ],
+  "encoding": "cp1252"
+}

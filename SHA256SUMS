@@ -35,3 +35,7 @@ bfeaadef87e81a6970873594eec7a98f66cc6e89c3d4d07a533da12eac359bac  ./skills/iks-p
 3e6a688e1eff2f502703769ea08e5c85cb85453b5d593efc80225c25c85c5d50  ./skills/lohnabrechnung/SKILL.md
 e17cc11fc2990f9e79c1f3de951e4c6b8d7fa03ba3c01ef37f990344b38f5de3  ./skills/monatsabschluss/SKILL.md
 ba05ae62d4a9b99ff2bd9c78f539ea9177185f8fc43855835f95d391bac24a49  ./skills/ust-voranmeldung/SKILL.md
+
+# v2.1.0 — added artifacts (PRD-deterministic-extf-serializer)
+209786384de4a7f025398282e7a84fd066c43904c17cbd6984d3ca471d050cf3 *scripts/generate_extf.py
+1f0d95c4a478fbd79081ed3da78072d09431069aaa9e956326bb4228d4da2f94 *config/shared/datev-extf-fields.json
