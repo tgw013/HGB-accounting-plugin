@@ -2,6 +2,30 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.5.0] - 2026-05-23
+
+### Added
+- **Wiederkehrende Buchungen** (PRD §14.4) — Formatkategorie 65, Formatversion 4. Serien-Definition für monatlich/quartalsweise wiederkehrende Buchungen (Beitragsüberträge, Bestandsprovisionen, Miete, etc.). Typische Anwendungsfälle: monatliche Bestandsprovisionen + quartalsweise Beitragsüberträge.
+- `config/shared/datev-extf-fields.json` Section `wiederkehrende_buchungen.4` — 101 Felder verbatim aus developer.datev.de Portal (Cross-Reference: `Format_Wiederkehrende Buchungen.xml` im DATEV-Prüfprogramm). Plus 3 Portal-Inkonsistenz-Interpretationsregeln dokumentiert (Felder #4 Soll/Haben, #81 Zeitintervallart, #97 Generalumkehr — alle Character-Class-zu-Alternation).
+- `scripts/generate_extf.py`:
+  - Formatkategorie-Routing erweitert: `{21, 65}` unterstützt; `16` (Debitoren/Kreditoren) kommt in v2.7
+  - `_make_wiederkehrend_field_handlers()` (101 Handler) + `build_data_row_wk()` + `build_column_header_row_wk()` parallel zu den Buchungsstapel-Varianten
+  - Spezielle Formatter: `_format_belegfeld_wk` (strikter als Buchungsstapel — verbietet `& * +`), `_format_zeitintervallart` (Portal-Typo-Interpretation), `_format_beginndatum_wk` (TTMMJJJJ quoted), `_format_endetyp` (1/2/3)
+  - WK-spezifisch: kein Saldo-Check (WK ist Serien-Spec, nicht balanced Stapel); auto-Normalisierung von Formatname + Formatversion via `FORMATKATEGORIE_META`-Lookup wenn nicht explizit angegeben
+- `skills/wiederkehrende-buchungen/SKILL.md` + `commands/wiederkehrende-buchungen.md` — neue Skill + Command für den WK-Workflow, inkl. expliziter Unterscheidung zu Buchungsstapel
+- `tests/fixtures/wiederkehrend_premium_accrual/input.json` — Monats-Beitragsübertrag + Quartalsbeitrag (fiktiver Broker, SKR04)
+- `tests/test_extf_serializer.py` `TestWiederkehrendeBuchungen` — 11 neue Tests: Header-Felder (Kat 65, Formatname, Version 4), Row-Counts (31+101+N), Row-2-Overrides, Zeitintervallart-Alternation, Endetyp 1-3, Ordnungszahl Wochentag 1-5, Belegfeld-1 WK-Regex (verbietet `& * +`), Belegfeld-2 max 12 Zeichen, Beginndatum TTMMJJJJ quoted, kein Saldo-Check, synthetische Fixture round-trip
+
+### Changed
+- `skills/datev-export/SKILL.md` — Cross-Reference zu neuem `wiederkehrende-buchungen`-Skill
+- Test-Suite: 70 → 81 Tests (+11). Coverage stabil bei 91 % (Ziel ≥90%).
+
+### Notes
+- **v2.4.0 wurde übersprungen** — Formatversionen 10/11/12 Buchungsstapel-Backwards-Compat ist per PRD §14.3 konditional auf Steuerberater-DATEV-Rechnungswesen-Version; kein Signal, dass das benötigt wird.
+- Multi-Format-Routing-Seam aus v2.3 zahlt sich hier aus: kein Refactor des Buchungsstapel-Codes notwendig, nur parallele Handler-Liste + Dispatcher.
+- Belegfeld-1 in WK ist strikter als in Buchungsstapel (`& * +` verboten) — wichtig wenn Belegfeld-1 zwischen Buchungsstapel und WK kopiert wird. Validator weist mit klarer Meldung darauf hin.
+- Nächste geplante Releases per PRD §14: v2.6.0 (KOST-Splitt), v2.7.0 (Debitoren/Kreditoren — recommended deferred bis konkreter Use-Case bestätigt).
+
 ## [2.3.0] - 2026-05-23
 
 ### Added
@@ -37,7 +61,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVe
 - Buchungsstapel default target version is now Formatversion 13 (introduced by DATEV February 2024 per portal Changelog)
 
 ### Notes
-- Formatversionen 10/11/12 backward-compatibility is planned for v2.4.0, only if a Sealogy-specific Steuerberater requires it
+- Formatversionen 10/11/12 backward-compatibility is planned for v2.4.0, only if a Mandanten-spezifischer Steuerberater requires it
 - DATEV-Format-Prüfprogramm CI integration (PRD §14.1 / v2.2.0) **deferred indefinitely**. Three unresolvable design blockers: (a) DATEV-Lizenz makes EXE redistribution legally fuzzy, (b) GitHub-Actions secrets capped at 64 KB vs. 314 KB EXE, (c) GUI-subsystem EXE has no parseable exit code. For a solo-maintainer project, manual run via `scripts/run_pruefprogramm.ps1` as a release-gate (see `UPDATE_CHECKLIST.md` §9) provides the same protection at zero infrastructure cost. Re-evaluation trigger: first external contributor PR that touches `scripts/generate_extf.py`.
 - No new pip dependencies; Python 3.10+ stdlib only
 - Anlagenverwaltung-internal logic and DATEV LODAS are explicitly NOT addressable via this serializer (they are not part of DATEV-Format)

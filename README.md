@@ -4,7 +4,7 @@ Ein Finanz- und Buchhaltungs-Plugin für **Cowork** (Anthropic's agentische Desk
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2025+2026, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Vordruckmuster). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen.
 
-**Status:** `v2.3.0` (in PR review, basiert auf v2.1.0). 14 Skills + 14 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert, **DATEV-EXTF-Export deterministisch** (Python-Serializer mit PORTAL-verifizierter Feld-Inventar; identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) + **Automatikkonten-Schutz** (verhindert DATEV-Importfehler REW00305 vor dem Export). Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`, `v2.0.1`, `v2.1.0`.
+**Status:** `v2.5.0` (in PR review, basiert auf v2.3.0). 15 Skills + 15 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert, **DATEV-EXTF-Export deterministisch** (Python-Serializer mit PORTAL-verifizierter Feld-Inventar; identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) + **Automatikkonten-Schutz** (verhindert REW00305) + **Wiederkehrende Buchungen** (Formatkategorie 65 v4 für monatliche/quartalsweise Serien). Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`, `v2.0.1`, `v2.1.0`. v2.3.0 in PR-Stack vor diesem.
 
 ---
 

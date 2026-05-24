@@ -720,10 +720,160 @@ class TestAutomatikkonten:
         assert "4400" in md
 
     def test_unsupported_formatkategorie_rejected(self, tmp_path):
-        """Formatkategorie 65 (Wiederkehrend) rejected in v2.3 — coming in v2.5."""
-        with pytest.raises(G.InputValidationError, match="Formatkategorie 65"):
-            _run(tmp_path, header_overrides={"formatkategorie": 65})
+        """Formatkategorie 16 (Debitoren/Kreditoren) rejected — coming in v2.7."""
+        with pytest.raises(G.InputValidationError, match="Formatkategorie 16"):
+            _run(tmp_path, header_overrides={"formatkategorie": 16})
 
     def test_supported_formatkategorie_21_succeeds(self, tmp_path):
         """Formatkategorie 21 (Buchungsstapel) — default — still works."""
         _run(tmp_path, header_overrides={"formatkategorie": 21})
+
+    def test_supported_formatkategorie_65_succeeds(self, tmp_path):
+        """Formatkategorie 65 (Wiederkehrend) — added in v2.5 — works (basic smoke)."""
+        # Smoke: just confirm validate_formatkategorie accepts 65;
+        # full WK round-trip is tested in TestWiederkehrendeBuchungen.
+        G.validate_formatkategorie(65)
+
+
+# ---------------------------------------------------------------------------
+# v2.5: Wiederkehrende Buchungen (Formatkategorie 65, Formatversion 4)
+# ---------------------------------------------------------------------------
+
+class TestWiederkehrendeBuchungen:
+    """
+    PRD §14.4. New Formatkategorie 65 with 101 data fields + recurrence-spec
+    semantics (Beginndatum, Zeitintervallart, Endetyp, etc.).
+
+    Spec source: developer.datev.de
+    /format-description/recurring-bookings, 101 fields verbatim.
+    """
+
+    def _wk_minimal_header(self, **overrides):
+        h = _minimal_header(**overrides)
+        h["formatkategorie"] = 65
+        h["formatname"] = "Wiederkehrende Buchungen"
+        h["formatversion"] = 4
+        return h
+
+    def _wk_minimal_buchung(self, **overrides):
+        base = {
+            "b1": "1",
+            "umsatz": "100,00",
+            "soll_haben_kennzeichen": "H",
+            "konto": "4900",
+            "gegenkonto": "1200",
+            "belegfeld_1": "WK-TEST",
+            "beginndatum": "01012026",
+            "buchungstext": "Test WK",
+            "zeitintervallart": "MON",
+            "zeitabstand": "1",
+            "ordnungszahl_tag_im_monat": "1",
+            "endetyp": "1",
+        }
+        base.update(overrides)
+        return base
+
+    def _wk_write_input(self, tmp_path, **kwargs):
+        payload = {
+            "header": self._wk_minimal_header(**kwargs.get("header_overrides", {})),
+            "skr": "SKR04",
+            "buchungen": kwargs.get("buchungen", [self._wk_minimal_buchung()]),
+            "encoding": "cp1252",
+        }
+        p = tmp_path / "input.json"
+        p.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        return p
+
+    def _wk_run(self, tmp_path, **kwargs):
+        inp = self._wk_write_input(tmp_path, **kwargs)
+        out = tmp_path / "out.csv"
+        report = G.generate(inp, out, format_version=4)
+        return out, report
+
+    def test_header_formatkategorie_65(self, tmp_path):
+        csv_path, _ = self._wk_run(tmp_path)
+        line0 = csv_path.read_bytes().decode("cp1252").split("\r\n")[0]
+        fields = line0.split(";")
+        assert len(fields) == 31
+        assert fields[2] == "65"  # Formatkategorie
+        assert fields[3] == '"Wiederkehrende Buchungen"'
+        assert fields[4] == "4"  # Formatversion
+
+    def test_data_row_has_101_fields(self, tmp_path):
+        csv_path, _ = self._wk_run(tmp_path)
+        lines = csv_path.read_bytes().decode("cp1252").split("\r\n")
+        col_header = lines[1].split(";")
+        data_row = lines[2].split(";")
+        assert len(col_header) == 101
+        assert len(data_row) == 101
+
+    def test_row_2_overrides(self, tmp_path):
+        csv_path, _ = self._wk_run(tmp_path)
+        col_header = csv_path.read_bytes().decode("cp1252").split("\r\n")[1].split(";")
+        # Field 3 = Umsatz override; field 9 = Gegenkonto override
+        assert col_header[2] == '"Umsatz (ohne Soll/Haben-Kennzeichen)"'
+        assert col_header[8] == '"Gegenkonto (ohne BU-Schlüssel)"'
+
+    def test_zeitintervallart_alternation_not_charclass(self, tmp_path):
+        """Portal regex ^["][TAG|MON]["]$ is a character class. Serializer enforces alternation."""
+        self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(zeitintervallart="TAG")])
+        self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(zeitintervallart="MON")])
+        with pytest.raises(G.FieldValidationError, match="Zeitintervallart"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(zeitintervallart="|")])
+
+    def test_endetyp_1_to_3(self, tmp_path):
+        for v in ("1", "2", "3"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(endetyp=v)])
+        with pytest.raises(G.FieldValidationError, match="Endetyp"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(endetyp="9")])
+
+    def test_ordnungszahl_wochentag_1_to_5(self, tmp_path):
+        for v in ("1", "2", "3", "4", "5"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(ordnungszahl_wochentag=v)])
+        with pytest.raises(G.FieldValidationError, match="Ordnungszahl Wochentag"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(ordnungszahl_wochentag="6")])
+
+    def test_belegfeld_1_wk_regex_drops_ampersand_star_plus(self, tmp_path):
+        """WK Belegfeld 1 is stricter than Buchungsstapel — & * + are NOT allowed."""
+        # Buchungsstapel allows these (per Buchungsstapel test); WK doesn't:
+        for bad in ("Rg&123", "Rg*123", "Rg+123"):
+            with pytest.raises(G.FieldValidationError, match="WK"):
+                self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(belegfeld_1=bad)])
+        # Allowed in WK:
+        for good in ("Rg-123", "Rg/123", "Rg$123", "Rg%123", "Rg_123", "Rg123"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(belegfeld_1=good)])
+
+    def test_belegfeld_2_wk_max_12_chars(self, tmp_path):
+        """WK Belegfeld 2 max 12 (Buchungsstapel: 36)."""
+        # 12 chars OK
+        self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(belegfeld_2="A" * 12)])
+        # 13 chars rejected
+        with pytest.raises(G.FieldValidationError, match="Belegfeld 2"):
+            self._wk_run(tmp_path, buchungen=[self._wk_minimal_buchung(belegfeld_2="A" * 13)])
+
+    def test_beginndatum_ttmmjjjj_quoted(self, tmp_path):
+        """Beginndatum is TTMMJJJJ (quoted, unlike Buchungsstapel's TTMM unquoted)."""
+        csv_path, _ = self._wk_run(tmp_path)
+        data_line = csv_path.read_bytes().decode("cp1252").split("\r\n")[2]
+        # Field 12 = Beginndatum (index 11)
+        assert data_line.split(";")[11] == '"01012026"'
+
+    def test_wk_no_saldo_check(self, tmp_path):
+        """WK is a recurrence-spec, not a stack of balanced postings — saldo NOT enforced."""
+        bs = [
+            self._wk_minimal_buchung(umsatz="100,00", soll_haben_kennzeichen="H"),
+            self._wk_minimal_buchung(umsatz="50,00", soll_haben_kennzeichen="S"),
+        ]
+        # Unbalanced but should NOT raise SaldoError for WK
+        self._wk_run(tmp_path, buchungen=bs)
+
+    def test_synthetic_premium_accrual_fixture(self, tmp_path):
+        """The committed fixture round-trips cleanly."""
+        fixture = REPO_ROOT / "tests" / "fixtures" / "wiederkehrend_premium_accrual" / "input.json"
+        out = tmp_path / "out.csv"
+        report = G.generate(fixture, out, format_version=4)
+        assert out.exists()
+        assert report.exists()
+        lines = out.read_bytes().decode("cp1252").split("\r\n")
+        # 1 header + 1 column-header + 2 data rows + trailing empty
+        assert sum(1 for l in lines if l) == 4

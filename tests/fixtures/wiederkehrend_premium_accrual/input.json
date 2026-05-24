@@ -1,0 +1,59 @@
+{
+  "_purpose": "Monthly recurring premium accrual (Beitragsübertrag). Fictional broker GP, SKR04. Demonstrates Wiederkehrende Buchungen Formatkategorie 65 Formatversion 4 — recurrence-spec fields: B1=2 (34-stellig+2-Ergänzung), Beginndatum, Zeitintervallart=MON, Zeitabstand=1 (monatlich), Endetyp=1 (kein Enddatum / unbefristet).",
+  "header": {
+    "kennzeichen": "EXTF",
+    "versionsnummer": 700,
+    "formatkategorie": 65,
+    "formatname": "Wiederkehrende Buchungen",
+    "formatversion": 4,
+    "erzeugt_am": "20260523120000000",
+    "herkunft": "RE",
+    "exportiert_von": "tgw013",
+    "importiert_von": "",
+    "berater_nr": 12345,
+    "mandanten_nr": 1,
+    "wj_beginn": "20260101",
+    "sachkonten_laenge": 4,
+    "datum_von": "20260101",
+    "datum_bis": "20261231",
+    "bezeichnung": "WK Beitragsübertrag",
+    "diktatkuerzel": "TG",
+    "buchungstyp": 1,
+    "rechnungslegungszweck": 0,
+    "festschreibung": 0,
+    "wkz": "EUR",
+    "anwendungsinformation": "WK 2026"
+  },
+  "skr": "SKR04",
+  "buchungen": [
+    {
+      "b1": "2",
+      "umsatz": "5000,00",
+      "soll_haben_kennzeichen": "H",
+      "konto": "4900",
+      "gegenkonto": "1200",
+      "belegfeld_1": "WK-BEITR-MON",
+      "beginndatum": "01012026",
+      "buchungstext": "Monatlicher Beitragsuebertrag Broker A",
+      "zeitintervallart": "MON",
+      "zeitabstand": "1",
+      "ordnungszahl_tag_im_monat": "1",
+      "endetyp": "1"
+    },
+    {
+      "b1": "2",
+      "umsatz": "3000,00",
+      "soll_haben_kennzeichen": "H",
+      "konto": "4900",
+      "gegenkonto": "1200",
+      "belegfeld_1": "WK-BEITR-QTRL",
+      "beginndatum": "01012026",
+      "buchungstext": "Quartalsbeitrag Broker B",
+      "zeitintervallart": "MON",
+      "zeitabstand": "3",
+      "ordnungszahl_tag_im_monat": "1",
+      "endetyp": "1"
+    }
+  ],
+  "encoding": "cp1252"
+}

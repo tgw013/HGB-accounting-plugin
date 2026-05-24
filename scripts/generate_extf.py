@@ -52,10 +52,16 @@ DEFAULT_FORMAT_VERSION = 13
 DEFAULT_ENCODING = "cp1252"
 SUPPORTED_ENCODINGS = {"cp1252", "utf-8-sig"}
 
-# Formatkategorien — v2.3 introduces multi-category routing seam.
-# Only category 21 (Buchungsstapel) has handlers in v2.3; 65 (Wiederkehrend) +
-# 16 (Debitoren/Kreditoren) coming in v2.5 + v2.7 respectively.
-SUPPORTED_FORMATKATEGORIEN = {21}
+# Formatkategorien — v2.3 introduced the routing seam, v2.5 adds 65.
+# 16 (Debitoren/Kreditoren) coming in v2.7.
+SUPPORTED_FORMATKATEGORIEN = {21, 65}
+
+# Per-Formatkategorie required Formatname + Formatversion (per portal Header field #4 + #5)
+FORMATKATEGORIE_META = {
+    21: {"formatname": "Buchungsstapel",         "formatversion": 13, "data_field_count": 125},
+    65: {"formatname": "Wiederkehrende Buchungen", "formatversion": 4,  "data_field_count": 101},
+    16: {"formatname": "Debitoren/Kreditoren",   "formatversion": 5,  "data_field_count": None},  # v2.7
+}
 
 # BU-Schlüssel "0040" = Aufhebung der Automatik (allowed even on Automatikkonten)
 BU_AUFHEBUNG_DER_AUTOMATIK = "0040"
@@ -107,17 +113,31 @@ class EncodingError(ExtfSerializerError):
 # Field-inventory loader
 # ---------------------------------------------------------------------------
 
-def load_field_inventory(format_version: int) -> dict:
-    """Load and return the buchungsstapel field inventory for the given Formatversion."""
+FORMATKATEGORIE_TO_INVENTORY_KEY = {
+    21: "buchungsstapel",
+    65: "wiederkehrende_buchungen",
+    16: "debitoren_kreditoren",  # v2.7
+}
+
+
+def load_field_inventory(format_version: int, formatkategorie: int = 21) -> dict:
+    """Load the field inventory for (formatkategorie, formatversion)."""
     with FIELDS_JSON.open("r", encoding="utf-8") as f:
         inventory = json.load(f)
-    fv_key = str(format_version)
-    if fv_key not in inventory["buchungsstapel"]:
+    inv_key = FORMATKATEGORIE_TO_INVENTORY_KEY.get(formatkategorie)
+    if inv_key is None or inv_key not in inventory:
         raise InputValidationError(
-            f"Formatversion {format_version} not in inventory. "
-            f"Available: {sorted(inventory['buchungsstapel'].keys())}"
+            f"Formatkategorie {formatkategorie} not in inventory. "
+            f"Available: {sorted(inventory.keys())}"
         )
-    return inventory["buchungsstapel"][fv_key]
+    section = inventory[inv_key]
+    fv_key = str(format_version)
+    if fv_key not in section:
+        raise InputValidationError(
+            f"Formatversion {format_version} not in inventory for {inv_key}. "
+            f"Available: {sorted(section.keys())}"
+        )
+    return section[fv_key]
 
 
 # ---------------------------------------------------------------------------
@@ -156,9 +176,9 @@ def validate_formatkategorie(formatkategorie: int) -> None:
     """
     if formatkategorie not in SUPPORTED_FORMATKATEGORIEN:
         raise InputValidationError(
-            f"Formatkategorie {formatkategorie} nicht unterstützt in v2.3. "
-            f"Unterstützt: {sorted(SUPPORTED_FORMATKATEGORIEN)}. "
-            f"Wiederkehrende Buchungen (65) kommt in v2.5; "
+            f"Formatkategorie {formatkategorie} nicht unterstützt. "
+            f"Unterstützt: {sorted(SUPPORTED_FORMATKATEGORIEN)} "
+            f"(21=Buchungsstapel, 65=Wiederkehrende Buchungen). "
             f"Debitoren/Kreditoren (16) kommt in v2.7."
         )
 
@@ -167,8 +187,14 @@ def validate_formatkategorie(formatkategorie: int) -> None:
 # Per-field formatters
 # ---------------------------------------------------------------------------
 
-# Belegfeld 1/2 character whitelist per portal regex: word chars + $&%*+-/
+# Belegfeld 1/2 character whitelist (Buchungsstapel): word chars + $&%*+-/
 _BELEGFELD_RE = re.compile(r"^[\w$&%*+\-/]{0,36}$", re.UNICODE)
+
+# Belegfeld 1/2 character whitelist (Wiederkehrend, v2.5): word chars + $%-/
+# DROPS & * + relative to Buchungsstapel — spec confirmed per portal page
+# /format-description/recurring-bookings fields #10 + #11.
+_BELEGFELD_WK_RE = re.compile(r"^[\w$%\-/]{0,36}$", re.UNICODE)
+_BELEGFELD_WK_2_RE = re.compile(r"^[\w$%\-/]{0,12}$", re.UNICODE)  # #11 max 12 in WK
 
 
 def _format_quoted_empty_or_text(value: Any, max_len: int | None = None) -> str:
@@ -846,7 +872,7 @@ def _make_field_handlers(sachkontenlaenge: int):
 
 
 def build_data_row(buchung: dict, sachkontenlaenge: int) -> list[str]:
-    """Build a 125-element data row from a single Buchung dict."""
+    """Build a 125-element Buchungsstapel data row from a single Buchung dict."""
     handlers = _make_field_handlers(sachkontenlaenge)
     out = []
     for key, formatter in handlers:
@@ -858,6 +884,263 @@ def build_data_row(buchung: dict, sachkontenlaenge: int) -> list[str]:
                 f"Buchung (Konto={buchung.get('konto')}, Belegfeld 1={buchung.get('belegfeld_1')}): {e}"
             ) from e
     assert len(out) == 125
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Wiederkehrende Buchungen handlers (v2.5) — Formatkategorie 65 / Version 4
+# ---------------------------------------------------------------------------
+
+def _format_belegfeld_wk(value, max_len, field_label="Belegfeld"):
+    """Belegfeld 1/2 for Wiederkehrend: word + $%-/ (DROPS & * + vs Buchungsstapel)."""
+    if value in (None, ""):
+        return '""'
+    s = str(value)
+    if len(s) > max_len:
+        raise FieldValidationError(
+            f"{field_label} '{s}' überschreitet {max_len} Zeichen ({len(s)})"
+        )
+    re_obj = _BELEGFELD_WK_2_RE if max_len == 12 else _BELEGFELD_WK_RE
+    if not re_obj.match(s):
+        raise FieldValidationError(
+            f"{field_label} '{s}' enthält unzulässige Zeichen (WK-Variante). "
+            f"Erlaubt: Buchstaben/Ziffern/_ + $ % - / . "
+            f"VERBOTEN: Leerzeichen, Umlaute, Punkt, Komma, Semikolon, "
+            f"Doppelpunkt, & * + (Wiederkehrend ist strikter als Buchungsstapel)"
+        )
+    return f'"{s}"'
+
+
+def _format_zeitintervallart(value):
+    """Field #81 Zeitintervallart — portal inconsistency (character-class typo).
+
+    Portal regex ^["][TAG|MON]["]$ is a character-class containing literal
+    'T A G | M O N'. Serializer enforces alternation ^["](TAG|MON)["]$.
+    """
+    if value in (None, ""):
+        return '""'
+    s = str(value).upper()
+    if s not in ("TAG", "MON"):
+        raise FieldValidationError(
+            f"Zeitintervallart '{value}' muss TAG oder MON sein (Portal-Typo-Interpretation)"
+        )
+    return f'"{s}"'
+
+
+def _format_beginndatum_wk(value):
+    """Field #12 Beginndatum: TTMMJJJJ, QUOTED (different from Buchungsstapel #10 which is unquoted TTMM)."""
+    if value in (None, ""):
+        return '""'
+    s = str(value)
+    if not re.fullmatch(r"(0[1-9]|[1-2]\d|3[0-1])(0[1-9]|1[0-2])20\d{2}", s):
+        raise FieldValidationError(f"Beginndatum '{s}' muss TTMMJJJJ sein")
+    return f'"{s}"'
+
+
+def _format_endetyp(value):
+    """Field #87 Endetyp: 1/2/3 only (unquoted)."""
+    if value in (None, ""):
+        return ""
+    s = str(value)
+    if s not in ("1", "2", "3"):
+        raise FieldValidationError(
+            f"Endetyp '{s}' muss 1 (kein Enddatum), 2 (Anzahl Ereignisse), oder 3 (Endet am) sein"
+        )
+    return s
+
+
+def _make_wiederkehrend_field_handlers(sachkontenlaenge):
+    """Build the 101-element handler list for Wiederkehrende Buchungen v4."""
+    text_max = lambda mx: (lambda v: _format_quoted_empty_or_text(v, max_len=mx))
+    text20  = text_max(20)
+    text210 = text_max(210)
+
+    def opt_numeric(v):
+        return _format_numeric_optional(v)
+
+    def opt_decimal(v, pat):
+        if v in (None, ""):
+            return ""
+        s = str(v)
+        if not re.fullmatch(pat, s):
+            raise FieldValidationError(f"Wert '{s}' verletzt Pattern {pat}")
+        return s
+
+    def opt_date_ttmmjjjj(v):
+        if v in (None, ""):
+            return ""
+        s = str(v)
+        if not re.fullmatch(r"(0[1-9]|[1-2]\d|3[0-1])(0[1-9]|1[0-2])20\d{2}", s):
+            raise FieldValidationError(f"Datum '{s}' muss TTMMJJJJ sein")
+        return s
+
+    handlers = [
+        # 1 B1
+        ("b1", lambda v: str(v) if v in ("1", "2", "3", 1, 2, 3) else (
+            "1" if v in (None, "") else (_ for _ in ()).throw(
+                FieldValidationError(f"B1 '{v}' muss 1, 2 oder 3 sein")))),
+        # 2 WKZ Umsatz
+        ("wkz_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else '""'),
+        # 3 Umsatz
+        ("umsatz", _format_umsatz),
+        # 4 Soll/Haben
+        ("soll_haben_kennzeichen", _format_soll_haben),
+        # 5 Kurs
+        ("kurs", lambda v: opt_decimal(v, r"[1-9]\d{0,3}\,\d{2,6}")),
+        # 6 Basis-Umsatz
+        ("basis_umsatz", lambda v: _format_umsatz(v) if v not in (None, "") else ""),
+        # 7 WKZ Basis-Umsatz
+        ("wkz_basis_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else '""'),
+        # 8 BU-Schlüssel
+        ("bu_schluessel", _format_bu_schluessel),
+        # 9 Gegenkonto
+        ("gegenkonto", lambda v: _format_konto(v, sachkontenlaenge, "Gegenkonto")),
+        # 10 Belegfeld 1 — WK regex (drops & * +)
+        ("belegfeld_1", lambda v: _format_belegfeld_wk(v, 36, "Belegfeld 1 (WK)")),
+        # 11 Belegfeld 2 — WK regex, max 12!
+        ("belegfeld_2", lambda v: _format_belegfeld_wk(v, 12, "Belegfeld 2 (WK)")),
+        # 12 Beginndatum — TTMMJJJJ quoted
+        ("beginndatum", _format_beginndatum_wk),
+        # 13 Konto
+        ("konto", lambda v: _format_konto(v, sachkontenlaenge, "Konto")),
+        # 14 Stück
+        ("stueck", opt_numeric),
+        # 15 Gewicht
+        ("gewicht", lambda v: opt_decimal(v, r"\d{1,8}\,\d{2}")),
+        # 16 KOST1 — note: WK regex is (.){0,36} (any char), not [\w ]
+        ("kost1", lambda v: _format_quoted_empty_or_text(v, max_len=36)),
+        # 17 KOST2
+        ("kost2", lambda v: _format_quoted_empty_or_text(v, max_len=36)),
+        # 18 KOST-Menge
+        ("kost_menge", _format_kost_menge),
+        # 19 Skonto
+        ("skonto", lambda v: opt_decimal(v, r"[1-9]\d{0,7}\,\d{2}")),
+        # 20 Buchungstext
+        ("buchungstext", _format_buchungstext),
+        # 21 Postensperre
+        ("postensperre", lambda v: _validate_choice(v, "Postensperre", {0, 1}) if v not in (None, "") else ""),
+        # 22 Diverse Adressnummer
+        ("diverse_adressnummer", lambda v: ('""' if v in (None, "")
+            else (f'"{str(v)}"' if re.fullmatch(r"\w{0,9}", str(v))
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Diverse Adressnummer '{v}' max 9 word chars"))))),
+        # 23 Geschäftspartnerbank
+        ("geschaeftspartnerbank", lambda v: ("" if v in (None, "")
+            else (str(v) if re.fullmatch(r"\d{3}", str(v))
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Geschäftspartnerbank '{v}' muss 3 Ziffern sein"))))),
+        # 24 Sachverhalt
+        ("sachverhalt", lambda v: ("" if v in (None, "")
+            else (str(v) if re.fullmatch(r"\d{2}", str(v))
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Sachverhalt '{v}' muss 2 Ziffern sein"))))),
+        # 25 Zinssperre
+        ("zinssperre", lambda v: _validate_choice(v, "Zinssperre", {0, 1}) if v not in (None, "") else ""),
+        # 26 Beleglink
+        ("beleglink", text210),
+        # 27 EU-Land u. UStID (Bestimmung)
+        ("eu_land_ustid_bestimmung", lambda v: _format_quoted_empty_or_text(v, max_len=15)),
+        # 28 EU-Steuersatz (Bestimmung)
+        ("eu_steuersatz_bestimmung", lambda v: opt_decimal(v, r"\d{2}\,\d{2}")),
+        # 29 Leerfeld (DATEV-intern, single word char quoted)
+        ("leerfeld_29", lambda v: _format_quoted_empty_or_text(v, max_len=1)),
+        # 30 Sachverhalt L+L
+        ("sachverhalt_l_l", lambda v: ("" if v in (None, "")
+            else (str(v) if re.fullmatch(r"\d{1,3}", str(v)) and str(v) != "0"
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Sachverhalt L+L '{v}' muss 1-3 Ziffern, nicht 0"))))),
+        # 31 BU 49 Hauptfunktiontyp
+        ("bu_49_hauptfunktiontyp", opt_numeric),
+        # 32 BU 49 Hauptfunktionsnummer
+        ("bu_49_hauptfunktionsnummer", opt_numeric),
+        # 33 BU 49 Funktionsergänzung
+        ("bu_49_funktionsergaenzung", opt_numeric),
+    ]
+    # 34-73: Zusatzinformation Art/Inhalt 1-20
+    for i in range(1, 21):
+        handlers.append((f"zusatzinfo_art_{i}", text20))
+        handlers.append((f"zusatzinfo_inhalt_{i}", text210))
+    # 74-101
+    handlers += [
+        ("zahlungsweise",                 opt_numeric),
+        ("forderungsart",                 lambda v: _format_quoted_empty_or_text(v, max_len=10)),
+        ("veranlagungsjahr",              lambda v: ("" if v in (None, "") else
+            (str(v) if re.fullmatch(r"20\d{2}", str(v))
+             else (_ for _ in ()).throw(FieldValidationError(f"Veranlagungsjahr '{v}' muss YYYY sein"))))),
+        ("zugeordnete_faelligkeit",       opt_date_ttmmjjjj),
+        ("zuletzt_per",                   opt_date_ttmmjjjj),
+        ("naechste_faelligkeit",          opt_date_ttmmjjjj),
+        ("enddatum",                      opt_date_ttmmjjjj),
+        ("zeitintervallart",              _format_zeitintervallart),
+        ("zeitabstand",                   opt_numeric),
+        ("wochentag",                     opt_numeric),
+        ("monat",                         opt_numeric),
+        ("ordnungszahl_tag_im_monat",     lambda v: ("" if v in (None, "")
+            else (str(v) if re.fullmatch(r"([1-9]|[1-2]\d|3[0-1])", str(v))
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Ordnungszahl Tag '{v}' muss 1-31 sein"))))),
+        ("ordnungszahl_wochentag",        lambda v: ("" if v in (None, "")
+            else (str(v) if str(v) in ("1", "2", "3", "4", "5")
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Ordnungszahl Wochentag '{v}' muss 1-5 sein"))))),
+        ("endetyp",                       _format_endetyp),
+        ("gesellschaftername",            lambda v: _format_quoted_empty_or_text(v, max_len=76)),
+        ("beteiligtennummer",             lambda v: ("" if v in (None, "")
+            else (str(v) if re.fullmatch(r"\d{4}", str(v))
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Beteiligtennummer '{v}' muss 4 Ziffern sein"))))),
+        ("identifikationsnummer",         lambda v: _format_quoted_empty_or_text(v, max_len=11)),
+        ("zeichnernummer",                lambda v: _format_quoted_empty_or_text(v, max_len=20)),
+        ("sepa_mandatsreferenz",          lambda v: _format_quoted_empty_or_text(v, max_len=35)),
+        ("postensperre_bis",              opt_date_ttmmjjjj),
+        ("kost_datum",                    opt_date_ttmmjjjj),
+        ("bezeichnung_sobil",             lambda v: _format_quoted_empty_or_text(v, max_len=30)),
+        ("kennzeichen_sobil",             opt_numeric),
+        ("generalumkehr",                 _format_generalumkehr),
+        ("steuersatz",                    lambda v: ('""' if v in (None, "")
+            else (f'"{v}"' if re.fullmatch(r"\d{1,2}\,\d{2}", str(v))
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Steuersatz '{v}' muss NN,NN sein"))))),
+        ("land",                          lambda v: ('""' if v in (None, "")
+            else (f'"{str(v).upper()}"' if re.fullmatch(r"[A-Z]{2}", str(v).upper())
+                  else (_ for _ in ()).throw(
+                      FieldValidationError(f"Land '{v}' muss 2-Letter-ISO sein"))))),
+        ("eu_land_ustid_ursprung",        lambda v: _format_quoted_empty_or_text(v, max_len=15)),
+        ("eu_steuersatz_ursprung",        lambda v: opt_decimal(v, r"\d{2}\,\d{2}")),
+    ]
+    assert len(handlers) == 101, f"Internal: built {len(handlers)} WK handlers, expected 101"
+    return handlers
+
+
+def build_data_row_wk(buchung: dict, sachkontenlaenge: int) -> list[str]:
+    """Build a 101-element Wiederkehrende-Buchungen data row from a single Buchung dict."""
+    handlers = _make_wiederkehrend_field_handlers(sachkontenlaenge)
+    out = []
+    for key, formatter in handlers:
+        value = buchung.get(key)
+        try:
+            out.append(formatter(value))
+        except FieldValidationError as e:
+            raise FieldValidationError(
+                f"WK-Buchung (Konto={buchung.get('konto')}, Belegfeld 1={buchung.get('belegfeld_1')}): {e}"
+            ) from e
+    assert len(out) == 101
+    return out
+
+
+def build_column_header_row_wk(inventory: dict) -> list[str]:
+    """Build the 101-element row-2 column-name list for Wiederkehrende Buchungen."""
+    cols = inventory["data_columns"]
+    if len(cols) != 101:
+        raise InputValidationError(
+            f"WK Field inventory has {len(cols)} data columns, expected 101"
+        )
+    # Reuse the same ROW2_OVERRIDES mechanism (fields #3 + #9 in WK are Umsatz + Gegenkonto)
+    wk_overrides = {3: "Umsatz (ohne Soll/Haben-Kennzeichen)", 9: "Gegenkonto (ohne BU-Schlüssel)"}
+    out = []
+    for col in cols:
+        name = wk_overrides.get(col["n"], col["name"])
+        out.append(f'"{name}"')
     return out
 
 
@@ -1094,15 +1377,33 @@ def generate(
         header_input = dict(header_input)
         header_input["sachkontenrahmen"] = data["skr"]
 
-    # v2.3: Formatkategorie routing seam — only 21 (Buchungsstapel) for now
+    # v2.3+: Formatkategorie routing
     formatkategorie = int(header_input.get("formatkategorie", 21))
     validate_formatkategorie(formatkategorie)
 
-    inventory = load_field_inventory(format_version)
+    # v2.5: auto-normalize Formatname + Formatversion to match the Kategorie if not explicit
+    meta = FORMATKATEGORIE_META[formatkategorie]
+    header_input = dict(header_input)
+    if "formatname" not in header_input or header_input.get("formatname") in ("", None):
+        header_input["formatname"] = meta["formatname"]
+    if "formatversion" not in header_input or header_input.get("formatversion") in ("", None):
+        header_input["formatversion"] = meta["formatversion"]
+    # The format_version arg is interpreted relative to the kategorie
+    if formatkategorie == 65:
+        format_version = int(header_input["formatversion"])
+
+    inventory = load_field_inventory(format_version, formatkategorie)
     sachkontenlaenge = int(header_input.get("sachkonten_laenge", 4))
 
-    # 1. Saldo check (fast-fail before formatting)
-    sum_soll, sum_haben = validate_saldo(buchungen)
+    # 1. Saldo check (Buchungsstapel only — WK is a recurrence-spec, not a stack of balanced postings)
+    if formatkategorie == 21:
+        sum_soll, sum_haben = validate_saldo(buchungen)
+    else:
+        # For WK: just sum totals for the report; no balance check
+        sum_soll = sum(Decimal(str(b.get("umsatz", "0")).replace(",", "."))
+                       for b in buchungen if b.get("soll_haben_kennzeichen", "S") == "S")
+        sum_haben = sum(Decimal(str(b.get("umsatz", "0")).replace(",", "."))
+                        for b in buchungen if b.get("soll_haben_kennzeichen") == "H")
 
     # 1b. v2.3: Automatikkonten check (REW00305 prevention) — fast-fail
     skr = data.get("skr") or header_input.get("sachkontenrahmen", "")
@@ -1111,16 +1412,25 @@ def generate(
     automatik_konten = load_automatik_konten(skr_lookup) if skr_lookup else {}
     automatik_notes = validate_no_bu_on_automatik(buchungen, automatik_konten)
 
-    # 2. Build rows
+    # 2. Build rows (dispatched on Formatkategorie)
     header_row = build_header_row(header_input, inventory)
-    col_header_row = build_column_header_row(inventory)
-    data_rows = [build_data_row(b, sachkontenlaenge) for b in buchungen]
+    expected_data_count = meta["data_field_count"]
+    if formatkategorie == 21:
+        col_header_row = build_column_header_row(inventory)
+        data_rows = [build_data_row(b, sachkontenlaenge) for b in buchungen]
+    elif formatkategorie == 65:
+        col_header_row = build_column_header_row_wk(inventory)
+        data_rows = [build_data_row_wk(b, sachkontenlaenge) for b in buchungen]
+    else:
+        raise InputValidationError(f"Internal: no row-builder for Formatkategorie {formatkategorie}")
 
-    # Sanity: every row 125 fields, header 31
+    # Sanity: every row matches the Kategorie's data_field_count
     assert len(header_row) == 31, f"Header has {len(header_row)} fields"
-    assert len(col_header_row) == 125, f"Column header has {len(col_header_row)} fields"
+    assert len(col_header_row) == expected_data_count, (
+        f"Column header has {len(col_header_row)} fields, expected {expected_data_count}")
     for i, r in enumerate(data_rows):
-        assert len(r) == 125, f"Data row {i} has {len(r)} fields"
+        assert len(r) == expected_data_count, (
+            f"Data row {i} has {len(r)} fields, expected {expected_data_count}")
 
     rows = [header_row, col_header_row] + data_rows
 
