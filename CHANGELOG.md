@@ -2,6 +2,25 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.3.0] - 2026-05-23
+
+### Added
+- **Automatikkonten-Schutz** (PRD §14.2). Plugin lehnt vor dem CSV-Export Buchungen ab, in denen ein AM- oder AV-Automatikkonto mit einem nicht-leeren BU-Schlüssel verwendet wird (außer BU `"0040"` Aufhebung der Automatik). Fängt DATEV-Importfehler **REW00305** vorab ab.
+- `config/shared/datev-automatik-konten.json` — auto-generated Automatik-Set für SKR03 + SKR04 (163 + 163 Konten, AM- und AV-Prefix der DATEV-Programmverbindung). DATEV-copyright-safe (nur Konto-Nummern, keine Bezeichnungen).
+- `scripts/generate_automatik_konten.py` — generiert die obige JSON-Datei aus den `.skr0[34]-clean.tsv`-Extraktionen. Re-run-fähig bei jedem DATEV-PDF-Jahresupdate.
+- **Multi-Formatkategorie-Routing-Seam** in `scripts/generate_extf.py`. v2.3 unterstützt nur `formatkategorie=21` (Buchungsstapel); Wiederkehrende (65) kommt in v2.5, Debitoren/Kreditoren (16) in v2.7. Klare Fehlermeldung bei nicht-unterstützten Kategorien.
+- `scripts/extract_datev_pdf.py` (v5): erfasst jetzt zusätzlich den Programmverbindungs-Prefix (AM/AV/S/F/R/...). Output-TSV hat neue 4. Spalte `pv_prefix`.
+
+### Changed
+- `skills/datev-export/SKILL.md`: neue §11.1 "Automatikkonten-Schutz" mit Beispiel-Fehlermeldung.
+- Sidecar `.report.md` listet jetzt ob Automatikkonten verwendet wurden (auch ohne BU-Clash, zur Audit-Sichtbarkeit).
+- Test-Suite: 62 → 69 Tests (7 neue für Automatik-Check + Routing-Seam). Coverage stabil bei 92 %.
+
+### Notes
+- v2.3 ist die kleinste der vier geplanten Folge-Releases (PRD §14). Nächste: v2.5.0 (Wiederkehrende Buchungen), v2.6.0 (KOST-Splitt), v2.7.0 (Debitoren/Kreditoren).
+- "S"-Prefix-Konten (Sammelkonten wie Debitoren-Sammel 1200, Vorsteuer-Sammel 1406) sind **bewusst NICHT** als Automatik geflagged — sie folgen anderen Regeln (z.B. direkte Buchung auf Sammelkonto generell unzulässig, aber das ist nicht REW00305).
+- Wenn `config/shared/datev-automatik-konten.json` fehlt: Plugin läuft weiter, der Automatik-Check ist dann no-op (soft-degrade). Vorteil: Backward-compat für ältere Setups.
+
 ## [2.1.0] - 2026-05-22
 
 ### Added
