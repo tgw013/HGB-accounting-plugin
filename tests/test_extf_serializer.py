@@ -877,3 +877,134 @@ class TestWiederkehrendeBuchungen:
         lines = out.read_bytes().decode("cp1252").split("\r\n")
         # 1 header + 1 column-header + 2 data rows + trailing empty
         assert sum(1 for l in lines if l) == 4
+
+
+# ---------------------------------------------------------------------------
+# v2.6 — KOST-Splitt (multi-allocation per Buchung)
+# ---------------------------------------------------------------------------
+
+class TestKostSplitt:
+    """
+    PRD §14.5. One logical transaction split across multiple Kostenstellen via
+    `kost_allocations` array — serializer expands to N flat Buchungen with
+    proportional umsatz (Decimal + ROUND_HALF_EVEN + residual-on-last).
+    """
+
+    def _splitt_buchung(self, allocations, **overrides):
+        b = {
+            "umsatz": "1000,00",
+            "soll_haben_kennzeichen": "S",
+            "konto": "6310",
+            "gegenkonto": "3300",
+            "belegdatum": "0104",
+            "belegfeld_1": "MIETE-04",
+            "buchungstext": "Miete Splitt",
+            "kost_allocations": allocations,
+        }
+        b.update(overrides)
+        return b
+
+    def _h_side(self, umsatz="1000,00"):
+        return {
+            "umsatz": umsatz,
+            "soll_haben_kennzeichen": "H",
+            "konto": "3300",
+            "gegenkonto": "6310",
+            "belegdatum": "0104",
+            "belegfeld_1": "MIETE-04",
+            "buchungstext": "Miete Kreditor",
+        }
+
+    def test_2_way_split_50_50(self, tmp_path):
+        s = self._splitt_buchung(
+            [
+                {"kost1": "A", "kost2": "", "anteil_prozent": "50,00"},
+                {"kost1": "B", "kost2": "", "anteil_prozent": "50,00"},
+            ],
+            umsatz="100,00",
+        )
+        h = self._h_side("100,00")
+        csv_path, _ = _run(tmp_path, buchungen=[s, h])
+        lines = [l for l in csv_path.read_bytes().decode("cp1252").split("\r\n") if l]
+        # header + col_header + 2 expanded S rows + 1 H row = 5
+        assert len(lines) == 5
+        s_rows = [l.split(";") for l in lines[2:4]]
+        # field 1 (index 0) = Umsatz; check both are 50,00
+        assert s_rows[0][0] == "50,00"
+        assert s_rows[1][0] == "50,00"
+
+    def test_3_way_split_residual_on_last(self, tmp_path):
+        s = self._splitt_buchung(
+            [
+                {"kost1": "A", "kost2": "", "anteil_prozent": "33,33"},
+                {"kost1": "B", "kost2": "", "anteil_prozent": "33,33"},
+                {"kost1": "C", "kost2": "", "anteil_prozent": "33,34"},
+            ],
+            umsatz="100,00",
+        )
+        h = self._h_side("100,00")
+        csv_path, _ = _run(tmp_path, buchungen=[s, h])
+        lines = [l for l in csv_path.read_bytes().decode("cp1252").split("\r\n") if l]
+        umsaetze = [l.split(";")[0] for l in lines[2:5]]
+        # 33,33 + 33,33 + 33,34 (residual on last) = 100,00
+        assert umsaetze == ["33,33", "33,33", "33,34"]
+        # And the cent-exact sum check:
+        total = sum(Decimal(u.replace(",", ".")) for u in umsaetze)
+        assert total == Decimal("100.00")
+
+    def test_anteil_sum_not_100_rejected(self, tmp_path):
+        s = self._splitt_buchung(
+            [
+                {"kost1": "A", "kost2": "", "anteil_prozent": "33,33"},
+                {"kost1": "B", "kost2": "", "anteil_prozent": "33,33"},
+                {"kost1": "C", "kost2": "", "anteil_prozent": "33,33"},
+            ],
+            umsatz="100,00",
+        )
+        h = self._h_side("100,00")
+        with pytest.raises(G.FieldValidationError, match="anteil_prozent"):
+            _run(tmp_path, buchungen=[s, h])
+
+    def test_saldo_balanced_after_expansion(self, tmp_path):
+        """After 40/30/30 expansion of 1000,00 the sum across all S rows still
+        balances the single H row of 1000,00 (saldo check runs AFTER expansion)."""
+        s = self._splitt_buchung(
+            [
+                {"kost1": "VERTRIEB",   "kost2": "", "anteil_prozent": "40,00"},
+                {"kost1": "VERWALTUNG", "kost2": "", "anteil_prozent": "30,00"},
+                {"kost1": "FundE",      "kost2": "", "anteil_prozent": "30,00"},
+            ],
+            umsatz="1000,00",
+        )
+        h = self._h_side("1000,00")
+        csv_path, _ = _run(tmp_path, buchungen=[s, h])
+        lines = [l for l in csv_path.read_bytes().decode("cp1252").split("\r\n") if l]
+        # Sum of S = sum of H
+        s_sum = sum(Decimal(l.split(";")[0].replace(",", ".")) for l in lines[2:5])
+        h_sum = Decimal(lines[5].split(";")[0].replace(",", "."))
+        assert s_sum == h_sum == Decimal("1000.00")
+
+    def test_flat_kost_back_compat(self, tmp_path):
+        """A Buchung without `kost_allocations` (flat kost1/kost2) still works."""
+        s = _minimal_buchung(kost1="VERTRIEB", kost2="PROJA")
+        h = _minimal_buchung(soll_haben_kennzeichen="H",
+                             konto=s["gegenkonto"], gegenkonto=s["konto"])
+        # No exception, fixture round-trips
+        csv_path, _ = _run(tmp_path, buchungen=[s, h])
+        lines = [l for l in csv_path.read_bytes().decode("cp1252").split("\r\n") if l]
+        # 1 header + 1 col-header + 2 data rows
+        assert len(lines) == 4
+
+    def test_synthetic_kost_splitt_fixture(self, tmp_path):
+        """The committed fixture round-trips cleanly."""
+        fixture = REPO_ROOT / "tests" / "fixtures" / "kost_splitt_miete" / "input.json"
+        out = tmp_path / "out.csv"
+        report = G.generate(fixture, out, format_version=13)
+        assert out.exists()
+        assert report.exists()
+        lines = [l for l in out.read_bytes().decode("cp1252").split("\r\n") if l]
+        # header + col-header + 3 expanded S rows + 1 H row = 6
+        assert len(lines) == 6
+        # And the report contains a Splitt-audit block
+        report_text = report.read_text(encoding="utf-8")
+        assert "Splitt" in report_text or "KOST" in report_text

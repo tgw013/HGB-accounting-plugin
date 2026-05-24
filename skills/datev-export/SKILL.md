@@ -1,6 +1,6 @@
 ---
 name: datev-export
-description: Buchungsvorschläge als DATEV-Buchungsstapel-CSV (EXTF-Format) exportieren — importfähig in DATEV-Anwendungen.
+description: Buchungsvorschläge als DATEV-Buchungsstapel-CSV (EXTF-Format) exportieren — importfähig in DATEV-Anwendungen. Deterministisch (identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) und DATEV-Prüfprogramm-validiert.
 ---
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-EXTF-Formatbeschreibung, Header-Version 700/810, Stand 2026-05). **Ersetzt keine Steuerberatung.** Erzeugter Buchungsstapel ist Vorschlag — vor produktivem Import in DATEV-Mandant Stichprobe prüfen und Test-Import in Vorabbuchungsstapel ausführen.
@@ -95,6 +95,37 @@ python scripts/generate_extf.py \
 Das Script validiert Eingaben (Saldengleichheit, Konto-Existenz, Belegfeld-Whitelist, Datums-Format), schreibt CSV mit korrekter Codierung (CP1252 default) und CRLF-Zeilenenden, und erzeugt einen `.report.md`-Begleitbericht mit SHA-256, Σ Soll / Σ Haben, verwendeten Konten + BU-Schlüsseln, und ausgelösten Portal-Inkonsistenz-Interpretationsregeln. Bei Validierungsfehlern bricht das Script mit klarer Fehlermeldung ab (Exit-Code 1).
 
 Das Feld-Inventar (31 Header-Felder + 125 Datenspalten mit Regex + Beschreibung pro Formatversion) liegt deklarativ in `config/shared/datev-extf-fields.json` und ist PORTAL-verifiziert gegen developer.datev.de.
+
+### 6.7 KOST-Splitt mit `kost_allocations` (v2.6+)
+
+Wenn ein logischer Vorgang (z. B. 1000 € Miete) auf mehrere Kostenstellen verteilt werden soll, kann eine Buchung statt mehrfach copy-paste mit einem `kost_allocations`-Array geschrieben werden. Der Serializer expandiert sie automatisch in N flache Buchungen mit proportionalem Umsatz.
+
+```json
+{
+  "umsatz": "1000,00",
+  "soll_haben_kennzeichen": "S",
+  "konto": "6310",
+  "gegenkonto": "3300",
+  "buchungstext": "Miete 04/2026",
+  "kost_allocations": [
+    {"kost1": "VERTRIEB",   "kost2": "", "anteil_prozent": "40,00"},
+    {"kost1": "VERWALTUNG", "kost2": "", "anteil_prozent": "30,00"},
+    {"kost1": "FundE",      "kost2": "", "anteil_prozent": "30,00"}
+  ]
+}
+```
+
+Semantik:
+
+- `Σ anteil_prozent` muss exakt `100,00` ergeben — sonst Abbruch.
+- Pro Allocation: `umsatz = original × anteil / 100`, kaufmännisch (Decimal, ROUND_HALF_EVEN) auf 2 Nachkommastellen gerundet.
+- Rundungs-Residual landet auf der **letzten** Allocation — cent-exakte Summe garantiert.
+- `konto`, `gegenkonto`, `belegfeld_1`, `buchungstext`, `belegdatum` werden geteilt; nur `kost1`/`kost2`/`kost_menge`/`umsatz` unterscheiden sich pro Output-Zeile.
+- Saldo-Check läuft **nach** Expansion: die expandierten S-Zeilen summieren weiterhin gegen die H-Buchung.
+- Backwards-compat: Buchungen ohne `kost_allocations` (flache `kost1`/`kost2`-Felder) bleiben unverändert.
+- Der Sidecar-`.report.md` enthält eine Sektion `## KOST-Splittbuchungen (v2.6)` mit Quell-Buchung + Allocations-Breakdown zur Audit-Sichtbarkeit der Rundungs-Verteilung.
+
+`[REASONED]` — kein DATEV-Portal-Pattern; pure Input-Schema-Erweiterung. Output-CSV bleibt 100 % Buchungsstapel-konform.
 
 ## 7. Output
 

@@ -1,0 +1,49 @@
+{
+  "_purpose": "Automatikkonten v2.3 — Happy path: SKR04 Erlöskonto 4400 (AM 19% USt) ohne BU-Schlüssel. DATEV wendet USt-Automatik an. Importfehler REW00305 wird NICHT ausgelöst, weil bu_schluessel leer ist.",
+  "header": {
+    "kennzeichen": "EXTF",
+    "versionsnummer": 700,
+    "formatkategorie": 21,
+    "formatname": "Buchungsstapel",
+    "formatversion": 13,
+    "erzeugt_am": "20260523120000000",
+    "herkunft": "RE",
+    "exportiert_von": "tgw013",
+    "importiert_von": "",
+    "berater_nr": 12345,
+    "mandanten_nr": 1,
+    "wj_beginn": "20260101",
+    "sachkonten_laenge": 4,
+    "datum_von": "20260401",
+    "datum_bis": "20260430",
+    "bezeichnung": "Erloese 04/2026 Automatik",
+    "diktatkuerzel": "TG",
+    "buchungstyp": 1,
+    "rechnungslegungszweck": 0,
+    "festschreibung": 0,
+    "wkz": "EUR",
+    "anwendungsinformation": "04/2026"
+  },
+  "skr": "SKR04",
+  "buchungen": [
+    {
+      "umsatz": "1190,00",
+      "soll_haben_kennzeichen": "S",
+      "konto": "1200",
+      "gegenkonto": "4400",
+      "belegdatum": "1504",
+      "belegfeld_1": "RE-2026-042",
+      "buchungstext": "Erloes Beratung 04/2026 (Automatik 19%)"
+    },
+    {
+      "umsatz": "1190,00",
+      "soll_haben_kennzeichen": "H",
+      "konto": "4400",
+      "gegenkonto": "1200",
+      "belegdatum": "1504",
+      "belegfeld_1": "RE-2026-042",
+      "buchungstext": "Erloes Beratung 04/2026 (Automatik 19%)"
+    }
+  ],
+  "encoding": "cp1252"
+}

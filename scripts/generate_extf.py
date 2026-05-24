@@ -1148,6 +1148,139 @@ def build_column_header_row_wk(inventory: dict) -> list[str]:
 # Automatikkonten validation (v2.3) — REW00305 prevention
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# KOST-Splitt expansion (v2.6) — multi-allocation per Buchung
+# ---------------------------------------------------------------------------
+
+def expand_kost_allocations(buchungen: list[dict]) -> tuple[list[dict], list[dict]]:
+    """
+    Expand any Buchung carrying a `kost_allocations` array into N flat Buchungen,
+    one per allocation, with proportional umsatz.
+
+    Input Buchung shape (v2.6 extension):
+        {
+          "umsatz": "1000,00",
+          "soll_haben_kennzeichen": "S",
+          "konto": "6310",
+          "gegenkonto": "3300",
+          "buchungstext": "Miete 04/2026",
+          "kost_allocations": [
+            {"kost1": "VERTRIEB",    "kost2": "", "anteil_prozent": "40,00"},
+            {"kost1": "VERWALTUNG",  "kost2": "", "anteil_prozent": "30,00"},
+            {"kost1": "F&E",         "kost2": "", "anteil_prozent": "30,00"}
+          ]
+        }
+
+    Each allocation may also carry an explicit `kost_menge`. Output rows share
+    `konto`, `gegenkonto`, `belegfeld_1`, `buchungstext`, `belegdatum` etc. —
+    only `umsatz`, `kost1`, `kost2`, `kost_menge` differ.
+
+    Returns (expanded_buchungen, splitt_audit) where splitt_audit is a list of
+    dicts describing each split for the sidecar `.report.md`:
+        [{"source_index": 0, "original_umsatz": "1000,00",
+          "allocations": [{"kost1": "VERTRIEB", "anteil": "40,00", "amount": "400,00"}, ...]}]
+
+    Validation:
+        - `anteil_prozent` Decimal-sum must equal Decimal("100.00") exactly
+        - Per-allocation umsatz = round_half_even(original × anteil / 100), 2 decimals
+        - Residual cents (sum of rounded < original) → added to the LAST allocation
+          to guarantee cent-exact total
+        - Empty/missing `kost_allocations` → buchung passes through unchanged
+          (back-compat with flat-KOST input)
+    """
+    from decimal import Decimal, ROUND_HALF_EVEN
+
+    expanded: list[dict] = []
+    audit: list[dict] = []
+
+    for src_idx, b in enumerate(buchungen):
+        allocs = b.get("kost_allocations")
+        if not allocs or not isinstance(allocs, list):
+            expanded.append(b)
+            continue
+
+        # Validate anteil_prozent sum
+        anteils = []
+        for a_idx, a in enumerate(allocs):
+            ap_raw = a.get("anteil_prozent")
+            if ap_raw in (None, ""):
+                raise FieldValidationError(
+                    f"Buchung #{src_idx+1} KOST-Allocation #{a_idx+1}: "
+                    f"'anteil_prozent' fehlt"
+                )
+            try:
+                ap = Decimal(str(ap_raw).replace(",", "."))
+            except Exception:
+                raise FieldValidationError(
+                    f"Buchung #{src_idx+1} KOST-Allocation #{a_idx+1}: "
+                    f"'anteil_prozent' '{ap_raw}' ist kein gültiger Decimal"
+                )
+            anteils.append(ap)
+
+        anteil_sum = sum(anteils, Decimal("0"))
+        if anteil_sum != Decimal("100.00") and anteil_sum != Decimal("100"):
+            raise FieldValidationError(
+                f"Buchung #{src_idx+1}: Σ anteil_prozent = {anteil_sum}, "
+                f"muss exakt 100,00 sein (KOST-Splitt-Anteile)."
+            )
+
+        # Compute per-allocation amounts via Decimal + ROUND_HALF_EVEN
+        umsatz_raw = b.get("umsatz")
+        if umsatz_raw in (None, ""):
+            raise FieldValidationError(
+                f"Buchung #{src_idx+1}: umsatz fehlt (KOST-Splitt benötigt umsatz)"
+            )
+        try:
+            umsatz_dec = Decimal(str(umsatz_raw).replace(",", "."))
+        except Exception:
+            raise FieldValidationError(
+                f"Buchung #{src_idx+1}: umsatz '{umsatz_raw}' ist kein gültiger Decimal"
+            )
+
+        amounts: list[Decimal] = []
+        for ap in anteils:
+            amt = (umsatz_dec * ap / Decimal("100")).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_EVEN
+            )
+            amounts.append(amt)
+        # Residual on last
+        diff = umsatz_dec - sum(amounts, Decimal("0"))
+        if diff != Decimal("0"):
+            amounts[-1] += diff
+            if amounts[-1] <= Decimal("0"):
+                raise FieldValidationError(
+                    f"Buchung #{src_idx+1}: KOST-Splitt Residual-Verteilung "
+                    f"führt zu nicht-positivem Betrag bei letzter Allocation. "
+                    f"Anteils-Verteilung prüfen."
+                )
+
+        # Build N expanded Buchungen
+        audit_allocs = []
+        for a_idx, (alloc, amt, ap) in enumerate(zip(allocs, amounts, anteils)):
+            new_b = {k: v for k, v in b.items() if k != "kost_allocations"}
+            new_b["umsatz"] = f"{amt:.2f}".replace(".", ",")
+            new_b["kost1"]      = alloc.get("kost1", "")
+            new_b["kost2"]      = alloc.get("kost2", "")
+            if "kost_menge" in alloc:
+                new_b["kost_menge"] = alloc["kost_menge"]
+            expanded.append(new_b)
+            audit_allocs.append({
+                "kost1":  alloc.get("kost1", ""),
+                "kost2":  alloc.get("kost2", ""),
+                "anteil": f"{ap}".rstrip("0").rstrip(".") or "0",
+                "amount": f"{amt:.2f}".replace(".", ","),
+            })
+        audit.append({
+            "source_index":   src_idx,
+            "original_umsatz": str(umsatz_raw),
+            "konto":          b.get("konto", ""),
+            "buchungstext":   b.get("buchungstext", ""),
+            "allocations":    audit_allocs,
+        })
+
+    return expanded, audit
+
+
 def validate_no_bu_on_automatik(buchungen: list[dict], automatik_konten: dict[str, str]) -> list[str]:
     """
     Reject bookings where konto OR gegenkonto is an Automatikkonto AND
@@ -1268,6 +1401,27 @@ def write_csv(rows: list[list[str]], path: Path, encoding: str) -> None:
 # Sidecar .report.md writer
 # ---------------------------------------------------------------------------
 
+def _format_splitt_audit_block(splitt_audit: list[dict] | None) -> str:
+    """Format the v2.6 KOST-Splitt audit section for the sidecar report."""
+    if not splitt_audit:
+        return ""
+    lines = ["## KOST-Splittbuchungen (v2.6)", ""]
+    for entry in splitt_audit:
+        lines.append(
+            f"**Quell-Buchung #{entry['source_index']+1}** "
+            f"(Konto {entry['konto']}, {entry['buchungstext'][:40]}): "
+            f"Umsatz {entry['original_umsatz']} aufgeteilt in "
+            f"{len(entry['allocations'])} Allocations"
+        )
+        for a in entry["allocations"]:
+            k1 = a["kost1"] or "(leer)"
+            k2 = a["kost2"] or ""
+            kost = f"{k1}/{k2}" if k2 else k1
+            lines.append(f"  - {kost}: {a['anteil']}% → {a['amount']} €")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def write_report(
     report_path: Path,
     csv_path: Path,
@@ -1278,6 +1432,7 @@ def write_report(
     encoding: str,
     format_version: int,
     interpretations_applied: list[str],
+    splitt_audit: list[dict] | None = None,
 ) -> None:
     """Write sidecar Markdown report next to the CSV."""
     csv_bytes = csv_path.read_bytes()
@@ -1340,6 +1495,8 @@ def write_report(
 
 {interpretations_block}
 
+{_format_splitt_audit_block(splitt_audit)}
+
 ## Wichtiger Hinweis
 
 ⚠ **Import als Vorabbuchungsstapel.** Vor Freigabe durch Anwender / Steuerberater stichprobenartig prüfen.
@@ -1394,6 +1551,10 @@ def generate(
 
     inventory = load_field_inventory(format_version, formatkategorie)
     sachkontenlaenge = int(header_input.get("sachkonten_laenge", 4))
+
+    # 0b. v2.6: KOST-Splitt expansion — runs BEFORE saldo check + automatik check
+    # so expanded rows are validated as ordinary Buchungen
+    buchungen, splitt_audit = expand_kost_allocations(buchungen)
 
     # 1. Saldo check (Buchungsstapel only — WK is a recurrence-spec, not a stack of balanced postings)
     if formatkategorie == 21:
@@ -1452,6 +1613,7 @@ def generate(
         encoding=encoding,
         format_version=format_version,
         interpretations_applied=interpretations_applied,
+        splitt_audit=splitt_audit,
     )
 
     return report_path

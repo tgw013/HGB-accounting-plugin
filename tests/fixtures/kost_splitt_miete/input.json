@@ -1,0 +1,54 @@
+{
+  "_purpose": "KOST-Splitt — Miete 1000 EUR auf 3 Kostenstellen aufgeteilt (Vertrieb 40%, Verwaltung 30%, F&E 30%). v2.6 input-schema-Erweiterung.",
+  "header": {
+    "kennzeichen": "EXTF",
+    "versionsnummer": 700,
+    "formatkategorie": 21,
+    "formatname": "Buchungsstapel",
+    "formatversion": 13,
+    "erzeugt_am": "20260523120000000",
+    "herkunft": "RE",
+    "exportiert_von": "tgw013",
+    "importiert_von": "",
+    "berater_nr": 12345,
+    "mandanten_nr": 1,
+    "wj_beginn": "20260101",
+    "sachkonten_laenge": 4,
+    "datum_von": "20260401",
+    "datum_bis": "20260430",
+    "bezeichnung": "Miete 04/2026 Splitt",
+    "diktatkuerzel": "TG",
+    "buchungstyp": 1,
+    "rechnungslegungszweck": 0,
+    "festschreibung": 0,
+    "wkz": "EUR",
+    "anwendungsinformation": "04/2026"
+  },
+  "skr": "SKR04",
+  "buchungen": [
+    {
+      "umsatz": "1000,00",
+      "soll_haben_kennzeichen": "S",
+      "konto": "6310",
+      "gegenkonto": "3300",
+      "belegdatum": "0104",
+      "belegfeld_1": "MIETE-04-2026",
+      "buchungstext": "Miete 04/2026 (gesplittet)",
+      "kost_allocations": [
+        {"kost1": "VERTRIEB",   "kost2": "", "anteil_prozent": "40,00"},
+        {"kost1": "VERWALTUNG", "kost2": "", "anteil_prozent": "30,00"},
+        {"kost1": "FundE",      "kost2": "", "anteil_prozent": "30,00"}
+      ]
+    },
+    {
+      "umsatz": "1000,00",
+      "soll_haben_kennzeichen": "H",
+      "konto": "3300",
+      "gegenkonto": "6310",
+      "belegdatum": "0104",
+      "belegfeld_1": "MIETE-04-2026",
+      "buchungstext": "Miete 04/2026 Kreditor"
+    }
+  ],
+  "encoding": "cp1252"
+}
