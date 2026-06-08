@@ -2,6 +2,14 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.7.1] - 2026-06-08
+
+### Fixed
+- **Release-Bundle:** `scripts/generate_extf.py` wird jetzt in der Cowork-Release-ZIP mitgeliefert. `datev-export` ruft den Serializer zur Laufzeit (deterministische, 125-Feld-validierte EXTF-CSV); fehlte er im Bundle (so bei v2.1.0–v2.7.0), fiel Cowork auf inline-CSV-Generierung zurück. Das Script ist Python-3.10-stdlib-only und findet seine Config (`config/shared/datev-extf-fields.json` + `datev-automatik-konten.json`) selbst über `__file__` — beides ist bereits im Bundle. README-Zip-Anleitung + `UPDATE_CHECKLIST.md` entsprechend ergänzt.
+
+### Notes
+- Reine Packaging-Korrektur; Plugin-Code unverändert ggü. v2.7.0. Patch-Release, weil das v2.7.0-Release-Asset wegen GitHub-Immutability nicht nachträglich ersetzbar war.
+
 ## [2.7.0] - 2026-06-08
 
 ### Added
