@@ -26,7 +26,7 @@ Cowork installiert Plugins über **ZIP-Upload** (kein Slash-Command-Marketplace 
 
 > ⚠ **Nicht** GitHub's grünen "Code → Download ZIP" Button benutzen — dort liegt alles in einem Wrapper-Ordner `HGB-accounting-plugin-main/`, was Cowork nicht versteht. Immer die Release-ZIP nutzen.
 >
-> **Falls eine Release-ZIP fehlt** (zwischen Releases): GitHub-ZIP entpacken, in den entpackten Ordner gehen, dort `.claude-plugin`, `commands`, `skills`, `config`, `.mcp.json` etc. markieren und neu zippen (Windows: Rechtsklick → "In ZIP-Datei komprimieren"). Diese neue ZIP in Cowork hochladen.
+> **Falls eine Release-ZIP fehlt** (zwischen Releases): GitHub-ZIP entpacken, in den entpackten Ordner gehen, dort `.claude-plugin`, `commands`, `skills`, `config`, `scripts/generate_extf.py`, `.mcp.json` etc. markieren und neu zippen (Windows: Rechtsklick → "In ZIP-Datei komprimieren"). Diese neue ZIP in Cowork hochladen.
 
 ### Claude Code (für Entwickler)
 

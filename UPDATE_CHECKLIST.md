@@ -77,7 +77,7 @@ DATEV-Format-Prüfprogramm-Lauf gegen alle Test-Fixtures. Erwartetes Ergebnis: *
 - [ ] `plugin.json` + `marketplace.json` Version bumpen
 - [ ] `CHANGELOG.md` `[neue_version]` Eintrag
 - [ ] Tag `v{neue_version}` setzen
-- [ ] Release-ZIP bauen + `gh release create` mit Asset
+- [ ] Release-ZIP bauen + `gh release create` mit Asset. **Inhalt:** `.claude-plugin`, `.mcp.json`, `LICENSE`, `README.md`, `commands/`, `config/`, `docs/`, `skills/` **und `scripts/generate_extf.py`** (der Serializer wird von `datev-export` zur Laufzeit benötigt und findet seine Config selbst über `__file__`; ohne ihn fällt Cowork auf inline-CSV-Generierung zurück). Kein Wrapper-Ordner. `tests/` und die übrigen Dev-Scripts bleiben außen vor.
 - [ ] Release Notes aus CHANGELOG generieren
 
 ---
