@@ -1,4 +1,5 @@
 {
+  "_purpose": "§13b Abs.1 UStG (EU-Sonstige Leistung, SaaS 1.500 EUR netto). Import-korrekte Darstellung: zwei vollständige Konto-an-Gegenkonto-Zeilen (6840 Aufwand an 3300 Kreditor; 1407 VSt §13b an 3837 USt §13b). Jede Zeile ist in sich ausgeglichen — KEINE Spiegelzeilen, daher keine Doppelbuchung beim Mandanten-Import. Σ Soll = Σ Haben = 1.785,00. §13b über explizite Kontenpaare + eu_land_ustid_bestimmung + sachverhalt_l_l, bu_schluessel leer.",
   "header": {
     "kennzeichen": "EXTF",
     "versionsnummer": 700,
@@ -46,26 +47,6 @@
       "buchungstext": "VSt 13b 19% EU-Sonstige",
       "eu_land_ustid_bestimmung": "IE9999999X",
       "sachverhalt_l_l": "1"
-    },
-    {
-      "umsatz": "285,00",
-      "soll_haben_kennzeichen": "H",
-      "konto": "3837",
-      "gegenkonto": "1407",
-      "bu_schluessel": "",
-      "belegdatum": "0305",
-      "belegfeld_1": "CLOUD-MAI-26",
-      "buchungstext": "USt 13b 19% EU-Sonstige"
-    },
-    {
-      "umsatz": "1500,00",
-      "soll_haben_kennzeichen": "H",
-      "konto": "3300",
-      "gegenkonto": "6840",
-      "bu_schluessel": "",
-      "belegdatum": "1005",
-      "belegfeld_1": "CLOUD-MAI-26",
-      "buchungstext": "Kreditor Acme Cloud Ltd"
     }
   ],
   "encoding": "cp1252"

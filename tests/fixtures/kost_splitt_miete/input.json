@@ -1,5 +1,5 @@
 {
-  "_purpose": "KOST-Splitt — Miete 1000 EUR auf 3 Kostenstellen aufgeteilt (Vertrieb 40%, Verwaltung 30%, F&E 30%). v2.6 input-schema-Erweiterung.",
+  "_purpose": "KOST-Splitt — Miete 1000 EUR auf 3 Kostenstellen aufgeteilt (Vertrieb 40%, Verwaltung 30%, F&E 30%). v2.6 input-schema-Erweiterung. Import-korrekt: EINE vollständige Konto-an-Gegenkonto-Zeile (6310 an 3300) mit kost_allocations; expandiert zu 3 in sich ausgeglichenen S-Zeilen — keine Spiegelzeile.",
   "header": {
     "kennzeichen": "EXTF",
     "versionsnummer": 700,
@@ -39,15 +39,6 @@
         {"kost1": "VERWALTUNG", "kost2": "", "anteil_prozent": "30,00"},
         {"kost1": "FundE",      "kost2": "", "anteil_prozent": "30,00"}
       ]
-    },
-    {
-      "umsatz": "1000,00",
-      "soll_haben_kennzeichen": "H",
-      "konto": "3300",
-      "gegenkonto": "6310",
-      "belegdatum": "0104",
-      "belegfeld_1": "MIETE-04-2026",
-      "buchungstext": "Miete 04/2026 Kreditor"
     }
   ],
   "encoding": "cp1252"

@@ -22,10 +22,25 @@ Wandelt einen oder mehrere Buchungsvorschläge (z.B. aus Skill `buchungssatz`) i
 
 ## 2. Eingaben
 
-- Liste von Buchungssätzen (aus `buchungssatz` oder strukturiert übergeben)
+- **Buchungssätze als JSON-Handoff** — kanonisch aus Skill `buchungssatz` (dessen Section 9). `buchungssatz` liefert `skr` + `buchungen[]`; dieser Skill ergänzt den `header` (Mandanten-Daten) und ruft den Serializer.
 - Mandant: Berater-Nr., Mandanten-Nr., WJ-Beginn, Sachkontenlänge (4 oder 5)
 - SKR-Variante (SKR03 / SKR04) — beeinflusst Konto-Validierung
 - Buchungs-Zeitraum (von / bis)
+
+### 2.1 Kanonisches Eingabe-Schema (Vertrag mit `buchungssatz`)
+
+Der Serializer `scripts/generate_extf.py` liest ein Top-Level-Objekt:
+
+```json
+{ "header": { … 31 Mandanten-/Format-Felder … }, "skr": "SKR04", "buchungen": [ … ] }
+```
+
+- **`buchungssatz` liefert** `skr` + `buchungen[]` (Section 9 dort). **Dieser Skill ergänzt** den `header` aus den Mandanten-Eingaben.
+- **`skr`** → Header-Feld Sachkontenrahmen: `"SKR03"`→`"03"`, `"SKR04"`→`"04"` (Mapping im Serializer).
+- **Felder je Buchungszeile** (exakte Keys): `umsatz` (positiv, Komma-Dezimal), `soll_haben_kennzeichen` (`S`/`H`, bezieht sich auf `konto`), `wkz_umsatz` (`EUR`), `konto`, `gegenkonto`, `bu_schluessel` (leer = keine Automatik), `belegdatum` (`TTMM`), `belegfeld_1` (≤ 36, Zeichensatz `\w$&%*+-/`), `buchungstext` (≤ 60), optional `kost1`/`kost2`/`kost_allocations`, sowie bei § 13b/ig `eu_land_ustid_bestimmung` + `sachverhalt_l_l`.
+- **`__`-präfigierte Felder** (z. B. `__comment`) werden **verworfen** und landen nicht in der CSV.
+- **Saldo:** jede vollständige Zeile (Konto + Gegenkonto) ist in sich ausgeglichen; der Serializer prüft Σ Soll = Σ Haben über den Stapel. `buchungssatz` erzeugt deshalb **keine Spiegelzeilen** (vermeidet Doppelbuchung beim Import). Nur echte Splittsatz-Teilzeilen lassen `gegenkonto` leer.
+- **§ 13b / ig-Erwerb:** als zwei vollständige Zeilen (Nettoaufwand → Kreditor; Vorsteuer 1407 → USt 3837 mit `eu_land_ustid_bestimmung` + `sachverhalt_l_l`), `bu_schluessel` leer — kein Automatik-Schlüssel.
 
 ## 3. EXTF-Format Grundlagen
 

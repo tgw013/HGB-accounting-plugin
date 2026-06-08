@@ -1,5 +1,5 @@
 {
-  "_purpose": "Automatikkonten v2.3 — Happy path: SKR04 Erlöskonto 4400 (AM 19% USt) ohne BU-Schlüssel. DATEV wendet USt-Automatik an. Importfehler REW00305 wird NICHT ausgelöst, weil bu_schluessel leer ist.",
+  "_purpose": "Automatikkonten v2.3 — Happy path: SKR04 Erlöskonto 4400 (AM 19% USt) ohne BU-Schlüssel. DATEV wendet USt-Automatik an. Importfehler REW00305 wird NICHT ausgelöst, weil bu_schluessel leer ist. Import-korrekt: EINE vollständige Konto-an-Gegenkonto-Zeile (1200 an 4400), in sich ausgeglichen — keine Spiegelzeile.",
   "header": {
     "kennzeichen": "EXTF",
     "versionsnummer": 700,
@@ -31,15 +31,6 @@
       "soll_haben_kennzeichen": "S",
       "konto": "1200",
       "gegenkonto": "4400",
-      "belegdatum": "1504",
-      "belegfeld_1": "RE-2026-042",
-      "buchungstext": "Erloes Beratung 04/2026 (Automatik 19%)"
-    },
-    {
-      "umsatz": "1190,00",
-      "soll_haben_kennzeichen": "H",
-      "konto": "4400",
-      "gegenkonto": "1200",
       "belegdatum": "1504",
       "belegfeld_1": "RE-2026-042",
       "buchungstext": "Erloes Beratung 04/2026 (Automatik 19%)"

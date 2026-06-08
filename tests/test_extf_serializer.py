@@ -344,12 +344,27 @@ class TestSaldo:
         _run(tmp_path)  # _balanced_pair default
 
     def test_unbalanced_raises_with_amounts(self, tmp_path):
+        # Splittsatz-Teilzeilen OHNE Gegenkonto, die sich nicht ausgleichen.
+        # (Vollständige Konto-an-Gegenkonto-Zeilen sind in sich ausgeglichen und
+        #  könnten gar nicht unbalanciert sein.)
         bs = [
-            _minimal_buchung(umsatz="100,00", soll_haben_kennzeichen="S"),
-            _minimal_buchung(umsatz="99,99", soll_haben_kennzeichen="H"),
+            _minimal_buchung(umsatz="100,00", soll_haben_kennzeichen="S", gegenkonto=""),
+            _minimal_buchung(umsatz="99,99", soll_haben_kennzeichen="H", konto="3300", gegenkonto=""),
         ]
         with pytest.raises(G.SaldoError, match="Σ Soll"):
             _run(tmp_path, buchungen=bs)
+
+    def test_single_full_booking_balances(self, tmp_path):
+        # Eine vollständige Zeile (Konto + Gegenkonto) ist in sich ausgeglichen
+        # und braucht KEINE Spiegelzeile (sonst Doppelbuchung beim Import).
+        bs = [_minimal_buchung(umsatz="32613,00", soll_haben_kennzeichen="S",
+                               konto="6072", gegenkonto="3079",
+                               belegfeld_1="URL-RST-04",
+                               buchungstext="Urlaubsrueckstellung 04/2026")]
+        csv_path, report = _run(tmp_path, buchungen=bs)
+        assert "✓ ausgeglichen" in report.read_text(encoding="utf-8")
+        lines = [l for l in csv_path.read_bytes().decode("cp1252").split("\r\n") if l]
+        assert len(lines) == 3  # header + col-header + 1 data row
 
     def test_decimal_precision_balanced(self, tmp_path):
         bs = [
@@ -526,8 +541,11 @@ class TestMisc:
         assert line0.split(";")[17] == '"TG"'
 
     def test_data_konto_empty_rejected(self, tmp_path):
+        # Einzelne vollständige Buchung mit leerem Konto: Saldo ist ausgeglichen
+        # (Gegenkonto vorhanden), der Format-Check lehnt das leere Konto ab.
+        bs = [_minimal_buchung(konto="", gegenkonto="3300")]
         with pytest.raises(G.FieldValidationError, match="Konto"):
-            _run(tmp_path, buchungen=_balanced_pair(konto=""))
+            _run(tmp_path, buchungen=bs)
 
     def test_data_konto_zeros_rejected(self, tmp_path):
         with pytest.raises(G.FieldValidationError, match="Nullen"):
@@ -1003,8 +1021,9 @@ class TestKostSplitt:
         assert out.exists()
         assert report.exists()
         lines = [l for l in out.read_bytes().decode("cp1252").split("\r\n") if l]
-        # header + col-header + 3 expanded S rows + 1 H row = 6
-        assert len(lines) == 6
+        # header + col-header + 3 expanded S rows = 5 (Zeile ist in sich
+        # ausgeglichen — keine Spiegel-/H-Zeile mehr im import-korrekten Fixture)
+        assert len(lines) == 5
         # And the report contains a Splitt-audit block
         report_text = report.read_text(encoding="utf-8")
         assert "Splitt" in report_text or "KOST" in report_text

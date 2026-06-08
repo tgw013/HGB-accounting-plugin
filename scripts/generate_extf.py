@@ -680,8 +680,8 @@ def _make_field_handlers(sachkontenlaenge: int):
         ("wkz_basis_umsatz", lambda v: _format_wkz(v) if v not in (None, "") else '""'),
         # 7 Konto
         ("konto", lambda v: _format_konto(v, sachkontenlaenge, "Konto")),
-        # 8 Gegenkonto
-        ("gegenkonto", lambda v: _format_konto(v, sachkontenlaenge, "Gegenkonto")),
+        # 8 Gegenkonto (optional — leer bei Splittsatz-Teilzeile; sonst Sachkonto)
+        ("gegenkonto", lambda v: "" if v in (None, "") else _format_konto(v, sachkontenlaenge, "Gegenkonto")),
         # 9 BU-Schlüssel
         ("bu_schluessel", _format_bu_schluessel),
         # 10 Belegdatum
@@ -1342,7 +1342,22 @@ def validate_no_bu_on_automatik(buchungen: list[dict], automatik_konten: dict[st
 
 def validate_saldo(buchungen: list[dict]) -> tuple[Decimal, Decimal]:
     """
-    Validate that Σ Umsatz where Soll/Haben = "S" equals Σ where = "H".
+    Validate the double-entry balance of the Buchungsstapel.
+
+    DATEV-Semantik: Eine Zeile mit *beiden* Feldern `konto` und `gegenkonto`
+    ist eine vollständige Buchung — der Umsatz steht auf `konto` (S-/H-Seite)
+    und spiegelbildlich auf `gegenkonto` (Gegenseite). Eine solche Zeile ist
+    **in sich ausgeglichen** und benötigt KEINE separate Gegenbuchung. Eine
+    künstliche Spiegelzeile würde beim Import in den Mandanten doppelt buchen.
+
+    Nur Zeilen *ohne* `gegenkonto` (echte Splittsatz-Teilzeilen einer
+    Sammelbuchung) tragen einseitig bei; ihre S-/H-Beträge müssen sich über den
+    Stapel ausgleichen.
+
+    Σ Soll (Konto-Soll-Seiten + Gegenkonto-Spiegel der H-Zeilen) muss Σ Haben
+    (Konto-Haben-Seiten + Gegenkonto-Spiegel der S-Zeilen) entsprechen. Bei
+    ausschließlich vollständigen Zeilen ist die Gleichheit strukturell
+    garantiert; der zurückgegebene Wert ist dann das Gesamt-Buchungsvolumen.
 
     Returns (sum_soll, sum_haben). Raises SaldoError if unbalanced.
     """
@@ -1357,17 +1372,24 @@ def validate_saldo(buchungen: list[dict]) -> tuple[Decimal, Decimal]:
             amount = Decimal(str(u).replace(",", "."))
         except InvalidOperation:
             raise SaldoError(f"Buchung #{i}: Umsatz '{u}' ist kein gültiger Decimal")
+        if sh not in ("S", "H"):
+            raise SaldoError(f"Buchung #{i}: Soll/Haben '{sh}' nicht S/H")
+        has_gegenkonto = str(b.get("gegenkonto") or "").strip() != ""
         if sh == "S":
             sum_soll += amount
-        elif sh == "H":
+            if has_gegenkonto:
+                sum_haben += amount   # Gegenkonto trägt die Haben-Seite
+        else:  # "H"
             sum_haben += amount
-        else:
-            raise SaldoError(f"Buchung #{i}: Soll/Haben '{sh}' nicht S/H")
+            if has_gegenkonto:
+                sum_soll += amount    # Gegenkonto trägt die Soll-Seite
     if sum_soll != sum_haben:
         diff = sum_soll - sum_haben
         raise SaldoError(
             f"Σ Soll ({sum_soll}) != Σ Haben ({sum_haben}); Differenz {diff}. "
-            f"Buchungen-Anzahl: {len(buchungen)}"
+            f"Buchungen-Anzahl: {len(buchungen)}. "
+            f"Hinweis: Zeilen mit Konto UND Gegenkonto sind in sich ausgeglichen; "
+            f"nur Splittsatz-Teilzeilen ohne Gegenkonto müssen sich stapelweise ausgleichen."
         )
     return sum_soll, sum_haben
 

@@ -4,7 +4,7 @@ Ein Finanz- und Buchhaltungs-Plugin für **Cowork** (Anthropic's agentische Desk
 
 > ⚠ **Hinweis:** Automatisiertes Hilfsmittel auf Basis öffentlich verifizierter Quellen (DATEV-SKR03/04 2025+2026, HGB/EStG/UStG/KStG/SGB Stand 2026-05, BMF-Vordruckmuster). **Ersetzt keine Steuerberatung.** Output ist Vorschlag — vor produktiver Buchung mit Steuerberater/Wirtschaftsprüfer abgleichen.
 
-**Status:** `v2.6.0` (in PR review, basiert auf v2.5.0). 15 Skills + 15 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert, **DATEV-EXTF-Export deterministisch** (Python-Serializer mit PORTAL-verifizierter Feld-Inventar; identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) + **Automatikkonten-Schutz** (verhindert REW00305) + **Wiederkehrende Buchungen** (Formatkategorie 65 v4 für monatliche/quartalsweise Serien) + **KOST-Splitt** (eine Buchung über mehrere Kostenstellen verteilen via `kost_allocations`). Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`, `v2.0.1`, `v2.1.0`. v2.3.0 + v2.5.0 in PR-Stack vor diesem.
+**Status:** `v2.6.0` (in PR review, basiert auf v2.5.0). 16 Skills + 16 Commands, 128 Konten gegen DATEV-PDFs 2025+2026 verifiziert, **DATEV-EXTF-Export deterministisch** (Python-Serializer mit PORTAL-verifizierter Feld-Inventar; identische Eingabe → byte-identische CSV via SHA-256, GoBD-relevant) + **Automatikkonten-Schutz** (verhindert REW00305) + **Wiederkehrende Buchungen** (Formatkategorie 65 v4 für monatliche/quartalsweise Serien) + **KOST-Splitt** (eine Buchung über mehrere Kostenstellen verteilen via `kost_allocations`). Vorgänger-Tags: `v1.1.0`, `v2.0.0-alpha`, `v2.0.0`, `v2.0.1`, `v2.1.0`. v2.3.0 + v2.5.0 in PR-Stack vor diesem.
 
 ---
 
@@ -51,32 +51,34 @@ Doku-Quellen: [Discover and install plugins](https://code.claude.com/docs/en/dis
 
 ---
 
-## Skills (14)
+## Skills (16)
 
 Skills stellen Hintergrundwissen und Workflow-Logik bereit. Claude wählt sie automatisch passend zur Aufgabe; Zugriff erfolgt über die Slash-Commands oder über natürliche Aufforderungen ("Erstelle Buchungssatz für …").
 
 | Skill | Typ | Anthropic-Pendant | Zweck |
 |---|---|---|---|
-| `buchung-grundlagen` | knowledge | `journal-entry-prep` (Knowledge) | Doppik, GoBD, SKR-Auswahl, Aufbewahrungsfristen, §-Verweis-Disziplin |
-| `buchungssatz` | workflow | `journal-entry-prep` + `journal-entry` | Beleg → Buchungsvorschlag (SKR03/04, USt-Tatbestand, §-Begründung) |
+| `buchung-grundlagen` | knowledge | `journal-entry-prep` (Knowledge) | Abschlussbuchungen-Wissen: RAP § 250, Rückstellungen § 249, Bewertung, HGB-vs-Steuerbilanz, DATEV-Praxis |
+| `buchungssatz` | workflow | `journal-entry` (zu `journal-entry-prep`) | Beleg ODER Abschlussbuchung → Buchungsvorschlag (SKR03/04, USt-Tatbestand, §-Begründung) + JSON-Handoff für datev-export |
 | `monatsabschluss` | workflow | `close-management` | Monats-Closing-Checkliste, Abgrenzungen, USt-VA-Vorbereitung |
 | `ust-voranmeldung` | workflow | — (DE-spezifisch) | KZ-Mapping nach BMF-Vordruckmuster USt 1 A, ELSTER-fähige Aufstellung |
 | `lohnabrechnung` | workflow | — (DE-spezifisch) | Brutto-Netto, SV, LSt, bAV §3 Nr.63, Minijob/Midijob, Verbuchung |
 | `jahresabschluss` | workflow | `close-management` + `financial-statements` | HGB-Aufstellung (Bilanz §266, GuV §275, Anhang §284-288) |
 | `ebilanz` | workflow | `financial-statements` (sinngemäß) | Datenpaket-Vorbereitung für ERiC/DATEV (kein Direktversand) |
 | `abstimmung` | workflow | `reconciliation` | Bank, Kasse, OP-Debitoren/-Kreditoren, USt, Intercompany, EWB/PWB |
-| `abweichungsanalyse` | workflow | `variance-analysis` | Plan-Ist-Decomposition (Preis/Menge/Mix), BWA-Kommentierung, Forecast |
+| `abweichungsanalyse` | workflow | `variance-analysis` | Plan-Ist-Decomposition (Preis/Menge/Mix), Forecast — Tiefenanalyse einer Position |
+| `bwa-kommentierung` | workflow | `financial-statements` (Kommentierungs-Teil) | BWA-/GuV-Kommentierung aus DATEV-BWA: kanonische GuV-Tabelle, Materialitäts-Flagging, Folgefragen (delegiert Tiefe an `abweichungsanalyse`) |
 | `gobd-konformitaet` | knowledge | — (DE-spezifisch) | BMF-GoBD 28.11.2019: Festschreibung, Z1/Z2/Z3, Verfahrensdokumentation |
 | `iks-pruefung` | methodology | `sox-testing` + `audit-support` | IKS nach IDW PS 261 / 5 COSO-Komponenten (ersetzt SOX in DE) |
 | `hinschg-meldewesen` | knowledge | — (DE-spezifisch) | HinSchG-Pflichten ab 50 MA, Meldestelle, Fristen, Bußgeldrahmen |
-| `datev-export` | workflow | — (DACH-spezifisch) | DATEV-Buchungsstapel-CSV (EXTF-Format) — **deterministisch** (SHA-256, GoBD), DATEV-Prüfprogramm-validiert, mit Automatikkonten-Schutz + Wiederkehrende Buchungen + KOST-Splitt |
+| `datev-export` | workflow | — (DACH-spezifisch) | DATEV-Buchungsstapel-CSV (EXTF-Format) — **deterministisch** (SHA-256, GoBD), DATEV-Prüfprogramm-validiert, mit Automatikkonten-Schutz + Wiederkehrende Buchungen + KOST-Splitt; konsumiert den JSON-Handoff aus `buchungssatz` |
+| `wiederkehrende-buchungen` | workflow | — (DACH-spezifisch) | Wiederkehrende DATEV-Buchungen (Format Kategorie 65, Version 4): Serien-Definition statt Copy-Paste (Miete, Beitragsüberträge, Bestandsprovisionen) |
 | `steuerberater-handoff` | workflow | — (DACH-spezifisch) | Strukturiertes Übergabe-Paket (Sachverhalt + Vorschlag + § + Belege) |
 
-## Slash-Commands (14)
+## Slash-Commands (16)
 
 Jeder Skill hat einen gleichnamigen Slash-Command zum direkten Aufruf:
 
-`/buchung-grundlagen` · `/buchungssatz` · `/monatsabschluss` · `/ust-voranmeldung` · `/lohnabrechnung` · `/jahresabschluss` · `/ebilanz` · `/abstimmung` · `/abweichungsanalyse` · `/gobd-konformitaet` · `/iks-pruefung` · `/hinschg-meldewesen` · `/datev-export` · `/steuerberater-handoff`
+`/buchung-grundlagen` · `/buchungssatz` · `/monatsabschluss` · `/ust-voranmeldung` · `/lohnabrechnung` · `/jahresabschluss` · `/ebilanz` · `/abstimmung` · `/abweichungsanalyse` · `/bwa-kommentierung` · `/gobd-konformitaet` · `/iks-pruefung` · `/hinschg-meldewesen` · `/datev-export` · `/wiederkehrende-buchungen` · `/steuerberater-handoff`
 
 ---
 
@@ -183,7 +185,7 @@ Anthropic's Pendant verbindet sich via MCP an ERP / Data-Warehouse / BI-Tools. *
 | `journal-entry-prep` | `buchung-grundlagen` (Knowledge) | übernommen |
 | `journal-entry` | `buchungssatz` (Workflow) | übernommen + DE-USt-Tatbestände + SKR03/04 |
 | `reconciliation` | `abstimmung` | übernommen + EWB/PWB-Logik nach HGB |
-| `financial-statements` | `jahresabschluss` + `ebilanz` | aufgeteilt: HGB-Aufstellung + eBilanz-Datenpaket |
+| `financial-statements` | `jahresabschluss` + `ebilanz` + `bwa-kommentierung` | aufgeteilt: HGB-Aufstellung (Bilanz/GuV) + eBilanz-Datenpaket + BWA-/GuV-Kommentierung |
 | `variance-analysis` | `abweichungsanalyse` | übernommen, gleiche Methodik |
 | `close-management` | `monatsabschluss` + `jahresabschluss` | aufgeteilt nach Periode |
 | `sox-testing` | `iks-pruefung` | SOX 404 ersetzt durch IDW PS 261 / COSO |
@@ -193,6 +195,7 @@ Anthropic's Pendant verbindet sich via MCP an ERP / Data-Warehouse / BI-Tools. *
 | — | `gobd-konformitaet` | **DE-neu** — BMF-spezifisches Verwaltungsrecht |
 | — | `hinschg-meldewesen` | **DE-neu** — EU-Whistleblower-Richtlinie + HinSchG |
 | — | `datev-export` | **DACH-neu** — DATEV-EXTF-Standard |
+| — | `wiederkehrende-buchungen` | **DACH-neu** — DATEV wiederkehrende Buchungen (Format Kategorie 65) |
 | — | `steuerberater-handoff` | **DACH-neu** — StB-System hat keine US-Entsprechung |
 
 ### Slash-Commands
@@ -204,7 +207,8 @@ Anthropic's Pendant verbindet sich via MCP an ERP / Data-Warehouse / BI-Tools. *
 | `/income-statement` | (im `/jahresabschluss`-Output enthalten) | GuV ist Teil der Bilanz/GuV-Aufstellung |
 | `/variance-analysis` | `/abweichungsanalyse` | Identische Decomposition-Logik |
 | `/sox-testing` | `/iks-pruefung` | IDW-PS-261-Framework statt SOX-Walkthroughs |
-| — | 9 weitere DE-Commands | siehe Skills-Tabelle oben |
+| (`financial-statements`) | `/bwa-kommentierung` | BWA-/GuV-Kommentierung auf DATEV-BWA-Basis |
+| — | 10 weitere DE-Commands | siehe Skills-Tabelle oben |
 
 ---
 

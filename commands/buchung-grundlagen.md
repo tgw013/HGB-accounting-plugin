@@ -1,5 +1,5 @@
 ---
-description: Doppik-Grundlagen, GoB/GoBD, Belegpflicht, Aufbewahrungsfristen, SKR03/SKR04-Auswahl. Hintergrundwissen für alle Workflow-Skills.
+description: Abschlussbuchungen-Wissen unter HGB — Rechnungsabgrenzungen (§ 250) und Rückstellungen (§ 249), Bewertung, Steuerbilanz-Delta, DATEV-Praxis. Knowledge-Base für buchungssatz/monatsabschluss/jahresabschluss.
 argument-hint: (optional Sachverhalt oder Periode)
 ---
 
