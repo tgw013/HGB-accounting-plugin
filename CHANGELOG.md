@@ -2,6 +2,26 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.7.0] - 2026-06-08
+
+### Added
+- **`bwa-kommentierung`** — neuer Skill (deutsches Pendant zu Anthropic `financial-statements`, Kommentierungs-Teil). Erzeugt aus einer DATEV-BWA (Form 01/04/05) eine kanonische GuV-Markdown-Tabelle, Kennzahlen-Übersicht (Margen-Kaskade, Cash-Conversion), Tabelle materieller Abweichungen mit Treiber-Hypothesen und Folgefragen; delegiert die Tiefen-Decomposition (Preis/Menge/Mix) an `abweichungsanalyse`. Inkl. Referenz-Material (§ 266/§ 275 HGB, DATEV-BWA-Formen, Cashflow E-DRS 28/DRS 21). + `commands/bwa-kommentierung.md`. Frontmatter als echter YAML-Block.
+- **`buchungssatz`** zweiter Output: strukturierter **JSON-Handoff** (`{ "skr", "buchungen": [...] }`) neben dem lesbaren Buchungsvorschlag — von `datev-export`/`scripts/generate_extf.py` ohne Transformation in die EXTF-CSV überführbar. Plus Vorgang-Katalog (Abschlussbuchungen SKR04) und 3 durchgerechnete Beispiele (ARAP-Bildung, Urlaubsrückstellung-Splitt, § 13b Reverse Charge).
+- `skills/datev-export/SKILL.md` § 2.1 — kanonisches Eingabe-Schema (beidseitiger Vertrag mit `buchungssatz`): Feld-Keys, `skr`→Sachkontenrahmen-Mapping, `__`-Felder werden verworfen, § 13b-Zwei-Zeilen-Fall.
+
+### Changed
+- **`buchungssatz`** deckt jetzt Einzelbelege **und** Abschluss-/Abgrenzungsvorgänge ab (RAP § 250, Rückstellungen § 249, Auflösungen) — deutsches `journal-entry`-Pendant zu `journal-entry-prep`. Modus-Routing erkennt Beleg vs. Abschlussbuchung automatisch.
+- **`buchung-grundlagen`** auf `journal-entry-prep`-Stil umgestellt: beschreibt die Abschlussbuchungs-Vorgänge als konzeptionelle Soll/Haben-Muster (Bewertung, HGB-vs-Steuerbilanz, DATEV-Praxis). Die ausgerechneten Beispiel-Buchungssätze entfernt (Entdoppelung gegen `buchungssatz`). Description, Command und README-Zeile angepasst.
+- README: 16 Skills / 16 Commands; Mapping-Tabellen ergänzt (`bwa-kommentierung` ← `financial-statements`; `wiederkehrende-buchungen` ergänzt).
+
+### Fixed
+- **EXTF-Saldo-Invariante** (`scripts/generate_extf.py` `validate_saldo`): Eine vollständige Zeile mit `konto` **und** `gegenkonto` ist in sich ausgeglichen (Konto = Soll-Seite, Gegenkonto = Haben-Seite) und benötigt keine separate Gegenbuchung; `gegenkonto` darf bei echten Splittsatz-Teilzeilen leer sein. Eine normale Einzelbuchung läuft jetzt durch — **ohne** künstliche Spiegelzeile, die beim Mandanten-Import doppelt buchen würde. Fixtures `eu_13b`/`automatik_erloese`/`kost_splitt_miete` import-korrigiert (Spiegelzeilen entfernt).
+- Test-Suite: 87 → 88 Tests; angepasst an die neue Saldo-Semantik (leeres Gegenkonto für Unbalanced-Test, Zeilenanzahl `kost_splitt`-Fixture, neuer Einzelbuchungs-Test).
+
+### Notes
+- Debitoren/Kreditoren (Formatkategorie 16), in v2.5/v2.6 für v2.7 vorgemerkt, ist auf eine spätere Release verschoben.
+- Der EXTF-Saldo-Fix ist `[REASONED]` (Korrektur der Plugin-internen Balance-Prüfung), kein Portal-Pattern. Output-CSV bleibt 100 % Buchungsstapel-konform. DATEV-Prüfprogramm (`scripts/run_pruefprogramm.ps1`) nach der `eu_13b`-Fixture-Änderung erneut gegenprüfen (benötigt DATEV-Tool + Windows).
+
 ## [2.6.0] - 2026-05-23
 
 ### Added
