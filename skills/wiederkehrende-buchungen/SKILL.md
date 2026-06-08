@@ -69,9 +69,10 @@ Wann die Serie startet.
 
 1. Sachverhalt erfassen (was wiederholt sich, wie oft, wie lange)
 2. Pro Serie: Buchungs-Felder + Recurrence-Felder befüllen
-3. Serialisieren via `scripts/generate_extf.py --format-version 4`:
+3. Serialisieren via `generate_extf.py --format-version 4` (Pfad-Auflösung wie in `datev-export` § 6.5 — **absoluter** Plugin-Pfad, nicht relativ zum CWD; das Script findet seine Config selbst):
    ```bash
-   python scripts/generate_extf.py \
+   # <PLUGIN_ROOT> = ${CLAUDE_PLUGIN_ROOT} (Claude Code) bzw. absoluter Plugin-Ordner (Cowork)
+   python "<PLUGIN_ROOT>/scripts/generate_extf.py" \
      --input /tmp/wk_beitraege.json \
      --output /tmp/EXTF_wiederkehrende_2026_06.csv \
      --format-version 4 \

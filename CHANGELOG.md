@@ -2,6 +2,14 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/) · Versionierung: [SemVer](https://semver.org/)
 
+## [2.7.2] - 2026-06-08
+
+### Fixed
+- **Serializer-Aufruf pfad-robust** in `datev-export` (§ 6.5) und `wiederkehrende-buchungen`: bisher wurde `generate_extf.py` per relativem `scripts/...`-Pfad aufgerufen, der nur aufgeht, wenn das Arbeitsverzeichnis zufällig der Plugin-Root ist (i. d. R. nicht der Fall). Jetzt wird der Plugin-Root explizit aufgelöst (`${CLAUDE_PLUGIN_ROOT}` in Claude Code bzw. absoluter Plugin-Ordner in Cowork) und das Script über absoluten Pfad aufgerufen. Das Script ist self-locating (Config über `__file__`), läuft also von jedem Arbeitsverzeichnis.
+
+### Notes
+- Reine Instruktions-/Doku-Härtung; Serializer-Code unverändert. Hintergrund: `${CLAUDE_PLUGIN_ROOT}` expandiert in SKILL.md nicht zuverlässig (claude-code Issue #9354), daher zusätzlich explizite Lokalisierungs-Anweisung an das Modell.
+
 ## [2.7.1] - 2026-06-08
 
 ### Fixed

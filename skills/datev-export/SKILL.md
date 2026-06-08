@@ -97,10 +97,16 @@ Vollständige Feldliste siehe DATEV-Format-Beschreibung "DATEV-Format" (DATEV-On
 
 ### 6.5 Implementation
 
-**Implementation:** Die Generierung der CSV-Datei erfolgt deterministisch über das Hilfsscript `scripts/generate_extf.py`. Nach Erstellung des strukturierten Buchungssatz-JSON ruft dieser Skill das Script auf:
+**Implementation:** Die CSV-Generierung erfolgt deterministisch über das mitgelieferte Script `generate_extf.py` (Python 3.10+, stdlib-only). Es liegt im Plugin-Verzeichnis unter `scripts/generate_extf.py` und **findet seine Config selbst** (über `__file__` → `config/shared/datev-extf-fields.json` + `datev-automatik-konten.json`), ist also von **jedem** Arbeitsverzeichnis lauffähig — entscheidend ist nur der korrekte **absolute** Pfad zum Script.
+
+**Pfad-Auflösung** (NICHT auf ein relatives `scripts/...` gegenüber dem aktuellen Arbeitsverzeichnis verlassen — das CWD ist i. d. R. nicht der Plugin-Root):
+- **Claude Code:** Plugin-Root über `${CLAUDE_PLUGIN_ROOT}` auflösen, falls gesetzt; sonst das Plugin-Installationsverzeichnis ermitteln (dort liegt `scripts/generate_extf.py`).
+- **Cowork:** das Script liegt im hochgeladenen Plugin-Ordner unter `scripts/generate_extf.py`.
+- Im Zweifel `generate_extf.py` im Plugin-Verzeichnis lokalisieren und mit absolutem Pfad aufrufen.
 
 ```bash
-python scripts/generate_extf.py \
+# <PLUGIN_ROOT> = ${CLAUDE_PLUGIN_ROOT} (Claude Code) bzw. absoluter Plugin-Ordner (Cowork)
+python "<PLUGIN_ROOT>/scripts/generate_extf.py" \
   --input /tmp/buchungen_2026-04.json \
   --output /tmp/EXTF_buchungsstapel_20260520_1430.csv \
   --format-version 13 \
